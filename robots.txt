@@ -2,4 +2,4 @@
 User-agent:*
 Disallow:
 
-Sitemap: https://wsq01.github.io/sitemap.xml
+Sitemap: https://wsq01.github.io/my-blog/sitemap.xml
