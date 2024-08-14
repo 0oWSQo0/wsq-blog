@@ -6,7 +6,6 @@ categories: linux
 order: 7
 ---
 
-
 ## Linux软件包
 Linux下的软件包可细分为两种，分别是源码包和二进制包。
 ### 源码包
@@ -148,7 +147,7 @@ rpm -Fvh 包全名
 RPM 软件包的卸载要考虑包之间的依赖性。例如，我们先安装的`httpd`软件包，后安装`httpd`的功能模块`mod_ssl`包，那么在卸载时，就必须先卸载`mod_ssl`，然后卸载`httpd`，否则会报错。
 
 如果卸载 RPM 软件不考虑依赖性，执行卸载命令会包依赖性错误，例如：
-```bash
+```shell
 [root@localhost ~]# rpm -e httpd
 error: Failed dependencies:
 httpd-mmn = 20051115 is needed by (installed) mod_wsgi-3.2-1.el6.i686
@@ -188,7 +187,7 @@ rpm -q 包名
 `-q`表示查询，是`query`的首字母。
 
 查看 Linux 系统中是否安装 apache：
-```bash
+```shell
 [root@localhost ~]# rpm -q httpd
 httpd-2.2.15-15.el6.centos.1.i686
 ```
@@ -205,7 +204,7 @@ httpd-2.2.15-15.el6.centos.1.i686
 相比`rpm -q`包名命令，采用这种方式可以找到含有包名的所有软件包。
 ### rpm -qi：查询软件包的详细信息
 `-i`选项表示查询软件信息，是`information`的首字母。
-```bash
+```shell
 [root@localhost ~]# rpm -qi httpd
 Name : httpd Relocations:(not relocatable)
 #包名
@@ -285,7 +284,7 @@ rpm -qf 系统文件名
 `-f`选项的含义是查询系统文件所属哪个软件包，是`file`的首字母。
 
 注意，只有使用 RPM 包安装的文件才能使用该命令，手动方式建立的文件无法使用此命令。
-```bash
+```shell
 [root@localhost ~]# rpm -qf /bin/ls
 coreutils-8.4-19.el6.i686
 ```
@@ -353,7 +352,7 @@ CentOS-Epel.repo
 docker-ce.repo
 ```
 通常情况下`CentOS-Base.repo`文件生效。我们可以尝试打开此文件：
-```bash
+```shell
 [root@localhost yum.repos.d]# vim /etc/yum.repos.d/CentOS-Base.repo
 [extras]
 gpgcheck=1
