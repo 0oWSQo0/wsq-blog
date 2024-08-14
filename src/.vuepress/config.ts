@@ -5,7 +5,7 @@ import theme from "./theme.js";
 const __dirname = getDirname(import.meta.url)
 
 export default defineUserConfig({
-  base: "/",
+  base: "/my-blog/",
 
   lang: "zh-CN",
   title: "",
