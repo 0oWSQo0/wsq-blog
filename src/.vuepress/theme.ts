@@ -5,26 +5,18 @@ import sidebar from "./sidebar.js";
 
 export default hopeTheme({
   hostname: "https://wsq01.github.io",
-
   author: {
     name: "WSQ",
     url: "https://wsq01.github.com",
   },
-
-  iconAssets: "fontawesome-with-brands",
-
+  iconAssets: "iconify",
   logo: "logo.png",
-
   repo: "https://wsq01.github.com",
-
   docsDir: "src",
-
   // 导航栏
   navbar,
-
   // 侧边栏
   sidebar,
-
   // 页脚
   footer: "",
   displayFooter: false,
@@ -35,17 +27,18 @@ export default hopeTheme({
       "/demo/encrypt.html": ["1234"],
     },
   },
-
+  editLink: false,
   // 多语言配置
   metaLocales: {
     editLink: "在 GitHub 上编辑此页",
   },
 
   // 如果想要实时查看任何改变，启用它。注: 这对更新性能有很大负面影响
-  // hotReload: true,
+  hotReload: true,
 
   // 在这里配置主题提供的插件
   plugins: {
+    // blog: true,
     // 注意: 仅用于测试! 你必须自行生成并在生产环境中使用自己的评论服务
     comment: {
       comment: false,
@@ -60,13 +53,14 @@ export default hopeTheme({
       components: ["Badge", "VPCard"],
     },
 
-    // 此处开启了很多功能用于演示，你应仅保留用到的功能。
+    // markdown增强配置
     mdEnhance: {
       align: true,
       attrs: true,
       codetabs: true,
       component: true,
       demo: true,
+      breaks: true,
       figure: true,
       imgLazyload: true,
       imgSize: true,
@@ -92,18 +86,13 @@ export default hopeTheme({
       tabs: true,
       tasklist: true,
       vPre: true,
-
       // 在启用之前安装 chart.js
       // chart: true,
-
       // insert component easily
-
       // 在启用之前安装 echarts
       // echarts: true,
-
-      // 在启用之前安装 flowchart.ts
-      // flowchart: true,
-
+      // 流程图，在启用之前安装 flowchart.ts
+      flowchart: true,
       // gfm requires mathjax-full to provide tex support
       // gfm: true,
 
@@ -133,8 +122,8 @@ export default hopeTheme({
     },
     shiki: {
       themes: {
-        light: 'andromeeda',
-        dark: ''
+        light: 'github-dark',
+        dark: 'github-light'
       }
     }
 
@@ -195,4 +184,6 @@ export default hopeTheme({
     //   },
     // },
   },
+}, {
+  custom: true
 });

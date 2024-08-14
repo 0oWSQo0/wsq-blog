@@ -26,5 +26,6 @@ export default sidebar({
   '/js': 'structure',
   '/java': 'structure',
   '/linux/linux基础': 'structure',
-  '/linux/docker': 'structure'
+  '/linux/docker': 'structure',
+  '/sql/mysql': 'structure',
 });

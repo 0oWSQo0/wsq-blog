@@ -1,1 +1,9 @@
 // place your custom styles here
+.theme-hope-content:not(.custom) > p, .theme-hope-content:not(.custom) > ul p, .theme-hope-content:not(.custom) > ol p {
+  text-align: left;
+}
+
+//@font-face {
+//  font-family: 'ark';
+//  src: url("/font/qiuhong.ttf");
+//}

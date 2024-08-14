@@ -5,35 +5,35 @@ export default navbar([
   // "/portfolio",
   {
     text: '前端',
-    icon: 'vue',
+    icon: 'devicon:javascript',
     link: '/js/'
   },
   {
     text: 'Java',
-    icon: 'java',
+    icon: 'devicon:java',
     prefix: '/java/',
     children: [
-      { text: 'Mybatis', link: '/java/mybatis' },
-      { text: 'Spring', link: '/java/spring' },
-      { text: 'springBoot', link: '/java/springBoot' }
+      { text: 'Mybatis', link: '/java/mybatis', icon: 'devicon:spring' },
+      { text: 'Spring', link: '/java/spring', icon: 'devicon:spring' },
+      { text: 'springBoot', link: '/java/springBoot', icon: 'devicon:spring' }
     ]
   },
   {
     text: 'SQL',
-    icon: 'sql',
+    icon: 'devicon:azuresqldatabase',
     prefix: '/sql/',
     children: [
-      { text: 'Redis', link: '/sql/redis' },
-      { text: 'MySQL', link: '/sql/mysql' }
+      { text: 'Redis', link: '/sql/redis/', icon: 'devicon:redis' },
+      { text: 'MySQL', link: '/sql/mysql/', icon: 'devicon:mysql-wordmark' }
     ]
   },
   {
     text: 'Linux',
-    icon: 'linux',
+    icon: 'devicon:centos',
     prefix: '/linux/',
     children: [
-      { text: 'linux基础', link: '/linux/linux基础/' },
-      { text: 'Docker', link: '/linux/docker/'}
+      { text: 'linux基础', link: '/linux/linux基础/', icon: 'devicon:linux' },
+      { text: 'Docker', link: '/linux/docker/', icon: 'mdi:docker'}
     ]
   },
   // {
@@ -50,7 +50,7 @@ export default navbar([
   //     {
   //       text: "Foo",
   //       icon: "lightbulb",
-  //       prefix: "foo/",
+  //       prefix: "linux/",
   //       children: ["ray", { text: "...", icon: "ellipsis", link: "" }],
   //     },
   //   ],

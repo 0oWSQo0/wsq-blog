@@ -6,24 +6,29 @@ categories: linux
 order: 1
 ---
 
-# Docker 架构
-Docker 使用客户端-服务器 (C/S) 架构模式，使用远程 API 来管理和创建 Docker 容器。
-* Docker 客户端(`Client`)：Docker 客户端通过命令行或者其他工具使用 Docker SDK(`https://docs.docker.com/develop/sdk/`) 与 Docker 的守护进程通信。
+## Docker 架构
+Docker 使用 C/S 架构模式，使用远程 API 来管理和创建 Docker 容器。
+* Docker 客户端(`Client`)：Docker 客户端通过命令行或者其他工具使用 [Docker SDK](https://docs.docker.com/develop/sdk/) 与 Docker 的守护进程通信。
 * Docker 主机(`Host`)：一个物理或者虚拟的机器用于执行 Docker 守护进程和容器。
 
 Docker 包括三个基本概念：
-* 镜像（`Image`）：Docker 镜像（`Image`），就相当于是一个`root`文件系统。比如官方镜像`ubuntu:22.04`就包含了完整的一套`Ubuntu22.04`最小系统的`root`文件系统。
-* 容器（`Container`）：镜像（`Image`）和容器（`Container`）的关系，就像是面向对象程序设计中的类和实例一样，镜像是静态的定义，容器是镜像运行时的实体。容器可以被创建、启动、停止、删除、暂停等。
-* 仓库（`Repository`）：仓库可看着一个代码控制中心，用来保存镜像。
+* 镜像（`Image`）：镜像就相当于是一个`root`文件系统。比如官方镜像`ubuntu:22.04`就包含了完整的一套`Ubuntu22.04`最小系统的`root`文件系统。
+* 容器（`Container`）：镜像和容器的关系，就像是面向对象程序设计中的类和实例一样，镜像是静态的定义，容器是镜像运行时的实体。容器可以被创建、启动、停止、删除、暂停等。
+* 仓库（`Repository`）：仓库可看成一个代码控制中心，用来保存镜像。
 
-![docker-architecture.svg](Docker基础/docker-architecture.svg)
+![Docker 架构](Docker基础/docker-architecture.svg)
+## Docker 安装
+::: warning
+从 2017 年 3 月开始 Docker 分为两个分支版本: DockerCE（社区免费版）和 DockerEE（企业版）；DockerEE 强调安全，但需付费使用；这里将展示在 CentOS 上安装 Docker。
+:::
+### 卸载老的Docker及依赖
 
-# Docker 安装
-从 2017 年 3 月开始 docker 在原来的基础上分为两个分支版本: Docker CE 和 Docker EE：Docker CE 即社区免费版；Docker EE 即企业版，强调安全，但需付费使用；按照官网上Docker Engine - Community 包现在就是叫做 Docker CE。这里将展示在 CentOS 上安装 Docker。
-## 卸载老的Docker及依赖
-为什么你可能还需要删除较低的 Docker 安装？因为较旧版本的 Docker 被称为 docker 或 docker-engine（它是一个简化 Docker 安装的命令行工具，通过一个简单的命令行即可在相应的平台上安装 Docker，比如 VirtualBox、 Digital Ocean、Microsoft Azure）
-```
-syum remove docker \
+::: info 为什么要删除较低的 Docker 安装？
+因为旧版本的 Docker 被称为 docker 或 docker-engine（它是一个简化 Docker 安装的命令行工具，通过一个简单的命令行即可在相应的平台上安装 Docker，比如 VirtualBox）
+:::
+
+```shell
+yum remove docker \
             docker-client \
             docker-client-latest \
             docker-common \
@@ -32,27 +37,19 @@ syum remove docker \
             docker-logrotate \
             docker-engine
 ```
-## 安装一些依赖库
-* `yum-utils`提供`yum-config-manager`类库
-* `device-mapper-persistent-data`和`lvm2`被`devicemapper`存储驱动依赖
-
-```
-yum install -y yum-utils device-mapper-persistent-data lvm2
-```
-设置稳定版本的库
-```
+### 安装前准备
+```shell
+# yum-utils 提供 yum-config-manager 类库
+yum install -y yum-utils
+# 设置稳定版本的库
 yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
 ```
-## 安装Docker CE
-```
-yum install -y docker-ce
-```
-安装完之后启动
-```
-systemctl start docker
-```
-测试是否安装成功
+### 安装Docker CE
 ```shell
+[root@localhost ~]# yum install -y docker-ce
+# 安装完之后启动
+[root@localhost ~]# systemctl start docker
+# 测试是否安装成功
 [root@localhost ~]# systemctl status docker
 ● docker.service - Docker Application Container Engine
    Loaded: loaded (/usr/lib/systemd/system/docker.service; disabled; vendor preset: disabled)
@@ -64,61 +61,58 @@ systemctl start docker
    CGroup: /system.slice/docker.service
            └─26029 /usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd
 ```
-# 仓库配置
+## 仓库配置
 Docker 安装好以后，我们就要开始为拉取镜像准备了；国内从 DockerHub 拉取镜像有时会特别慢，此时可以配置镜像加速器。
 
-Docker 官方和国内很多云服务商都提供了国内加速器服务，比如：
-* 阿里云的加速器：`https://help.aliyun.com/document_detail/60750.html`
-* 网易加速器：`http://hub-mirror.c.163.com`
-* Docker官方中国加速器：`https://registry.docker-cn.com`
-* ustc 的镜像：`https://docker.mirrors.ustc.edu.cn`
-
-
-这里配置 Docker 官方中国的加速器：
+Docker 官方和国内很多云服务商都提供了国内加速器服务：
+* [阿里云的加速器](https://help.aliyun.com/document_detail/60750.html)
+* [网易加速器](http://hub-mirror.c.163.com)
+* [Docker官方中国加速器](https://registry.docker-cn.com)
+* [ustc 的镜像](https://docker.mirrors.ustc.edu.cn)
 
 对于使用`systemd`的系统，请在`/etc/docker/daemon.json`中写入如下内容（如果文件不存在请新建该文件）
-```
+```json
 {"registry-mirrors":["https://registry.docker-cn.com"]}
 ```
 之后重新启动服务
-```
-$ sudo systemctl daemon-reload
-$ sudo systemctl restart docker
-```
-# Docker 镜像
-当运行容器时，使用的镜像如果在本地中不存在，docker 就会自动从 docker 镜像仓库中下载，默认是从 Docker Hub 公共镜像源下载。
-## 镜像列表
-列出本地主机上的镜像，可以使用`docker image ls`命令或`docker images`。
 ```shell
-[root@localhost ~]# docker images
+[root@localhost ~]# systemctl daemon-reload
+[root@localhost ~]# systemctl restart docker
+```
+## Docker 镜像
+当运行容器时，使用的镜像如果在本地中不存在，Docker 就会自动从 Docker 镜像仓库中下载，默认是从 DockerHub 公共镜像源下载。
+### 镜像列表
+列出本地主机上的镜像，可以使用`docker image ls`或`docker images`。
+```shell
+[root@localhost ~]# docker image ls
 REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
 ubuntu              latest              ccc6e87d482b        4 weeks ago         64.2MB
 hello-world         latest              fce289e99eb9        13 months ago       1.84kB
 ```
-
-各个选项说明:
+选项说明:
 * `REPOSITORY`：表示镜像的仓库源
 * `TAG`：镜像的标签，同一仓库源可以有多个`TAG`，代表这个仓库源的不同个版本
-* `IMAGE ID`：镜像 ID
+* `IMAGE ID`：镜像 ID，是镜像的唯一标识
 * `CREATED`：镜像创建时间
 * `SIZE`：镜像大小
 
-镜像 ID 则是镜像的唯一标识，一个镜像可以对应多个标签。
-## 查找镜像
+### 查找镜像
 以查找 MySQL 的镜像为例：
-* 通过Docker Hub 进行查找, 比如`https://hub.docker.com/search?q=mysql&type=image`
-* 使用`docker search`命令来查找官方仓库中的镜像。
+* 通过 [DockerHub](https://hub.docker.com/search?q=mysql&type=image) 查找
+* 使用`docker search`命令来查找官方仓库中的镜像
 
 ```bash
 docker search [OPTIONS] 镜像名称
 ```
 `OPTIONS`：
 
+::: center
 | 参数         | 描述 |
 | :--: | :--: |
 | --filter, -f | 根据指定条件过滤结果 |
 | --limit	     | 搜索结果的最大条数 |
 | --no-trunc	 | 不截断输出，显示完整的输出 |
+:::
 
 ```bash
 [root@localhost ~]# docker search mysql
@@ -149,25 +143,26 @@ bitnami/percona-mysql                   Bitnami container image for Percona MySQ
 rapidfort/mysql-official                RapidFort optimized, hardened image for MySQ…   9         
 percona/proxysql2                       High-performance MySQL proxy with a GPL lice…   5         
 ```
-* `NAME`: 镜像仓库源的名称
-* `DESCRIPTION`: 镜像的描述
-* `OFFICIAL`: 是否 docker 官方发布
-* `STARS`: 类似 Github 里面的`star`，表示点赞、喜欢的意思。
+选项说明：
+* `NAME`：镜像仓库源的名称
+* `DESCRIPTION`：镜像描述
+* `OFFICIAL`：是否是 Docker 官方发布
+* `STARS`：点赞数
 
-根据是否是官方提供，可将镜像分为两类。
+根据是否是官方提供，可将镜像分为两类：
 * 一种是基础镜像或根镜像。这些基础镜像由 Docker 公司创建、验证、支持、提供。这样的镜像往往使用单个单词作为名字。
-* 还有一种类型，比如`bitnami/mysql`镜像，它是由 Docker Hub 的注册用户创建并维护的，往往带有用户名称前缀。可以通过前缀`username/`来指定使用某个用户提供的镜像，比如`bitnami`用户。
+* 还有一种类型，比如`bitnami/mysql`镜像，它是由 DockerHub 的注册用户创建并维护的，往往带有用户名称前缀。可以通过前缀`username/`来指定使用某个用户提供的镜像，比如`bitnami`用户。
 
-## 拉取镜像
+### 拉取镜像
 可以通过`docker pull`命令从 Docker 镜像仓库获取镜像。
 ```bash
 docker pull [选项] [Docker 镜像仓库地址[:端口号]/]仓库名[:标签]
 ```
 具体的选项可以通过`docker pull --help`命令看到。
 
-镜像名称的格式。
-* Docker 镜像仓库地址：地址的格式一般是`<域名/IP>[:端口号]`。默认地址是`Docker Hub(docker.io)`。
-* 仓库名：仓库名是两段式名称，即`<用户名>/<软件名>`。对于 Docker Hub，如果不给出用户名，则默认为`library`，也就是官方镜像。
+镜像名称的格式：
+* Docker 镜像仓库地址：地址的格式一般是`<域名/IP>[:端口号]`。默认地址是`DockerHub(docker.io)`。
+* 仓库名：仓库名是两段式名称，即`<用户名>/<软件名>`。对于 DockerHub，如果不给出用户名，则默认为`library`，也就是官方镜像。
 
 ```shell
 [root@localhost ~]# docker pull mysql
@@ -191,15 +186,14 @@ REPOSITORY   TAG       IMAGE ID       CREATED      SIZE
 mysql        latest    7ce93a845a8a   9 days ago   586MB
 ```
 `docker pull`命令的输出结果最后一行给出了镜像的完整名称，即：`docker.io/library/centos:7`。
-## 删除镜像
+### 删除镜像
 删除本地的镜像，可以使用`docker image rm`或`docker rmi`。
-
 ```
 docker image rm [选项] <镜像1> [<镜像2> ...]
 //或 docker rmi [选项] <镜像1> [<镜像2> ...]
 ```
 ```shell
-[root@localhost ~]# docker rmi mysql
+[root@localhost ~]# docker image rm mysql
 Untagged: mysql:latest
 Untagged: mysql@sha256:d8df069848906979fd7511db00dc22efeb0a33a990d87c3c6d3fcdafd6fc6123
 Deleted: sha256:7ce93a845a8a98c89bd58a5e45fe71277ca5f52177c88046858a6a0af969ba74
@@ -216,10 +210,8 @@ Deleted: sha256:2606c15a4838dfb909dab29f47c601a797f657f51a35005bd06d01da891d813c
 [root@localhost ~]# docker ps
 CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
 ```
-## 更新镜像
-针对`ubuntu`的镜像，我们能否在里面安装一些软件，然后重新生成一个镜像呢？这就是更新重新`commit`出一个新的镜像。
-
-我们先跑一个`ubuntu`容器实例，同时在里面进行`apt-get update`更新。
+### 更新镜像
+针对`ubuntu`的镜像，我们能否在里面安装一些软件，然后重新生成一个镜像呢？这就是重新`commit`出一个新的镜像。
 ```shell
 [root@localhost ~]# docker run -it ubuntu
 root@ba07a44eadc7:/# apt-get update
@@ -257,10 +249,8 @@ REPOSITORY   TAG       IMAGE ID       CREATED          SIZE
 wsq/ubuntu   v1.0.1    4f356e712241   24 seconds ago   117MB
 ubuntu       latest    35a88802559d   7 weeks ago      78.1MB
 ```
-## 生成镜像
-那如果是生成一个全新的镜像呢？我们使用命令`docker build`，通过创建一个`Dockerfile`文件，其中包含一组指令来告诉 Docker 如何构建我们的镜像。
-
-这里特意指定的`Base`镜像为上一步修改生成的`wsq/ubuntu:v1.0.1`
+### 生成镜像
+如果是生成一个全新的镜像，可以使用命令`docker build`，通过创建一个`Dockerfile`文件，其中包含一组指令来告诉 Docker 如何构建我们的镜像。
 ```dockerfile
 FROM    wsq/ubuntu:v1.0.1
 
@@ -274,8 +264,8 @@ CMD     /usr/sbin/sshd -D
 ```
 稍微解释下：
 * 每一个指令都会在镜像上创建一个新的层，每一个指令的前缀都必须是大写的
-* 第一条FROM，指定使用哪个镜像源
-* `RUN`指令告诉 docker 在镜像内执行命令
+* `FROM`指令，指定使用哪个镜像源
+* `RUN`指令告诉 Docker 在镜像内执行命令
 * 我们使用`Dockerfile`文件，通过`docker build`命令来构建一个镜像
 
 接下来生成镜像：
@@ -318,8 +308,8 @@ root@f5332ebce695:/# exit
 exit
 ```
 从上面看到新镜像已经包含我们创建的用户 wsq。
-## 镜像标签
-我们可以使用`docker tag`命令，为镜像添加一个新的标签。
+### 镜像标签
+`docker tag`命令，为镜像添加一个新的标签。
 ```shell
 [root@localhost ~]# docker tag 983aeebc0909 wsq/ubuntu:v3.0.1
 [root@localhost ~]# docker images
@@ -329,7 +319,7 @@ wsq/ubuntu   v3.0.1    983aeebc0909   9 minutes ago    117MB
 wsq/ubuntu   v1.0.1    4f356e712241   25 minutes ago   117MB
 ubuntu       latest    35a88802559d   7 weeks ago      78.1MB
 ```
-## 镜像导出和导入
+### 镜像导出和导入
 区别于容器的导出和导入。
 
 镜像导出
@@ -354,13 +344,13 @@ docker load < wsq-ubuntu-v2.0.2.tar
 * 若是只想备份`images`，使用`save、load`即可
 * 若是在启动容器后，容器内容有变化，需要备份，则使用`export、import`
 
-# Docker 容器
-## 容器启动
+## Docker 容器
+### 容器启动
 启动容器有两种方式：
 * 基于镜像新建一个容器并启动
 * 将在终止状态（`exited`）的容器重新启动。
 
-### 新建并启动
+#### 新建并启动
 使用的命令为`docker run`。
 
 参数说明：
@@ -390,9 +380,9 @@ exit
 以`-it`方式创建并启动容器，启动完成后，直接进入当前容器。使用`exit`命令退出容器。需要注意的是以此种方式启动容器，如果退出容器，则容器会进入停止状态。
 
 以`-id`方式创建并启动容器，启动完成后，不会进入当前容器，会在后台运行容器。
-### 启动已终止容器
+#### 启动已终止容器
 可以利用`docker container start 容器名/ID`或`docker start 容器名/ID`命令，直接将一个已经终止（`exited`）的容器启动运行。
-## 容器查看
+### 容器查看
 查看正在运行的容器：`docker ps`或`docker container ls`。查看所有容器：`docker ps -a`或`docker container ls -a`。
 ```shell
 [root@localhost ~]# docker ps -a
@@ -400,12 +390,12 @@ CONTAINER ID   IMAGE               COMMAND       CREATED              STATUS    
 3fe0e9a9e0b2   wsq/ubuntu:v2.0.1   "/bin/bash"   About a minute ago   Exited (127) 3 seconds ago             distracted_bouman
 ba07a44eadc7   ubuntu              "/bin/bash"   2 hours ago          Exited (0) 2 hours ago                 peaceful_curran
 ```
-输出详情介绍：
-* `CONTAINER ID`: 容器 ID。
-* `IMAGE`: 使用的镜像。
-* `COMMAND`: 启动容器时运行的命令。
-* `CREATED`: 容器的创建时间。
-* `STATUS`: 容器状态(状态有7种)。
+参数说明：
+* `CONTAINER ID`: 容器 ID
+* `IMAGE`: 使用的镜像
+* `COMMAND`: 启动容器时运行的命令
+* `CREATED`: 容器的创建时间
+* `STATUS`: 容器状态(状态有7种)
   * `created`（已创建）
   * `restarting`（重启中）
   * `running`（运行中）
@@ -413,10 +403,10 @@ ba07a44eadc7   ubuntu              "/bin/bash"   2 hours ago          Exited (0)
   * `paused`（暂停）
   * `exited`（停止）
   * `dead`（死亡）
-* `PORTS`: 容器的端口信息和使用的连接类型（`tcp\udp`）。
-* `NAMES`: 自动分配的容器名称。
+* `PORTS`: 容器的端口信息和使用的连接类型（`tcp\udp`）
+* `NAMES`: 自动分配的容器名称
 
-## 容器再启动
+### 容器再启动
 ```shell
 [root@localhost ~]# docker start ba07a44eadc7
 ba07a44eadc7
@@ -424,7 +414,7 @@ ba07a44eadc7
 CONTAINER ID   IMAGE     COMMAND       CREATED       STATUS         PORTS     NAMES
 ba07a44eadc7   ubuntu    "/bin/bash"   2 hours ago   Up 2 seconds             peaceful_curran
 ```
-## 容器停止和重启
+### 容器停止和重启
 可以使用`docker container stop 容器名/ID`或`docker stop 容器名称/ID`来终止一个运行中的容器。
 ```shell
 [root@localhost ~]# docker stop ba07a44eadc7
@@ -438,7 +428,7 @@ CONTAINER ID   IMAGE               COMMAND       CREATED         STATUS         
 3fe0e9a9e0b2   wsq/ubuntu:v2.0.1   "/bin/bash"   5 minutes ago   Exited (127) 4 minutes ago             distracted_bouman
 ba07a44eadc7   ubuntu              "/bin/bash"   2 hours ago     Up 4 seconds                           peaceful_curran
 ```
-## 后台模式与进入
+### 后台模式与进入
 在使用`-d`参数时，容器启动后会进入后台，如何进入容器呢？
 
 第一种：`docker attach`
@@ -473,7 +463,7 @@ ba07a44eadc7   ubuntu    "/bin/bash"   2 hours ago   Up 4 seconds             pe
 * 我特意在容器停止状态下执行了`docker exec`，是让你看到`docker exec`是在容器启动状态下用的，且注意下错误信息；
 * 推荐大家使用`docker exec`命令，因为此命令退出容器终端，不会导致容器的停止。
 
-## 容器导出和导入
+### 容器导出和导入
 在生产环境中，很多时候是无法连接外网的，所以有时候需要用到容器的导入和导出。
 
 容器的导出
@@ -499,7 +489,7 @@ wsq/ubuntu   v3.0.1    983aeebc0909   2 hours ago      117MB
 wsq/ubuntu   v1.0.1    4f356e712241   3 hours ago      117MB
 ubuntu       latest    35a88802559d   7 weeks ago      78.1MB
 ```
-## 删除容器
+### 删除容器
 可以使用`docker container rm 容器名/ID`或`docker rm 容器名/ID`来删除一个处于终止状态的容器。
 
 如果要删除一个运行中的容器，可以添加`-f`参数。
@@ -513,7 +503,7 @@ CONTAINER ID   IMAGE               COMMAND       CREATED          STATUS        
 CONTAINER ID   IMAGE     COMMAND       CREATED       STATUS                       PORTS     NAMES
 ba07a44eadc7   ubuntu    "/bin/bash"   3 hours ago   Exited (137) 4 minutes ago             peaceful_curran
 ```
-## 删除所有停止的容器
+### 删除所有停止的容器
 删除所有停止的容器: `docker container prune`
 ```shell
 [root@localhost ~]# docker ps -a
@@ -529,7 +519,7 @@ Total reclaimed space: 38.83MB
 [root@localhost ~]# docker ps -a
 CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
 ```
-## 容器别名及操作
+### 容器别名及操作
 我们上述对容器的操作都是针对容器 ID，这个 ID 是随机的，能否添加一个`name`对我们自己设置的`name`操作呢？
 ```shell
 [root@localhost ~]# docker run -itd --name wsq-ubuntu-202 wsq/ubuntu:v2.0.2 /bin/bash
@@ -543,7 +533,7 @@ wsq-ubuntu-202
 CONTAINER ID   IMAGE               COMMAND       CREATED          STATUS                                PORTS     NAMES
 572642db48bb   wsq/ubuntu:v2.0.2   "/bin/bash"   50 seconds ago   Exited (137) Less than a second ago             wsq-ubuntu-202 
 ```
-## 容器错误日志
+### 容器错误日志
 ```
 例：实时查看docker容器名为user-uat的最后10行日志
 docker logs -f -t --tail 10 user-uat
@@ -563,7 +553,9 @@ docker logs -t --since="2018-02-08T13:23:37" --until "2018-02-09T12:23:37" user-
 例：将错误日志写入文件：
 docker logs -f -t --since="2018-02-18" user-uat | grep error >> logs_error.txt
 ```
-## 在容器外执行容器内命令
+### 在容器外执行容器内命令
+在宿主机内让容器执行命令可以使用`docker exec`。
 ```
 docker exec centos ls
+bin  boot  data  dev  etc  home  lib  lib64  lost+found  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var
 ```
