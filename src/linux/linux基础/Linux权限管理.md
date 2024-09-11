@@ -1,9 +1,9 @@
 ---
 title: Linux权限管理
-date: 2024-03-01
+date: 2024-03-05
 tags: linux基础
 categories: linux
-order: 6
+order: 7
 ---
 
 ## chgrp命令：修改文件和目录的所属组

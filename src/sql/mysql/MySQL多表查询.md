@@ -6,8 +6,6 @@ categories: SQL
 order: 13
 ---
 
-
-
 多表查询就是同时查询两个或两个以上的表。在 MySQL 中，多表查询主要有交叉连接、内连接和外连接。
 ## CROSS JOIN：交叉连接
 交叉连接（`CROSS JOIN`）一般用来返回连接表的笛卡尔积。

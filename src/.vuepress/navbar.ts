@@ -6,7 +6,12 @@ export default navbar([
   {
     text: '前端',
     icon: 'devicon:javascript',
-    link: '/js/'
+    prefix: '/js/',
+    children: [
+      { text: 'JS基础', link: '/js/基础/', icon: 'devicon:javascript' },
+      { text: 'ES6', link: '/js/es6/', icon: 'devicon:javascript' },
+
+    ]
   },
   {
     text: 'Java',
@@ -28,12 +33,13 @@ export default navbar([
     ]
   },
   {
-    text: 'Linux',
+    text: '运维',
     icon: 'devicon:centos',
     prefix: '/linux/',
     children: [
       { text: 'linux基础', link: '/linux/linux基础/', icon: 'devicon:linux' },
-      { text: 'Docker', link: '/linux/docker/', icon: 'mdi:docker'}
+      { text: 'Docker', link: '/linux/docker/', icon: 'mdi:docker' },
+      { text: 'Nginx', link: '/linux/nginx/', icon: 'devicon:nginx' }
     ]
   },
   // {

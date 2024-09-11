@@ -1,9 +1,9 @@
 ---
 title: Linux用户和用户组管理
-date: 2024-02-25
+date: 2024-03-01
 tags: linux基础
 categories: linux
-order: 5
+order: 6
 ---
 
 ## 用户和用户组

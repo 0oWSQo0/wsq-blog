@@ -1,9 +1,9 @@
 ---
 title: Linux软件安装
-date: 2024-03-05
+date: 2024-03-10
 tags: linux基础
 categories: linux
-order: 7
+order: 8
 ---
 
 ## Linux软件包
@@ -326,7 +326,7 @@ libc.so.6(GLIBC_2.1)
 …省略部分输出…
 ```
 注意，这里使用的也是“绝对路径+包全名”的方式。
-## yum源配置
+## yum
 `yum(Yellow dog Updater, Modified)`，是一个专门为了解决包的依赖关系而存在的软件包管理器。
 
 可以这么说，`yum`是改进型的 RPM 软件管理器，它很好的解决了 RPM 所面临的软件包依赖问题。`yum`在服务器端存有所有的 RPM 包，并将各个包之间的依赖关系记录在文件中，当使用`yum`安装 RPM 包时，`yum`会先从服务器端下载包的依赖性文件，通过分析此文件从服务器端一次性下载所有相关的 RPM 包并进行安装。
@@ -341,7 +341,7 @@ yum-3.2.29-30.el6.centos.noarch
 使用`yum`安装软件包之前，需指定好`yum`下载 RPM 包的位置，此位置称为`yum`源。换句话说，`yum`源指的就是软件安装包的来源。
 
 使用`yum`安装软件时至少需要一个`yum`源。`yum`源既可以使用网络`yum`源，也可以将本地光盘作为`yum`源。
-### 网络 yum 源搭建
+### yum源
 一般情况下，只要你的主机网络正常，可以直接使用网络`yum`源，不需要对配置文件做任何修改。
 
 网络`yum`源配置文件位于`/etc/yum.repos.d/`目录下，文件扩展名为`*.repo`（只要扩展名为`*.repo`的文件都是`yum`源的配置文件）。
@@ -380,9 +380,31 @@ baseurl=http://mirrors.tencentyun.com/centos/$releasever/updates/$basearch/
 * `gpgcheck`：1 则表示 RPM 的数字证书生效；0 则表示 RPM 的数字证书不生效
 * `gpgkey`：数字证书的公钥文件保存位置。不用修改
 
-## yum命令
-### yum查询命令
-使用`yum`对软件包执行查询操作常用命令：
+#### 使用阿里yum源
+```shell
+[root@localhost yum.repos.d]# cd /etc/yum.repos.d/
+# 备份本地源文件
+[root@localhost yum.repos.d]# mv CentOS-Base.repo CentOS-Base.repo.bak
+# 下载阿里云源文件
+[root@localhost yum.repos.d]# curl -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
+# 清理yum缓存
+[root@localhost yum.repos.d]# yum clean all
+# 重新建立缓存，让新yum源生效
+[root@localhost yum.repos.d]# yum makecache
+```
+#### epel
+很多时候，我们安装完了 linux 系统之后，一般都会把`yum`源改成国内阿里云。但是世界上的软件这么多，阿里云或者`yum`源官方公司不可能去把所有的软件都收集起来，让你们去通过`yum install`一键安装，所以 Fedora 社区就搞了个额外软件库，就是`EPEL(Extra Packages for Enterprise Linux)`。
+
+EPEL，一个非官方的第三方软件库，用于补充主流Linux发行版如CentOS的yum源，特别在安装小众软件时提供丰富资源。通过EPEL，用户可以方便地安装大部分软件，即使在主流源中找不到也能在EPEL仓库找到解决方案。。装上了 EPEL 之后，就相当于添加了一个第三方源。
+
+```shell
+[root@localhost yum.repos.d]# yum install -y epel-release
+[root@localhost yum.repos.d]# ls
+CentOS-Base.repo  CentOS-Epel.repo  docker-ce.repo  epel.repo  epel-testing.repo
+```
+### yum命令
+#### yum查询命令
+查询操作常用命令：
 * `yum list`：查询所有已安装和可安装的软件包
 * `yum list 包名`：查询执行软件包的安装情况
 * `yum search 关键字`：从`yum`源服务器上查找与关键字相关的所有软件包
@@ -400,8 +422,7 @@ Size : 4.9M <—大小
 Repo : c6-media <-在光盘上
 …省略部分输出…
 ```
-
-### yum 安装命令
+#### yum 安装命令
 ```shell
 yum -y install 包名
 ```
@@ -412,24 +433,20 @@ yum -y install 包名
 #使用yum自动安装gcc
 [root@localhost yum jepos.d]# yum -y install gcc
 ```
-### yum 升级命令
+#### yum 升级命令
 使用`yum`升级软件包，需确保`yum`源服务器中软件包的版本比本机安装的软件包版本高。
 
-`yum`升级软件包常用命令：
+`yum`升级软件包命令：
 * `yum -y update`：升级所有软件包。不过考虑到服务器强调稳定性，因此该命令并不常用
 * `yum -y update 包名`：升级特定的软件包
 
-### yum 卸载命令
+#### yum 卸载命令
 使用`yum`卸载软件包时，会同时卸载所有与该包有依赖关系的其他软件包，即便有依赖包属于系统运行必备文件，也会被`yum`无情卸载，带来的直接后果就是使系统崩溃。
 
 除非你能确定卸载此包以及它的所有依赖包不会对系统产生影响，否则不要使用`yum`卸载软件包。
 ```shell
 #卸载指定的软件包
-yum remove 包名
-```
-```shell
-#卸载samba软件包
-[root@localhost ~]# yum remove samba
+yum remove 包名 [-y]
 ```
 ## 源码包安装和卸载
 Linux 系统中，绝大多数软件的源代码都是用 C 语言编写的，少部分用 C++（或其他语言）编写。因此要想安装源码包，必须安装`gcc`编译器（如果涉及 C++ 源码程序，还需要安装`gcc-c++`）。

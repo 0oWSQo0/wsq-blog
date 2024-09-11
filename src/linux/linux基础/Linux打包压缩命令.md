@@ -1,9 +1,9 @@
 ---
 title: Linux打包压缩命令
-date: 2024-02-20
+date: 2024-02-25
 tags: linux基础
 categories: linux
-order: 4
+order: 5
 ---
 
 
