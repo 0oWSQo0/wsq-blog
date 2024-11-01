@@ -854,7 +854,7 @@ mysql> SELECT CASE WEEKDAY(NOW())
     WHEN 4 THEN '星期五'
     WHEN 5 THEN '星期六'
     ELSE '星期天'
-    END AS COLUMN1,NOW(), WEEKDAY(NOW()), DAYNAME(NOW());
+    END AS COLUMN1, NOW(), WEEKDAY(NOW()), DAYNAME(NOW());
 +---------+---------------------+----------------+----------------+
 | COLUMN1 | NOW()               | WEEKDAY(NOW()) | DAYNAME(NOW()) |
 +---------+---------------------+----------------+----------------+
@@ -864,7 +864,7 @@ mysql> SELECT CASE WEEKDAY(NOW())
 ```
 由执行结果可以看出，`NOW()`函数得到当前系统时间是 2019 年 2 月 28 日，`DAYNAME(NOW())`得到当天是`'Thursday'`，`WEEKDAY(NOW())`函数返回当前时间的工作日索引是 3，即对应的是星期四。
 ### 可搜索的 CASE 语句
-简单`CASE`语句仅允许将表达式的值与一组不同的值进行匹配。 为了执行更复杂的匹配，如范围，则可以使用可搜索`CASE`语句。 可搜索`CASE`语句等同于`IF`语句，但是它的构造更加可读。
+简单`CASE`语句仅允许将表达式的值与一组不同的值进行匹配。 为了执行更复杂的匹配，如范围，则可以使用可搜索`CASE`语句。可搜索`CASE`语句等同于`IF`语句，但是它的构造更加可读。
 ```sql
 CASE
     WHEN <条件1> THEN <命令>

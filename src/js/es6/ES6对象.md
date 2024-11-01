@@ -1,4 +1,10 @@
-
+---
+title: ES6对象
+date: 2023-02-05
+tags: es6
+categories: 前端
+order: 7
+---
 
 
 

@@ -1,6 +1,10 @@
-
-
-
+---
+title: ES6数组
+date: 2023-01-30
+tags: es6
+categories: 前端
+order: 6
+---
 
 
 ## 扩展运算符
@@ -355,7 +359,8 @@ function ArrayOf(){
   return [].slice.call(arguments);
 }
 ```
-## 数组实例的copyWithin()
+## 实例方法
+### copyWithin()
 数组实例的`copyWithin`方法，在当前数组内部，将指定位置的成员复制到其他位置（会覆盖原有成员），然后返回当前数组。也就是说，使用这个方法，会修改当前数组。
 ```js
 Array.prototype.copyWithin(target, start = 0, end = this.length)
@@ -384,7 +389,7 @@ i32a.copyWithin(0, 2); // Int32Array [3, 4, 5, 4, 5]
 // 需要采用下面的写法
 [].copyWithin.call(new Int32Array([1,2,3,4,5]),0,3,4); // Int32Array[4,2,3,4,5]
 ```
-## 数组实例的find()和findIndex()
+### find()和findIndex()
 数组实例的`find`方法，用于找出第一个符合条件的数组成员。它的参数是一个回调函数，所有数组成员依次执行该回调函数，直到找出第一个返回值为`true`的成员，然后返回该成员。如果没有符合条件的成员，则返回`undefined`。
 ```js
 [1, 4, -5, 10].find((n) => n < 0) // -5
@@ -413,7 +418,7 @@ let person = {name: 'John', age: 20};
 [NaN].findIndex(y => Object.is(NaN, y)) // 0
 ```
 上面代码中，`indexOf`方法无法识别数组的`NaN`成员，但是`findIndex`方法可以借助`Object.is`方法做到。
-## 数组实例的fill()
+### fill()
 `fill`方法使用给定值，填充一个数组。
 ```js
 ['a', 'b', 'c'].fill(7) // [7, 7, 7]
@@ -434,7 +439,7 @@ let arr = new Array(3).fill([]);
 arr[0].push(5);
 arr // [[5], [5], [5]]
 ```
-## 数组实例的entries(),keys()和values()
+### entries(),keys()和values()
 `entries()`，`keys()`和`values()`方法用于遍历数组。它们都返回一个遍历器对象，可以用`for...of`循环进行遍历，唯一的区别是`keys()`是对键名的遍历、`values()`是对键值的遍历，`entries()`是对键值对的遍历。
 ```js
 for (let index of ['a', 'b'].keys()) {
@@ -459,7 +464,7 @@ console.log(entries.next().value); // [0, 'a']
 console.log(entries.next().value); // [1, 'b']
 console.log(entries.next().value); // [2, 'c']
 ```
-## 数组实例的includes()
+### includes()
 `Array.prototype.includes`方法返回一个布尔值，表示某个数组是否包含给定的值，与字符串的`includes`方法类似。
 ```js
 [1, 2, 3].includes(2) // true
@@ -497,6 +502,76 @@ contains(['foo', 'bar'], 'baz'); // => false
 另外，`Map`和`Set`数据结构有一个`has`方法，需要注意与`includes`区分。
 `Map`结构的`has`方法，是用来查找键名的，比如`Map.prototype.has(key)`、`WeakMap.prototype.has(key)`、`Reflect.has(target, propertyKey)`。
 `Set`结构的`has`方法，是用来查找值的，比如`Set.prototype.has(value)`、`WeakSet.prototype.has(value)`。
+### 实例方法：flat()，flatMap()
+数组的成员有时还是数组，`Array.prototype.flat()`用于将嵌套的数组“拉平”，变成一维的数组。该方法返回一个新数组，对原数据没有影响。
+```js
+[1, 2, [3, 4]].flat()
+// [1, 2, 3, 4]
+```
+上面代码中，原数组的成员里面有一个数组，`flat()`方法将子数组的成员取出来，添加在原来的位置。
+
+`flat()`默认只会“拉平”一层，如果想要“拉平”多层的嵌套数组，可以将`flat()`方法的参数写成一个整数，表示想要拉平的层数，默认为 1。
+```js
+[1, 2, [3, [4, 5]]].flat()
+// [1, 2, 3, [4, 5]]
+
+[1, 2, [3, [4, 5]]].flat(2)
+// [1, 2, 3, 4, 5]
+```
+上面代码中，`flat()`的参数为 2，表示要“拉平”两层的嵌套数组。
+
+如果不管有多少层嵌套，都要转成一维数组，可以用`Infinity`关键字作为参数。
+```js
+[1, [2, [3]]].flat(Infinity)
+// [1, 2, 3]
+```
+如果原数组有空位，`flat()`方法会跳过空位。
+```js
+[1, 2, , 4, 5].flat()
+// [1, 2, 4, 5]
+```
+`flatMap()`方法对原数组的每个成员执行一个函数（相当于执行`Array.prototype.map()`），然后对返回值组成的数组执行`flat()`方法。该方法返回一个新数组，不改变原数组。
+```js
+// 相当于 [[2, 4], [3, 6], [4, 8]].flat()
+[2, 3, 4].flatMap((x) => [x, x * 2])
+// [2, 4, 3, 6, 4, 8]
+```
+`flatMap()`只能展开一层数组。
+```js
+// 相当于 [[[2]], [[4]], [[6]], [[8]]].flat()
+[1, 2, 3, 4].flatMap(x => [[x * 2]])
+// [[2], [4], [6], [8]]
+```
+上面代码中，遍历函数返回的是一个双层的数组，但是默认只能展开一层，因此`flatMap()`返回的还是一个嵌套数组。
+
+`flatMap()`方法的参数是一个遍历函数，该函数可以接受三个参数，分别是当前数组成员、当前数组成员的位置（从零开始）、原数组。
+```js
+arr.flatMap(function callback(currentValue[, index[, array]]) {
+// ...
+}[, thisArg])
+```
+`flatMap()`方法还可以有第二个参数，用来绑定遍历函数里面的`this`。
+### at()
+长久以来，JavaScript 不支持数组的负索引，如果要引用数组的最后一个成员，不能写成`arr[-1]`，只能使用`arr[arr.length - 1]`。
+
+这是因为方括号运算符`[]`在 JavaScript 语言里面，不仅用于数组，还用于对象。对于对象来说，方括号里面就是键名，比如`obj[1]`引用的是键名为字符串1的键，同理`obj[-1]`引用的是键名为字符串-1的键。由于 JavaScript 的数组是特殊的对象，所以方括号里面的负数无法再有其他语义了，也就是说，不可能添加新语法来支持负索引。
+
+为了解决这个问题，ES2022 为数组实例增加了`at()`方法，接受一个整数作为参数，返回对应位置的成员，并支持负索引。这个方法不仅可用于数组，也可用于字符串和类型数组。
+```js
+const arr = [5, 12, 8, 130, 44];
+arr.at(2) // 8
+arr.at(-2) // 130
+```
+如果参数位置超出了数组范围，`at()`返回`undefined`。
+```js
+const sentence = 'This is a sample sentence';
+
+sentence.at(0); // 'T'
+sentence.at(-1); // 'e'
+
+sentence.at(-100) // undefined
+sentence.at(100) // undefined
+```
 ## 数组的空位
 数组的空位指，数组的某一个位置没有任何值。比如，`Array`构造函数返回的数组都是空位。
 ```js

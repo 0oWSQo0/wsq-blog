@@ -78,7 +78,6 @@ shift "$(($OPTIND - 1))"
 ```bash
 # 退出值为0（成功）
 [root@localhost ~]# exit 0
-
 # 退出值为1（失败）
 [root@localhost ~]# exit 1
 ```

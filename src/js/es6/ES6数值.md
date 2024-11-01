@@ -1,4 +1,10 @@
-
+---
+title: ES6数值
+date: 2023-01-20
+tags: es6
+categories: 前端
+order: 4
+---
 
 
 

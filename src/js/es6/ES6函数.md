@@ -1,7 +1,10 @@
-
-
-
-
+---
+title: ES6函数
+date: 2023-01-25
+tags: es6
+categories: 前端
+order: 5
+---
 
 
 ## 函数参数的默认值

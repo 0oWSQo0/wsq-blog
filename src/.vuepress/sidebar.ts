@@ -25,11 +25,16 @@ export default sidebar({
   ],
   '/js/es6': 'structure',
   '/js/基础': 'structure',
-  '/java': 'structure',
+  '/js/CSS': 'structure',
+  '/java/mybatis': 'structure',
+  '/java/Spring': 'structure',
+  '/java/springBoot': 'structure',
   '/linux/linux基础': 'structure',
   '/linux/docker': 'structure',
+  '/network': 'structure',
   '/linux/nginx': 'structure',
   '/linux/Bash': 'structure',
   '/sql/mysql': 'structure',
   '/sql/redis': 'structure',
+  '/computer/其它': 'structure'
 });

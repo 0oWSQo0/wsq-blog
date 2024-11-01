@@ -19,14 +19,15 @@ SELECT <字段名> FROM <表1>, <表2> [WHERE子句]
 * <表1><表2>：需要交叉连接的表名。
 * `WHERE`子句：用来设置交叉连接的查询条件。
 
-> 注意：多个表交叉连接时，在`FROM`后连续使用`CROSS JOIN`或`,`即可。
-
+:::warning
+注意：多个表交叉连接时，在`FROM`后连续使用`CROSS JOIN`或`,`即可。
+:::
 当连接的表之间没有关系时，我们会省略掉`WHERE`子句，这时返回结果就是两个表的笛卡尔积，返回结果数量就是两个表的数据行相乘。需要注意的是，如果每个表有 1000 行，那么返回结果的数量就有 1000×1000 = 1000000 行，数据量是非常巨大的。
 
 交叉连接可以查询两个或两个以上的表。
 
-查询学生信息表和科目信息表，并得到一个笛卡尔积。
 ```shell
+# 查询学生信息表和科目信息表，并得到一个笛卡尔积
 mysql> SELECT * FROM tb_students_info;
 +----+--------+------+------+--------+-----------+
 | id | name   | age  | sex  | height | course_id |
@@ -51,10 +52,8 @@ mysql> SELECT * FROM tb_course;
 |  1 | Java        |
 |  2 | MySQL       |
 |  3 | Python      |
-|  4 | Go          |
-|  5 | C++         |
 +----+-------------+
-5 rows in set (0.00 sec)
+3 rows in set (0.00 sec)
 
 mysql> SELECT * FROM tb_course CROSS JOIN tb_students_info;
 +----+-------------+----+--------+------+------+--------+-----------+
@@ -63,60 +62,39 @@ mysql> SELECT * FROM tb_course CROSS JOIN tb_students_info;
 |  1 | Java        |  1 | Dany   |   25 | 男   |    160 |         1 |
 |  2 | MySQL       |  1 | Dany   |   25 | 男   |    160 |         1 |
 |  3 | Python      |  1 | Dany   |   25 | 男   |    160 |         1 |
-|  4 | Go          |  1 | Dany   |   25 | 男   |    160 |         1 |
-|  5 | C++         |  1 | Dany   |   25 | 男   |    160 |         1 |
 |  1 | Java        |  2 | Green  |   23 | 男   |    158 |         2 |
 |  2 | MySQL       |  2 | Green  |   23 | 男   |    158 |         2 |
 |  3 | Python      |  2 | Green  |   23 | 男   |    158 |         2 |
-|  4 | Go          |  2 | Green  |   23 | 男   |    158 |         2 |
-|  5 | C++         |  2 | Green  |   23 | 男   |    158 |         2 |
 |  1 | Java        |  3 | Henry  |   23 | 女   |    185 |         1 |
 |  2 | MySQL       |  3 | Henry  |   23 | 女   |    185 |         1 |
 |  3 | Python      |  3 | Henry  |   23 | 女   |    185 |         1 |
-|  4 | Go          |  3 | Henry  |   23 | 女   |    185 |         1 |
-|  5 | C++         |  3 | Henry  |   23 | 女   |    185 |         1 |
 |  1 | Java        |  4 | Jane   |   22 | 男   |    162 |         3 |
 |  2 | MySQL       |  4 | Jane   |   22 | 男   |    162 |         3 |
 |  3 | Python      |  4 | Jane   |   22 | 男   |    162 |         3 |
-|  4 | Go          |  4 | Jane   |   22 | 男   |    162 |         3 |
-|  5 | C++         |  4 | Jane   |   22 | 男   |    162 |         3 |
 |  1 | Java        |  5 | Jim    |   24 | 女   |    175 |         2 |
 |  2 | MySQL       |  5 | Jim    |   24 | 女   |    175 |         2 |
 |  3 | Python      |  5 | Jim    |   24 | 女   |    175 |         2 |
-|  4 | Go          |  5 | Jim    |   24 | 女   |    175 |         2 |
-|  5 | C++         |  5 | Jim    |   24 | 女   |    175 |         2 |
 |  1 | Java        |  6 | John   |   21 | 女   |    172 |         4 |
 |  2 | MySQL       |  6 | John   |   21 | 女   |    172 |         4 |
 |  3 | Python      |  6 | John   |   21 | 女   |    172 |         4 |
-|  4 | Go          |  6 | John   |   21 | 女   |    172 |         4 |
-|  5 | C++         |  6 | John   |   21 | 女   |    172 |         4 |
 |  1 | Java        |  7 | Lily   |   22 | 男   |    165 |         4 |
 |  2 | MySQL       |  7 | Lily   |   22 | 男   |    165 |         4 |
 |  3 | Python      |  7 | Lily   |   22 | 男   |    165 |         4 |
-|  4 | Go          |  7 | Lily   |   22 | 男   |    165 |         4 |
-|  5 | C++         |  7 | Lily   |   22 | 男   |    165 |         4 |
 |  1 | Java        |  8 | Susan  |   23 | 男   |    170 |         5 |
 |  2 | MySQL       |  8 | Susan  |   23 | 男   |    170 |         5 |
 |  3 | Python      |  8 | Susan  |   23 | 男   |    170 |         5 |
-|  4 | Go          |  8 | Susan  |   23 | 男   |    170 |         5 |
-|  5 | C++         |  8 | Susan  |   23 | 男   |    170 |         5 |
 |  1 | Java        |  9 | Thomas |   22 | 女   |    178 |         5 |
 |  2 | MySQL       |  9 | Thomas |   22 | 女   |    178 |         5 |
 |  3 | Python      |  9 | Thomas |   22 | 女   |    178 |         5 |
-|  4 | Go          |  9 | Thomas |   22 | 女   |    178 |         5 |
-|  5 | C++         |  9 | Thomas |   22 | 女   |    178 |         5 |
 |  1 | Java        | 10 | Tom    |   23 | 女   |    165 |         5 |
 |  2 | MySQL       | 10 | Tom    |   23 | 女   |    165 |         5 |
 |  3 | Python      | 10 | Tom    |   23 | 女   |    165 |         5 |
-|  4 | Go          | 10 | Tom    |   23 | 女   |    165 |         5 |
-|  5 | C++         | 10 | Tom    |   23 | 女   |    165 |         5 |
 +----+-------------+----+--------+------+------+--------+-----------+
-50 rows in set (0.00 sec)
+30 rows in set (0.00 sec)
 ```
-由运行结果可以看出，`tb_course`和`tb_students_info`表交叉连接查询后，返回了 50 条记录。可以想象，当表中的数据较多时，得到的运行结果会非常长，而且得到的运行结果也没太大的意义。所以，通过交叉连接的方式进行多表查询的这种方法并不常用，我们应该尽量避免这种查询。
-
-查询`tb_course`表中的`id`字段和`tb_students_info`表中的`course_id`字段相等的内容：
+由运行结果可以看出，当表中的数据较多时，得到的运行结果会非常长，而且得到的运行结果也没太大的意义。所以，通过交叉连接的方式进行多表查询的这种方法并不常用，我们应该尽量避免这种查询。
 ```shell
+# 查询`tb_course`表中的`id`字段和`tb_students_info`表中的`course_id`字段相等的内容
 mysql> SELECT * FROM tb_course CROSS JOIN tb_students_info 
     -> WHERE tb_students_info.course_id = tb_course.id;
 +----+-------------+----+--------+------+------+--------+-----------+
@@ -127,13 +105,8 @@ mysql> SELECT * FROM tb_course CROSS JOIN tb_students_info
 |  1 | Java        |  3 | Henry  |   23 | 女   |    185 |         1 |
 |  3 | Python      |  4 | Jane   |   22 | 男   |    162 |         3 |
 |  2 | MySQL       |  5 | Jim    |   24 | 女   |    175 |         2 |
-|  4 | Go          |  6 | John   |   21 | 女   |    172 |         4 |
-|  4 | Go          |  7 | Lily   |   22 | 男   |    165 |         4 |
-|  5 | C++         |  8 | Susan  |   23 | 男   |    170 |         5 |
-|  5 | C++         |  9 | Thomas |   22 | 女   |    178 |         5 |
-|  5 | C++         | 10 | Tom    |   23 | 女   |    165 |         5 |
 +----+-------------+----+--------+------+------+--------+-----------+
-10 rows in set (0.01 sec)
+5 rows in set (0.01 sec)
 ```
 如果在交叉连接时使用`WHERE`子句，MySQL 会先生成两个表的笛卡尔积，然后再选择满足`WHERE`条件的记录。因此，表的数量较多时，交叉连接会非常非常慢。一般情况下不建议使用交叉连接。
 
@@ -164,17 +137,16 @@ B×A={(3,1), (3,2), (4,1), (4,2), (5,1), (5,2) };
 SELECT <字段名> FROM <表1> INNER JOIN <表2> [ON子句]
 ```
 说明：
-* 字段名：需要查询的字段名称。
-* <表1><表2>：需要内连接的表名。
-* `INNER JOIN`：内连接中可以省略`INNER`关键字，只用关键字`JOIN`。
-* `ON`子句：用来设置内连接的连接条件。
+* 字段名：需要查询的字段名称
+* <表1><表2>：需要内连接的表名
+* `INNER JOIN`：内连接中可以省略`INNER`关键字，只用关键字`JOIN`
+* `ON`子句：用来设置内连接的连接条件
 
 `INNER JOIN`也可以使用`WHERE`子句指定连接条件，但是`INNER JOIN ... ON`语法是官方的标准写法，而且`WHERE`子句在某些时候会影响查询的性能。
 
 多个表内连接时，在`FROM`后连续使用`INNER JOIN`或`JOIN`即可。
-
-在`tb_students_info`表和`tb_course`表之间，使用内连接查询学生姓名和相对应的课程名称。
 ```shell
+# 在`tb_students_info`表和`tb_course`表之间，使用内连接查询学生姓名和相对应的课程名称
 mysql> SELECT s.name,c.course_name FROM tb_students_info s INNER JOIN tb_course c 
     -> ON s.course_id = c.id;
 +--------+-------------+
@@ -185,17 +157,12 @@ mysql> SELECT s.name,c.course_name FROM tb_students_info s INNER JOIN tb_course 
 | Henry  | Java        |
 | Jane   | Python      |
 | Jim    | MySQL       |
-| John   | Go          |
-| Lily   | Go          |
-| Susan  | C++         |
-| Thomas | C++         |
-| Tom    | C++         |
 +--------+-------------+
-10 rows in set (0.00 sec)
+5 rows in set (0.00 sec)
 ```
-在这里的查询语句中，两个表之间的关系通过`INNER JOIN`指定，连接的条件使用`ON`子句给出。
-
+:::warning
 注意：当对多个表进行查询时，要在`SELECT`语句后面指定字段是来源于哪一张表。因此，在多表查询时，`SELECT`语句后面的写法是表名.列名。另外，如果表名非常长的话，也可以给表设置别名，这样就可以直接在`SELECT`语句后面写上表的别名.列名。
+:::
 ## LEFT/RIGHT JOIN：外连接
 内连接的查询结果都是符合连接条件的记录，而外连接会先将连接的表分为基表和参考表，再以基表为依据返回满足和不满足条件的记录。
 
@@ -221,11 +188,9 @@ mysql> SELECT * FROM tb_course;
 |  1 | Java        |
 |  2 | MySQL       |
 |  3 | Python      |
-|  4 | Go          |
-|  5 | C++         |
-|  6 | HTML        |
+|  4 | HTML        |
 +----+-------------+
-6 rows in set (0.00 sec)
+4 rows in set (0.00 sec)
 
 mysql> SELECT * FROM tb_students_info;
 +----+--------+------+------+--------+-----------+
@@ -256,31 +221,25 @@ mysql> SELECT s.name,c.course_name FROM tb_students_info s LEFT OUTER JOIN tb_co
 | Green  | MySQL       |
 | Jim    | MySQL       |
 | Jane   | Python      |
-| John   | Go          |
-| Lily   | Go          |
-| Susan  | C++         |
-| Thomas | C++         |
-| Tom    | C++         |
 | LiMing | NULL        |
 +--------+-------------+
-12 rows in set (0.00 sec)
+7 rows in set (0.00 sec)
 ```
-可以看到，运行结果显示了 12 条记录，`name`为`LiMing`的学生目前没有课程，因为对应的`tb_course`表中没有该学生的课程信息，所以该条记录只取出了`tb_students_info`表中相应的值，而从`tb_course`表中取出的值为`NULL`。
+可以看到，`name`为`LiMing`的学生目前没有课程，因为对应的`tb_course`表中没有该学生的课程信息，所以该条记录只取出了`tb_students_info`表中相应的值，而从`tb_course`表中取出的值为`NULL`。
 ### 右连接
 右外连接又称为右连接，右连接是左连接的反向连接。使用`RIGHT OUTER JOIN`关键字连接两个表，并使用`ON`子句来设置连接条件。
 ```sql
 SELECT <字段名> FROM <表1> RIGHT OUTER JOIN <表2> <ON子句>
 ```
 语法说明：
-* 字段名：需要查询的字段名称。
-* <表1><表2>：需要右连接的表名。
-* `RIGHT OUTER JOIN`：右连接中可以省略`OUTER`关键字，只使用关键字`RIGHT JOIN`。
-* `ON`子句：用来设置右连接的连接条件，不能省略。
+* 字段名：需要查询的字段名称
+* <表1><表2>：需要右连接的表名
+* `RIGHT OUTER JOIN`：右连接中可以省略`OUTER`关键字，只使用关键字`RIGHT JOIN`
+* `ON`子句：用来设置右连接的连接条件，不能省略
 
 与左连接相反，右连接以“表2”为基表，“表1”为参考表。右连接查询时，可以查询出“表2”中的所有记录和“表1”中匹配连接条件的记录。如果“表2”的某行在“表1”中没有匹配行，那么在返回结果中，“表1”的字段值均为空值（`NULL`）。
 ```shell
-mysql> SELECT s.name,c.course_name FROM tb_students_info s RIGHT OUTER JOIN tb_course c 
-    -> ON s.`course_id`=c.`id`;
+mysql> SELECT s.name,c.course_name FROM tb_students_info s RIGHT OUTER JOIN tb_course c ON s.`course_id`=c.`id`;
 +--------+-------------+
 | name   | course_name |
 +--------+-------------+
@@ -289,20 +248,16 @@ mysql> SELECT s.name,c.course_name FROM tb_students_info s RIGHT OUTER JOIN tb_c
 | Henry  | Java        |
 | Jane   | Python      |
 | Jim    | MySQL       |
-| John   | Go          |
-| Lily   | Go          |
-| Susan  | C++         |
-| Thomas | C++         |
-| Tom    | C++         |
 | NULL   | HTML        |
 +--------+-------------+
-11 rows in set (0.00 sec)
+6 rows in set (0.00 sec)
 ```
-可以看到，结果显示了 11 条记录，名称为`HTML`的课程目前没有学生，因为对应的`tb_students_info`表中并没有该学生的信息，所以该条记录只取出了`tb_course`表中相应的值，而从`tb_students_info`表中取出的值为`NULL`。
+可以看到，名称为`HTML`的课程目前没有学生，因为对应的`tb_students_info`表中并没有该学生的信息，所以该条记录只取出了`tb_course`表中相应的值，而从`tb_students_info`表中取出的值为`NULL`。
 
 多个表左/右连接时，在`ON`子句后连续使用`LEFT/RIGHT OUTER JOIN`或`LEFT/RIGHT JOIN`即可。
-
+:::tip
 使用外连接查询时，一定要分清需要查询的结果，是需要显示左表的全部记录还是右表的全部记录，然后选择相应的左连接和右连接。
+:::
 ## 子查询
 子查询是 MySQL 中比较常用的查询方法，通过子查询可以实现多表查询。子查询指将一个查询语句嵌套在另一个查询语句中。子查询可以在`SELECT、UPDATE`和`DELETE`语句中使用，而且可以进行多层嵌套。在实际开发时，子查询经常出现在`WHERE`子句中。
 ```sql

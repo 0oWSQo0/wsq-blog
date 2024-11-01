@@ -9,8 +9,8 @@ export default navbar([
     prefix: '/js/',
     children: [
       { text: 'JS基础', link: '/js/基础/', icon: 'devicon:javascript' },
-      { text: 'ES6', link: '/js/es6/', icon: 'devicon:javascript' },
-
+      { text: 'ES6', link: '/js/es6/', icon: 'logos:es6' },
+      { text: 'CSS', link: '/js/CSS/', icon: 'devicon:css3' },
     ]
   },
   {
@@ -18,9 +18,9 @@ export default navbar([
     icon: 'devicon:java',
     prefix: '/java/',
     children: [
-      { text: 'Mybatis', link: '/java/mybatis', icon: 'devicon:spring' },
-      { text: 'Spring', link: '/java/spring', icon: 'devicon:spring' },
-      { text: 'springBoot', link: '/java/springBoot', icon: 'devicon:spring' }
+      { text: 'Mybatis', link: '/java/mybatis/', icon: 'devicon:spring' },
+      { text: 'Spring', link: '/java/Spring/', icon: 'devicon:spring' },
+      { text: 'springBoot', link: '/java/springBoot/', icon: 'devicon:spring' }
     ]
   },
   {
@@ -39,9 +39,17 @@ export default navbar([
     children: [
       { text: 'linux基础', link: '/linux/linux基础/', icon: 'devicon:linux' },
       { text: 'Docker', link: '/linux/docker/', icon: 'mdi:docker' },
-      { text: 'Nginx', link: '/linux/nginx/', icon: 'devicon:nginx' }
+      { text: 'Nginx', link: '/linux/nginx/', icon: 'devicon:nginx' },
     ]
   },
+  {
+    text: '计算机基础',
+    icon: 'devicon:centos',
+    prefix: '/computer/',
+    children: [
+      { text: '其它', link: '/computer/其它/', icon: 'devicon:network' }
+    ]
+  }
   // {
   //   text: "指南",
   //   icon: "lightbulb",

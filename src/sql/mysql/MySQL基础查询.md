@@ -554,7 +554,7 @@ mysql> SELECT `name`, login_date FROM tb_students_info WHERE login_date IS NOT N
 ## GROUP BY分组查询
 `GROUP BY`关键字可以根据一个或多个字段对查询结果进行分组。
 ```sql
-GROUP BY  <字段名>
+GROUP BY <字段名>
 ```
 其中，“字段名”表示需要分组的字段名称，多个字段时用逗号隔开。
 ### GROUP BY单独使用
@@ -569,7 +569,7 @@ mysql> SELECT `name`, `sex` FROM tb_students_info GROUP BY sex;
 +-------+------+
 ```
 结果中只显示了两条记录，这两条记录的`sex`字段的值分别为“女”和“男”。
-### GROUP BY 与 GROUP_CONCAT()
+### GROUP BY与GROUP_CONCAT()
 `GROUP BY`关键字可以和`GROUP_CONCAT()`函数一起使用。`GROUP_CONCAT()`函数会把每个分组的字段值都显示出来。
 ```shell
 mysql> SELECT `sex`, GROUP_CONCAT(name) FROM tb_students_info GROUP BY sex;
@@ -609,7 +609,7 @@ mysql> SELECT sex, COUNT(sex) FROM tb_students_info GROUP BY sex;
 | 男   |          5 |
 +------+------------+
 ```
-### GROUP BY 与 WITH ROLLUP
+### GROUP BY与WITH ROLLUP
 `WITH POLLUP`关键字用来在所有记录的最后加上一条记录，这条记录是上面所有记录的总和，即统计记录数量。
 ```shell
 mysql> SELECT sex,GROUP_CONCAT(name) FROM tb_students_info GROUP BY sex WITH ROLLUP;

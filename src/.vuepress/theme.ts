@@ -48,6 +48,9 @@ export default hopeTheme({
       category: "Announcements",
       categoryId: "DIC_kwDOG_Pt2M4COD69",
     },
+    markdownMath: {
+      type: "katex"
+    },
 
     components: {
       components: ["Badge", "VPCard"],
@@ -57,13 +60,13 @@ export default hopeTheme({
     mdEnhance: {
       align: true,
       attrs: true,
-      codetabs: true,
+      // codetabs: true,
       component: true,
       demo: true,
       breaks: true,
-      figure: true,
-      imgLazyload: true,
-      imgSize: true,
+      // figure: true,
+      // imgLazyload: true,
+      // imgSize: true,
       include: true,
       mark: true,
       plantuml: true,
@@ -83,7 +86,7 @@ export default hopeTheme({
       ],
       sub: true,
       sup: true,
-      tabs: true,
+      // tabs: true,
       tasklist: true,
       vPre: true,
       // 在启用之前安装 chart.js
@@ -96,15 +99,10 @@ export default hopeTheme({
       // gfm requires mathjax-full to provide tex support
       // gfm: true,
 
-      // 在启用之前安装 katex
-      // katex: true,
-
-      // 在启用之前安装 mathjax-full
-      // mathjax: true,
 
       // 在启用之前安装 mermaid
-      // mermaid: true,
-
+      mermaid: true,
+      markmap: true,
       // playground: {
       //   presets: ["ts", "vue"],
       // },

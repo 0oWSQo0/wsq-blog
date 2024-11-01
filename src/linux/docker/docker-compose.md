@@ -31,7 +31,7 @@ Docker Compose version v2.6.0
 ```
 在 Linux 上的也安装十分简单，从官方[GitHub Release](https://github.com/docker/compose/releases)处直接下载编译好的二进制文件即可。
 ```shell
-$ DOCKER_CONFIG=/usr/local/lib/docker/cli-plugins
+$ DOCKER_CONFIG=/usr/local/bin
 $ mkdir -p $DOCKER_CONFIG
 $ curl -SL https://github.com/docker/compose/releases/download/v2.29.1/docker-compose-`uname -s`-`uname -m` > $DOCKER_CONFIG/docker-compose
 # 国内用户可以使用以下方式加快下载

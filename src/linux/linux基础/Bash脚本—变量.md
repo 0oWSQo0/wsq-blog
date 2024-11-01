@@ -118,9 +118,9 @@ variable='value'
 variable="value"
 ```
 上面命令中，等号左边是变量名，右边是变量。
-
-> 注意，等号两边不能有空格。
-
+:::warning
+等号两边不能有空格。
+:::
 如果变量的值包含空格，则必须将值放在引号中。
 ```shell
 myvar="hello world"
@@ -266,7 +266,7 @@ ls: doesnotexist: No such file or directory
 1
 ```
 上面例子中，`ls`命令查看一个不存在的文件，导致报错。`$?`为 1，表示上一个命令执行失败。
-### $$
+### \$\$
 `$$`为当前 Shell 的进程 ID。
 ```shell
 [root@localhost ~]# echo $$
@@ -336,12 +336,10 @@ filename=${1:?"filename missing."}
 上面代码出现在脚本中，1 表示脚本的第一个参数。如果该参数不存在，就退出脚本并报错。
 ## declare 命令
 `declare`命令可以声明一些特殊类型的变量，为变量设置一些限制，比如声明只读类型的变量和整数类型的变量。
-
-它的语法形式如下。
 ```
 declare OPTION VARIABLE=value
 ```
-`declare`命令的主要参数（`OPTION`）如下。
+`declare`命令的主要参数（`OPTION`）：
 * `-a`：声明数组变量。
 * `-f`：输出所有函数定义。
 * `-F`：输出所有函数名。

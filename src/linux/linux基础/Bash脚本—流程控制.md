@@ -626,16 +626,12 @@ for variable in list
 do
   commands
 done
-```
-上面语法中，`for`循环会依次从`list`列表中取出一项，作为变量`variable`，然后在循环体中进行处理。
-
-关键词`do`可以跟`for`写在同一行，两者使用分号分隔。
-```bash
+# 关键词`do`可以跟`for`写在同一行，两者使用分号分隔
 for variable in list; do
   commands
 done
 ```
-下面是一个例子。
+上面语法中，`for`循环会依次从`list`列表中取出一项，作为变量`variable`，然后在循环体中进行处理。
 ```bash
 #!/bin/bash
 
@@ -665,14 +661,13 @@ done
 ```
 上面例子中，`cat ~/.bash_profile`命令会输出`~/.bash_profile`文件的内容，然后通过遍历每一个词，计算该文件一共包含多少个词，以及每个词有多少个字符。
 
-`in list`的部分可以省略，这时list默认等于脚本的所有参数`$@`。但是，为了可读性，最好还是不要省略，参考下面的例子。
+`in list`的部分可以省略，这时`list`默认等于脚本的所有参数`$@`。但是，为了可读性，最好还是不要省略。
 ```bash
 for filename; do
   echo "$filename"
 done
 
 # 等同于
-
 for filename in "$@" ; do
   echo "$filename"
 done
