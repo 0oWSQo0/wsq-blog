@@ -182,7 +182,7 @@ javax.servlet.http.HttpServlet 继承了 GenericServlet 抽象类，用于开发
 
 在 HTTP/1.1 协议中共定义了 7 种请求方式，即 GET、POST、HEAD、PUT、DELETE、TRACE 和 OPTIONS。
 
-HttpServlet 针对这 7 种请求方式分别定义了 7 种方法，即 doGet()、doPost()、doHead()、doPut()、doDelete()、doTrace() 和 doOptions()。
+`HttpServlet`针对这 7 种请求方式分别定义了 7 种方法，即 doGet()、doPost()、doHead()、doPut()、doDelete()、doTrace() 和 doOptions()。
 
 HttpServlet 重写了 service() 方法，该方法会先获取客户端的请求方式，然后根据请求方式调用对应 doXxx 方法。
 
@@ -221,8 +221,8 @@ Generic 是“通用”的意思，正如其名，GenericServlet 是一个通用
 
 人们都是通过 HTTP 协议来访问动态网页的，其中使用最频繁的就是 GET 方式和 POST 方式，因此，我们通常基于 HttpServlet 来创建 Servlet 类，这样就省去了处理 HTTP 请求的过程。
 
-## Servlet的部署和访问
-Servlet 没有 main() 方法，不能独立运行，但它可以作为 JavaWeb 应用的一个组件被部署到 Servlet 容器中，由容器来实例化和调用 Servlet 的方法，例如：doGet() 、doPost() 等。
+## Servlet的部署
+`Servlet`没有`main()`方法，不能独立运行，但它可以作为 JavaWeb 应用的一个组件被部署到 Servlet 容器中，由容器来实例化和调用 Servlet 的方法，例如：doGet() 、doPost() 等。
 
 那么，JavaWeb 应用是什么呢？Servlet 是如何部署和访问的呢？
 ### JavaWeb 应用

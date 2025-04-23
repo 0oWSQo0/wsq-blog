@@ -14,7 +14,7 @@ Java 反射机制是在运行状态中，对于任意一个类，都能够知道
 
 Java 反射机制在服务器程序和中间件程序中得到了广泛运用。在服务器端，往往需要根据客户的请求，动态调用某一个对象的特定方法。此外，在 ORM 中间件的实现中，运用 Java 反射机制可以读取任意一个`JavaBean`的所有属性，或者给这些属性赋值。
 
-{% asset_img 1.png %}
+![](Java反射机制/1.png)
 
 Java 反射机制主要提供了以下功能，这些功能都位于`java.lang.reflect`包。
 * 在运行时判断任意一个对象所属的类。
@@ -31,21 +31,21 @@ Class labelCls = label1.getClass();    // label1为 JLabel 类的对象
 ```
 利用`Class`类的对象`labelCls`可以访问`labelCls`对象的描述信息、`JLabel`类的信息以及基类`Object`的信息。反射可访问的常用信息：
 
-| 类型     | 访问方法              | 返回值类型      | 说明 |
-| :--: | :--: | :--: | :--: |
-| 包路径   | getPackage()         | Package 对象	| 获取该类的存放路径 |
-| 类名称   | getName()            | String 对象     | 获取该类的名称 |
-| 继承类   | getSuperclass()      | Class 对象      | 获取该类继承的类 |
-| 实现接口 | getlnterfaces()      | Class 型数组	| 获取该类实现的所有接口 |
-| 构造方法 | getConstructors()    | Constructor 型数组	| 获取所有权限为 public 的构造方法 |
-| 构造方法 | getDeclaredContruectors() | Constructor 对象	| 获取当前对象的所有构造方法 |
-| 方法     | getMethods()         | Methods 型数组  | 获取所有权限为 public 的方法 |
-| 方法     | getDeclaredMethods() | Methods 对象    | 获取当前对象的所有方法 |
-| 成员变量 | getFields()          | Field 型数组	| 获取所有权限为 public 的成员变量 |
-| 成员变量 | getDeclareFileds()   | Field 对象      | 获取当前对象的所有成员变量 |
-| 内部类   | getClasses()         | Class 型数组	| 获取所有权限为 public 的内部类 |
-| 内部类   | getDeclaredClasses() | Class 型数组	| 获取所有内部类 |
-| 内部类的声明类 | getDeclaringClass() | Class 对象 | 如果该类为内部类，则返回它的成员类，否则返回 null |
+|   类型    |           访问方法            |      返回值类型       |             说明              |
+|:-------:|:-------------------------:|:----------------:|:---------------------------:|
+|   包路径   |       getPackage()        |   Package 对象	    |          获取该类的存放路径          |
+|   类名称   |         getName()         |    String 对象     |           获取该类的名称           |
+|   继承类   |      getSuperclass()      |     Class 对象     |          获取该类继承的类           |
+|  实现接口   |      getlnterfaces()      |    Class 型数组	    |         获取该类实现的所有接口         |
+|  构造方法   |     getConstructors()     | Constructor 型数组	 |    获取所有权限为 public 的构造方法     |
+|  构造方法   | getDeclaredContruectors() | Constructor 对象	  |        获取当前对象的所有构造方法        |
+|   方法    |       getMethods()        |   Methods 型数组    |     获取所有权限为 public 的方法      |
+|   方法    |   getDeclaredMethods()    |    Methods 对象    |         获取当前对象的所有方法         |
+|  成员变量   |        getFields()        |    Field 型数组	    |    获取所有权限为 public 的成员变量     |
+|  成员变量   |   getDeclareFileds()      |   Field 对象       |        获取当前对象的所有成员变量        |
+|   内部类   |       getClasses()        |    Class 型数组	    |     获取所有权限为 public 的内部类     |
+|   内部类   |   getDeclaredClasses()    |    Class 型数组	    |           获取所有内部类           |
+| 内部类的声明类 |    getDeclaringClass()    |     Class 对象     | 如果该类为内部类，则返回它的成员类，否则返回 null |
 
 在调用`getFields()`和`getMethods()`方法时将会依次获取权限为`public`的字段和变量，然后将包含从超类中继承到的成员变量和方法。而通过`getDeclareFields()`和`getDeclareMethod()`只是获取在本类中定义的成员变量和方法。
 
@@ -159,25 +159,25 @@ objectClass.getDeclaredConstructor(new Class[]{int.class,String.class});
 ```
 创建的每个`Constructor`对象表示一个构造方法，然后利用`Constructor`对象的方法操作构造方法。`Constructor`类的常用方法：
 
-| 方法名称 | 说明 |
-| :--: | :--: |
-| isVarArgs()                    | 查看该构造方法是否允许带可变数量的参数，如果允许，返回 true，否则返回false |
-| getParameterTypes()            | 按照声明顺序以 Class 数组的形式获取该构造方法各个参数的类型 |
-| getExceptionTypes()            | 以 Class 数组的形式获取该构造方法可能抛出的异常类型 |
+|              方法名称              | 说明 |
+|:------------------------------:| :--: |
+|          isVarArgs()           | 查看该构造方法是否允许带可变数量的参数，如果允许，返回 true，否则返回false |
+|      getParameterTypes()       | 按照声明顺序以 Class 数组的形式获取该构造方法各个参数的类型 |
+|   getExceptionTypes()          | 以 Class 数组的形式获取该构造方法可能抛出的异常类型 |
 | newInstance(Object … initargs) | 通过该构造方法利用指定参数创建一个该类型的对象，如果未设置参数则表示采用默认无参的构造方法 |
-| setAccessiable(boolean flag)   | 如果该构造方法的权限为 private，默认为不允许通过反射利用 netlnstance() 方法创建对象。如果先执行该方法，并将入口参数设置为 true，则允许创建对象 |
-| getModifiers()                 | 获得可以解析出该构造方法所采用修饰符的整数 |
+|  setAccessiable(boolean flag)  | 如果该构造方法的权限为 private，默认为不允许通过反射利用 netlnstance() 方法创建对象。如果先执行该方法，并将入口参数设置为 true，则允许创建对象 |
+|         getModifiers()         | 获得可以解析出该构造方法所采用修饰符的整数 |
 
 通过`java.lang.reflect.Modifier`类可以解析出`getMocMers()`方法的返回值所表示的修饰符信息。在该类中提供了一系列用来解析的静态方法，既可以查看是否被指定的修饰符修饰，还可以字符串的形式获得所有修饰符。`Modifier`类的常用静态方法：
 
-| 静态方法名称         | 说明 |
-| :--: | :--: |
-| isStatic(int mod)    | 如果使用 static 修饰符修饰则返回 true，否则返回 false |
-| isPublic(int mod)    | 如果使用 public 修饰符修饰则返回 true，否则返回 false |
-| isProtected(int mod) | 如果使用 protected 修饰符修饰则返回 true，否则返回 false |
-| isPrivate(int mod)   | 如果使用 private 修饰符修饰则返回 true，否则返回 false |
-| isFinal(int mod)     | 如果使用 final 修饰符修饰则返回 true，否则返回 false |
-| toString(int mod)    | 以字符串形式返回所有修饰符 |
+|         静态方法名称         |                   说明                    |
+|:----------------------:|:---------------------------------------:|
+|   isStatic(int mod)    |  如果使用 static 修饰符修饰则返回 true，否则返回 false   |
+|   isPublic(int mod)    |  如果使用 public 修饰符修饰则返回 true，否则返回 false   |
+|  isProtected(int mod)  | 如果使用 protected 修饰符修饰则返回 true，否则返回 false |
+|   isPrivate(int mod)   |  如果使用 private 修饰符修饰则返回 true，否则返回 false  |
+|    isFinal(int mod)    |   如果使用 final 修饰符修饰则返回 true，否则返回 false   |
+| toString(int mod)      |             以字符串形式返回所有修饰符               |
 
 例如，下列代码判断对象`con`所代表的构造方法是否被`public`修饰，以及以字符串形式获取该构造方法的所有修饰符。
 ```java
@@ -317,15 +317,15 @@ objectClass.getDeclaredConstructor("max",new Class[]{int.class,String.class});
 ```
 `Method`类的常用方法。
 
-| 静态方法名称                      | 说明 |
-| :--: | :--: |
-| getName()                         | 获取该方法的名称 |
-| getParameterType()                | 按照声明顺序以 Class 数组的形式返回该方法各个参数的类型 |
-| getReturnType()                   | 以 Class 对象的形式获得该方法的返回值类型 |
-| getExceptionTypes()               | 以 Class 数组的形式获得该方法可能抛出的异常类型 |
-| invoke(Object obj,Object...args)	| 利用 args 参数执行指定对象 obj 中的该方法，返回值为 Object 类型 |
-| isVarArgs()                       | 查看该方法是否允许带有可变数量的参数，如果允许返回 true，否则返回 false |
-| getModifiers()                    | 获得可以解析出该方法所采用修饰符的整数 |
+|              静态方法名称               |                    说明                     |
+|:---------------------------------:|:-----------------------------------------:|
+|             getName()             |                 获取该方法的名称                  |
+|        getParameterType()         |      按照声明顺序以 Class 数组的形式返回该方法各个参数的类型      |
+|          getReturnType()          |         以 Class 对象的形式获得该方法的返回值类型          |
+|    getExceptionTypes()            |       以 Class 数组的形式获得该方法可能抛出的异常类型         |
+| invoke(Object obj,Object...args)	 | 利用 args 参数执行指定对象 obj 中的该方法，返回值为 Object 类型 |
+|            isVarArgs()            | 查看该方法是否允许带有可变数量的参数，如果允许返回 true，否则返回 false |
+|          getModifiers()           |            获得可以解析出该方法所采用修饰符的整数            |
 
 ```java
 public class Book1 {
@@ -468,20 +468,20 @@ object.getDeciaredField("price");
 ```
 `Field`类的常用方法
 
-| 方法名称                          | 说明 |
-| :--: | :--: |
-| getName()                         | 获得该成员变量的名称 |
-| getType()                         | 获取表示该成员变量的 Class 对象 |
-| get(Object obj)                   | 获得指定对象 obj 中成员变量的值，返回值为 Object 类型 |
-| set(Object obj, Object value)     | 将指定对象 obj 中成员变量的值设置为 value |
-| getlnt(0bject obj)                | 获得指定对象 obj 中成员类型为 int 的成员变量的值 |
-| setlnt(0bject obj, int i)         | 将指定对象 obj 中成员变量的值设置为 i |
-| setFloat(Object obj, float f)     | 将指定对象 obj 中成员变量的值设置为 f |
-| getBoolean(Object obj)            | 获得指定对象 obj 中成员类型为 boolean 的成员变量的值 |
-| setBoolean(Object obj, boolean b)	| 将指定对象 obj 中成员变量的值设置为 b |
-| getFloat(Object obj)              | 获得指定对象 obj 中成员类型为 float 的成员变量的值 |
-| setAccessible(boolean flag)       | 此方法可以设置是否忽略权限直接访问 private 等私有权限的成员变量 |
-| getModifiers()                    | 获得可以解析出该方法所采用修饰符的整数 |
+|                方法名称                |                  说明                  |
+|:----------------------------------:|:------------------------------------:|
+|     getName()                      |              获得该成员变量的名称              |
+|             getType()              |         获取表示该成员变量的 Class 对象          |
+|          get(Object obj)           |  获得指定对象 obj 中成员变量的值，返回值为 Object 类型   |
+|   set(Object obj, Object value)    |      将指定对象 obj 中成员变量的值设置为 value      |
+|         getlnt(0bject obj)         |    获得指定对象 obj 中成员类型为 int 的成员变量的值     |
+|     setlnt(0bject obj, int i)      |        将指定对象 obj 中成员变量的值设置为 i        |
+|   setFloat(Object obj, float f)    |        将指定对象 obj 中成员变量的值设置为 f        |
+|       getBoolean(Object obj)       |  获得指定对象 obj 中成员类型为 boolean 的成员变量的值   |
+| setBoolean(Object obj, boolean b)	 |        将指定对象 obj 中成员变量的值设置为 b        |
+|        getFloat(Object obj)        |   获得指定对象 obj 中成员类型为 float 的成员变量的值    |
+|    setAccessible(boolean flag)     | 此方法可以设置是否忽略权限直接访问 private 等私有权限的成员变量 |
+|           getModifiers()           |         获得可以解析出该方法所采用修饰符的整数          |
 
 ```java
 public class Book2 {

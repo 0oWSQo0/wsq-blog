@@ -1,4 +1,10 @@
-
+---
+title: MySQL试题
+date: 2024-07-25
+tags: MySQL
+categories: SQL
+order: 26
+---
 
 
 ## 1

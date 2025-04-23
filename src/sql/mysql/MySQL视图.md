@@ -1,4 +1,10 @@
-
+---
+title: MySQL视图
+date: 2024-07-10
+tags: MySQL
+categories: SQL
+order: 20
+---
 
 
 

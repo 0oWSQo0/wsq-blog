@@ -5,8 +5,8 @@
 
 
 # 引入
-1. Spring 框架通过定义切面, 通过拦截切点实现了不同业务模块的解耦，这个就叫面向切面编程 - Aspect Oriented Programming (AOP)
-2. 为什么@Aspect注解使用的是aspectj的jar包呢？这就引出了Aspect4J和Spring AOP的历史渊源，只有理解了Aspect4J和Spring的渊源才能理解有些注解上的兼容设计
+1. Spring 框架通过定义切面，拦截切点实现了不同业务模块的解耦，这个就叫面向切面编程 - `Aspect Oriented Programming(AOP)`
+2. 为什么`@Aspect`注解使用的是`aspectj`的`jar`包呢？这就引出了 Aspect4J 和 Spring AOP 的历史渊源，只有理解了 Aspect4J 和 Spring 的渊源才能理解有些注解上的兼容设计
 3. 如何支持更多拦截方式来实现解耦， 以满足更多场景需求呢？这就是@Around, @Pointcut... 等的设计
 4. 那么Spring框架又是如何实现AOP的呢？ 这就引入代理技术，分静态代理和动态代理，动态代理又包含JDK代理和CGLIB代理等
 
@@ -46,11 +46,11 @@ public class UserServiceImpl implements IUserService {
 ```
 我们将记录日志功能解耦为日志切面，它的目标是解耦。进而引出 AOP 的理念：就是将分散在各个业务逻辑代码中相同的代码通过横向切割的方式抽取到一个独立的模块中！
 
-{% asset_img spring-framework-aop-4.png %}
+![](Spring详解—面向切面编程(AOP)/spring-framework-aop-4.png)
 
 OOP 面向对象编程，针对业务处理过程的实体及其属性和行为进行抽象封装，以获得更加清晰高效的逻辑单元划分。而 AOP 则是针对业务处理过程中的切面进行提取，它所面对的是处理过程的某个步骤或阶段，以获得逻辑过程中各部分之间低耦合的隔离效果。这两种设计思想在目标上有着本质的差异。
 
-{% asset_img spring-framework-aop-2.png %}
+![](Spring详解—面向切面编程(AOP)/spring-framework-aop-2.png)
 
 ## AOP术语
 首先让我们从一些重要的AOP概念和术语开始。这些术语不是Spring特有的。
@@ -74,7 +74,7 @@ OOP 面向对象编程，针对业务处理过程的实体及其属性和行为�
 
 我们把这些术语串联到一起，方便理解
 
-{% asset_img spring-framework-aop-3.png %}
+![](Spring详解—面向切面编程(AOP)/spring-framework-aop-3.png)
 
 
 ## Spring AOP和AspectJ是什么关系
@@ -85,22 +85,22 @@ AspectJ 是一个 java 实现的 AOP 框架，它能够对 java 代码进行 AOP
 ### 其次，为什么需要理清楚Spring AOP和AspectJ的关系？
 我们看下`@Aspect`以及增强的几个注解，为什么不是 Spring 包，而是来源于 aspectJ 呢？
 
-{% asset_img spring-framework-aop-5.png %}
+![](Spring详解—面向切面编程(AOP)/spring-framework-aop-5.png)
 
 ### Spring AOP和AspectJ是什么关系？
 1. AspectJ 是更强的 AOP 框架，是实际意义的 AOP 标准；
 2. Spring 为何不写类似 AspectJ 的框架？Spring AOP 使用纯 Java 实现，它不需要专门的编译过程，它一个重要的原则就是无侵入性（`non-invasiveness`）；Spring 小组完全有能力写类似的框架，只是 Spring AOP 从来没有打算通过提供一种全面的 AOP 解决方案来与 AspectJ 竞争。Spring 的开发小组相信无论是基于代理（`proxy-based`）的框架如 Spring AOP 或者是成熟的框架如 AspectJ 都是很有价值的，他们之间应该是互补而不是竞争的关系。
 3. Spring小组喜欢`@AspectJ`注解风格更胜于 Spring XML 配置；所以在 Spring 2.0 使用了和 AspectJ 5 一样的注解，并使用 AspectJ 来做切入点解析和匹配。但是，AOP 在运行时仍旧是纯的 Spring AOP，并不依赖于 AspectJ 的编译器或者织入器（`weaver`）。
-4. Spring 2.5 对 AspectJ 的支持：在一些环境下，增加了对 AspectJ 的装载时编织支持，同时提供了一个新的`bean`切入点。
+4. Spring2.5 对 AspectJ 的支持：在一些环境下，增加了对 AspectJ 的装载时编织支持，同时提供了一个新的`bean`切入点。
 
 ### 更多关于AspectJ？
 了解 AspectJ 应用到 java 代码的过程（这个过程称为织入），对于织入这个概念，可以简单理解为`aspect`(切面)应用到目标函数(类)的过程。
 
 对于这个过程，一般分为动态织入和静态织入：
 * 动态织入的方式是在运行时动态将要增强的代码织入到目标类中，这样往往是通过动态代理技术完成的，如 Java JDK 的动态代理(`Proxy`，底层通过反射实现)或者 CGLIB 的动态代理(底层通过继承实现)，Spring AOP 采用的就是基于运行时增强的代理技术
-* ApectJ 采用的就是静态织入的方式。ApectJ 主要采用的是编译期织入，在这个期间使用 AspectJ 的 acj 编译器(类似 javac )把`aspect`类编译成`class`字节码后，在 java 目标类编译时织入，即先编译`aspect`类再编译目标类。
+* ApectJ 采用的就是静态织入的方式。ApectJ 主要采用的是编译期织入，在这个期间使用 AspectJ 的 acj 编译器(类似javac)把`aspect`类编译成`class`字节码后，在 java 目标类编译时织入，即先编译`aspect`类再编译目标类。
 
-{% asset_img spring-framework-aop-6.png %}
+![](Spring详解—面向切面编程(AOP)/spring-framework-aop-6.png)
 
 # AOP的配置方式
 Spring AOP 支持对 XML 模式和基于`@AspectJ`注解的两种配置方式。
@@ -182,7 +182,6 @@ public class LogAspect {
     public void doAfter() {
         System.out.println("最终通知");
     }
-
 }
 ```
 XML配置AOP
@@ -283,7 +282,6 @@ AopDemoServiceImpl.doMethod3()
 ```
 ## AspectJ注解方式
 基于 XML 的声明式 AspectJ 存在一些不足，需要在 Spring 配置文件配置大量的代码信息，为了解决这个问题，Spring 使用了`@AspectJ`框架为 AOP 的实现提供了一套注解。
-
 
 | 注解名称        |  解释|
 | :--: | :-- |
@@ -419,7 +417,6 @@ public class LogAspect {
     public void doAfter() {
         System.out.println("最终通知");
     }
-
 }
 ```
 输出
@@ -502,11 +499,11 @@ execution（modifiers-pattern? ret-type-pattern declaring-type-pattern? name-pat
 * `ret-type-pattern`返回类型模式, `name-pattern`名字模式和`param-patter`n参数模式是必选的，其它部分都是可选的。返回类型模式决定了方法的返回类型必须依次匹配一个连接点。你会使用的最频繁的返回类型模式是`*`，它代表了匹配任意的返回类型。
 * `declaring-type-pattern`, 一个全限定的类型名将只会匹配返回给定类型的方法。
 * `name-pattern`名字模式匹配的是方法名。你可以使用`*`通配符作为所有或者部分命名模式。
-* `param-pattern`参数模式稍微有点复杂：`()`匹配了一个不接受任何参数的方法， 而`(..)`匹配了一个接受任意数量参数的方法（零或者更多）。模式`()`匹配了一个接受一个任何类型的参数的方法。模式`(,String)`匹配了一个接受两个参数的方法，第一个可以是任意类型，第二个则必须是`String`类型。
+* `param-pattern`参数模式稍微有点复杂：`()`匹配了一个不接受任何参数的方法，而`(..)`匹配了一个接受任意数量参数的方法（零或者更多）。模式`()`匹配了一个接受一个任何类型的参数的方法。模式`(,String)`匹配了一个接受两个参数的方法，第一个可以是任意类型，第二个则必须是`String`类型。
 
 对应到我们上面的例子：
 
-{% asset_img spring-framework-aop-7.png %}
+![](Spring详解—面向切面编程(AOP)/spring-framework-aop-7.png)
 
 下面给出一些通用切入点表达式的例子。
 ```java
@@ -574,23 +571,23 @@ AspectJ 可以做 Spring AOP 干不了的事情，它是 AOP 编程的完全解�
 
 下表总结了 Spring AOP 和 AspectJ 之间的关键区别:
 
-| Spring AOP                                    | AspectJ |
-| :--: | :--: |
-| 在纯 Java 中实现                              | 使用Java 编程语言的扩展实现 |
-| 不需要单独的编译过程                           |  除非设置 LTW，否则需要 AspectJ 编译器 (ajc) |
-| 只能使用运行时织入                              | 运行时织入不可用。支持编译时、编译后和加载时织入 |
-| 功能不强-仅支持方法级编织                       | 更强大 - 可以编织字段、方法、构造函数、静态初始值设定项、最终类/方法等......。 |
-| 只能在由 Spring 容器管理的 bean 上实现           | 可以在所有域对象上实现 |
-| 仅支持方法执行切入点                             | 支持所有切入点 |
-| 代理是由目标对象创建的, 并且切面应用在这些代理上 |  在执行应用程序之前 (在运行时) 前, 各方面直接在代码中进行织入 |
-| 比 AspectJ 慢多了                               | 更好的性能 |
-| 易于学习和应用                                   | 相对于 Spring AOP 来说更复杂 |
+| Spring AOP                      | AspectJ                                      |
+|:--------------------------------|:---------------------------------------------|
+| 在纯 Java 中实现                     | 使用Java 编程语言的扩展实现                             |
+| 不需要单独的编译过程                      | 除非设置 LTW，否则需要 AspectJ 编译器 (ajc)              |
+| 只能使用运行时织入                       | 运行时织入不可用。支持编译时、编译后和加载时织入                     |
+| 功能不强-仅支持方法级编织                   | 更强大 - 可以编织字段、方法、构造函数、静态初始值设定项、最终类/方法等......。 |
+| 只能在由 Spring 容器管理的 bean 上实现      | 可以在所有域对象上实现                                  |
+| 仅支持方法执行切入点                      | 支持所有切入点                                      |
+| 代理是由目标对象创建的, 并且切面应用在这些代理上       | 在执行应用程序之前 (在运行时) 前, 各方面直接在代码中进行织入            |
+| 比 AspectJ 慢多了                   | 更好的性能                                        |
+| 易于学习和应用                         | 相对于 Spring AOP 来说更复杂                         |
 
 
 ## Spring AOP还是完全用AspectJ？
 以下 Spring 官方的回答：（总结来说就是 Spring AOP 更易用，AspectJ 更强大）。
 * Spring AOP 比完全使用 AspectJ 更加简单， 因为它不需要引入 AspectJ 的编译器／织入器到你开发和构建过程中。 如果你仅仅需要在 Spring bean 上通知执行操作，那么 Spring AOP 是合适的选择。
 * 如果你需要通知`domain`对象或其它没有在 Spring 容器中管理的任意对象，那么你需要使用 AspectJ。
-* 如果你想通知除了简单的方法执行之外的连接点（如：调用连接点、字段`get`或`set`的连接点等等）， 也需要使用 AspectJ。
+* 如果你想通知除了简单的方法执行之外的连接点（如：调用连接点、字段`get`或`set`的连接点等等），也需要使用 AspectJ。
 
 当使用 AspectJ 时，你可以选择使用 AspectJ 语言（也称为“代码风格”）或`@AspectJ`注解风格。 如果切面在你的设计中扮演一个很大的角色，并且你能在 Eclipse 等 IDE 中使用`AspectJ Development Tools (AJDT)`， 那么首选 AspectJ 语言 :- 因为该语言专门被设计用来编写切面，所以会更清晰、更简单。如果你没有使用 Eclipse 等 IDE，或者在你的应用中只有很少的切面并没有作为一个主要的角色，你或许应该考虑使用`@AspectJ`风格 并在你的 IDE 中附加一个普通的 Java 编辑器，并且在你的构建脚本中增加切面织入（链接）的段落。

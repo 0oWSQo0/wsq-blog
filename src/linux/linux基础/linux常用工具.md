@@ -1,4 +1,10 @@
-
+---
+title: linux常用工具
+date: 2024-07-05
+tags: Bash
+categories: Linux
+order: 31
+---
 
 
 

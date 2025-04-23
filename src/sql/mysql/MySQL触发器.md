@@ -1,14 +1,18 @@
+---
+title: MySQL触发器
+date: 2024-07-20
+tags: MySQL
+categories: SQL
+order: 22
+---
 
 
-
-
-
-# 触发器到底是什么
+## 触发器是什么
 MySQL 的触发器和存储过程一样，都是嵌入到 MySQL 中的一段程序，是 MySQL 中管理数据的有力工具。不同的是执行存储过程要使用 CALL 语句来调用，而触发器的执行不需要使用 CALL 语句来调用，也不需要手工启动，而是通过对数据表的相关操作来触发、激活从而实现执行。比如当对 student 表进行操作（INSERT，DELETE 或 UPDATE）时就会激活它执行。
 
 触发器与数据表关系密切，主要用于保护表中的数据。特别是当有多个表具有一定的相互联系的时候，触发器能够让不同的表保持数据的一致性。
 
-在 MySQL 中，只有执行 INSERT、UPDATE 和 DELETE 操作时才能激活触发器，其它 SQL 语句则不会激活触发器。
+在 MySQL 中，只有执行`INSERT、UPDATE`和`DELETE`操作时才能激活触发器，其它 SQL 语句则不会激活触发器。
 
 那么为什么要使用触发器呢？比如，在实际开发项目时，我们经常会遇到以下情况：
 在学生表中添加一条关于学生的记录时，学生的总数就必须同时改变。
@@ -17,10 +21,10 @@ MySQL 的触发器和存储过程一样，都是嵌入到 MySQL 中的一段程�
 删除一条数据时，需要在数据库存档表中保留一个备份副本。
 
 虽然上述情况实现的业务逻辑不同，但是它们都需要在数据表发生更改时，自动进行一些处理。这时就可以使用触发器处理。例如，对于第一种情况，可以创建一个触发器对象，每当添加一条学生记录时，就执行一次计算学生总数的操作，这样就可以保证每次添加一条学生记录后，学生总数和学生记录数是一致的。
-## 触发器的优缺点
+### 触发器的优缺点
 触发器的优点如下：
 * 触发器的执行是自动的，当对触发器相关表的数据做出相应的修改后立即执行。
-* 触发器可以实施比 FOREIGN KEY 约束、CHECK 约束更为复杂的检查和操作。
+* 触发器可以实施比`FOREIGN KEY`约束、`CHECK`约束更为复杂的检查和操作。
 * 触发器可以实现表数据的级联更改，在一定程度上保证了数据的完整性。
 
 触发器的缺点如下：
@@ -28,31 +32,33 @@ MySQL 的触发器和存储过程一样，都是嵌入到 MySQL 中的一段程�
 * 大量使用触发器容易导致代码结构被打乱，增加了程序的复杂性，
 * 如果需要变动的数据量较大时，触发器的执行效率会非常低。
 
-## MySQL 支持的触发器
-在实际使用中，MySQL 所支持的触发器有三种：INSERT 触发器、UPDATE 触发器和 DELETE 触发器。
-1) INSERT 触发器
-	 在 INSERT 语句执行之前或之后响应的触发器。
+### MySQL 支持的触发器
+在实际使用中，MySQL 所支持的触发器有三种：`INSERT`触发器、`UPDATE`触发器和`DELETE`触发器。
+#### INSERT 触发器
+在`INSERT`语句执行之前或之后响应的触发器。
 
-使用 INSERT 触发器需要注意以下几点：
-在 INSERT 触发器代码内，可引用一个名为 NEW（不区分大小写）的虚拟表来访问被插入的行。
-在 BEFORE INSERT 触发器中，NEW 中的值也可以被更新，即允许更改被插入的值（只要具有对应的操作权限）。
-对于 AUTO_INCREMENT 列，NEW 在 INSERT 执行之前包含的值是 0，在 INSERT 执行之后将包含新的自动生成值。
-2) UPDATE 触发器
-	 在 UPDATE 语句执行之前或之后响应的触发器。
+使用`INSERT`触发器需要注意以下几点：
+* 在`INSERT`触发器代码内，可引用一个名为`NEW`（不区分大小写）的虚拟表来访问被插入的行。
+* 在`BEFORE INSERT`触发器中，`NEW`中的值也可以被更新，即允许更改被插入的值（只要具有对应的操作权限）。
+* 对于`AUTO_INCREMENT`列，`NEW`在`INSERT`执行之前包含的值是 0，在`INSERT`执行之后将包含新的自动生成值。
 
-使用 UPDATE 触发器需要注意以下几点：
-在 UPDATE 触发器代码内，可引用一个名为 NEW（不区分大小写）的虚拟表来访问更新的值。
-在 UPDATE 触发器代码内，可引用一个名为 OLD（不区分大小写）的虚拟表来访问 UPDATE 语句执行前的值。
-在 BEFORE UPDATE 触发器中，NEW 中的值可能也被更新，即允许更改将要用于 UPDATE 语句中的值（只要具有对应的操作权限）。
+#### UPDATE 触发器
+在 UPDATE 语句执行之前或之后响应的触发器。
+
+使用`UPDATE`触发器需要注意以下几点：
+* 在`UPDATE`触发器代码内，可引用一个名为`NEW`（不区分大小写）的虚拟表来访问更新的值。
+* 在`UPDATE`触发器代码内，可引用一个名为`OLD`（不区分大小写）的虚拟表来访问`UPDATE`语句执行前的值。
+* 在`BEFORE UPDATE`触发器中，`NEW`中的值可能也被更新，即允许更改将要用于`UPDATE`语句中的值（只要具有对应的操作权限）。
+
 OLD 中的值全部是只读的，不能被更新。
 
 注意：当触发器设计对触发表自身的更新操作时，只能使用 BEFORE 类型的触发器，AFTER 类型的触发器将不被允许。
-3) DELETE 触发器
-	 在 DELETE 语句执行之前或之后响应的触发器。
+#### DELETE 触发器
+在 DELETE 语句执行之前或之后响应的触发器。
 
-使用 DELETE 触发器需要注意以下几点：
-在 DELETE 触发器代码内，可以引用一个名为 OLD（不区分大小写）的虚拟表来访问被删除的行。
-OLD 中的值全部是只读的，不能被更新。
+使用`DELETE`触发器需要注意以下几点：
+* 在`DELETE`触发器代码内，可以引用一个名为`OLD`（不区分大小写）的虚拟表来访问被删除的行。
+* OLD 中的值全部是只读的，不能被更新。
 
 总体来说，触发器使用的过程中，MySQL 会按照以下方式来处理错误。
 
@@ -63,18 +69,16 @@ OLD 中的值全部是只读的，不能被更新。
 若在 BEFORE 或 AFTER 触发程序的执行过程中出现错误，则将导致调用触发程序的整个语句失败。
 
 仅当 BEFORE 触发程序和行操作均已被成功执行，MySQL 才会执行 AFTER 触发程序。
-# 创建触发器
+## 创建触发器
 触发器是与 MySQL 数据表有关的数据库对象，在满足定义条件时触发，并执行触发器中定义的语句集合。触发器的这种特性可以协助应用在数据库端确保数据的完整性。
-## 基本语法
-在 MySQL 5.7 中，可以使用`CREATE TRIGGER`语句创建触发器。
-
-语法格式如下：
+### 基本语法
+可以使用`CREATE TRIGGER`语句创建触发器。
 ```sql
 CREATE <触发器名> < BEFORE | AFTER >
 <INSERT | UPDATE | DELETE >
 ON <表名> FOR EACH Row<触发器主体>
 ```
-语法说明如下。
+语法说明：
 1) 触发器名
 	 触发器的名称，触发器在当前数据库中必须具有唯一的名称。如果要在某个特定数据库中创建，名称前面应该加上数据库的名称。
 2) INSERT | UPDATE | DELETE
@@ -96,8 +100,8 @@ UPDATE：更改表中某一行数据时激活触发器，例如 UPDATE 语句。
 注意：每个表都支持 INSERT、UPDATE 和 DELETE 的 BEFORE 与 AFTER，因此每个表最多支持 6 个触发器。每个表的每个事件每次只允许有一个触发器。单一触发器不能与多个事件或多个表关联。
 
 另外，在 MySQL 中，若需要查看数据库中已有的触发器，则可以使用`SHOW TRIGGERS`语句。
-## 创建 BEFORE 类型触发器
-在 test_db 数据库中，数据表 tb_emp8 为员工信息表，包含 id、name、deptId 和 salary 字段，数据表 tb_emp8 的表结构如下所示。
+### 创建 BEFORE 类型触发器
+在`test_db`数据库中，数据表`tb_emp8`为员工信息表，包含`id、name、deptId`和`salary`字段，数据表`tb_emp8`的表结构如下所示。
 ```sql
 mysql> SELECT * FROM tb_emp8;
 Empty set (0.07 sec)
@@ -112,7 +116,7 @@ mysql> DESC tb_emp8;
 +--------+-------------+------+-----+---------+-------+
 4 rows in set (0.05 sec)
 ```
-创建一个名为 SumOfSalary 的触发器，触发的条件是向数据表 tb_emp8 中插入数据之前，对新插入的 salary 字段值进行求和计算。输入的 SQL 语句和执行过程如下所示。
+创建一个名为`SumOfSalary`的触发器，触发的条件是向数据表`tb_emp8`中插入数据之前，对新插入的`salary`字段值进行求和计算。输入的 SQL 语句和执行过程如下所示。
 ```sql
 mysql> CREATE TRIGGER SumOfSalary
     -> BEFORE INSERT ON tb_emp8
@@ -120,7 +124,7 @@ mysql> CREATE TRIGGER SumOfSalary
     -> SET @sum=@sum+NEW.salary;
 Query OK, 0 rows affected (0.35 sec)
 ```
-触发器 SumOfSalary 创建完成之后，向表 tb_emp8 中插入记录时，定义的 sum 值由 0 变成了 1500，即插入值 1000 和 500 的和，如下所示。
+触发器`SumOfSalary`创建完成之后，向表`tb_emp8`中插入记录时，定义的`sum`值由 0 变成了 1500，即插入值 1000 和 500 的和，如下所示。
 ```sql
 SET @sum=0;
 Query OK, 0 rows affected (0.05 sec)
@@ -136,8 +140,8 @@ mysql> SELECT @sum;
 +------+
 1 row in set (0.03 sec)
 ```
-## 创建 AFTER 类型触发器
-在 test_db 数据库中，数据表 tb_emp6 和 tb_emp7 都为员工信息表，包含 id、name、deptId 和 salary 字段，数据表 tb_emp6 和 tb_emp7 的表结构如下所示。
+### 创建 AFTER 类型触发器
+在`test_db`数据库中，数据表`tb_emp6`和`tb_emp7`都为员工信息表，包含`id、name、deptId`和`salary`字段，数据表`tb_emp6`和`tb_emp7`的表结构如下所示。
 ```sql
 mysql> SELECT * FROM tb_emp6;
 Empty set (0.07 sec)
@@ -164,7 +168,7 @@ mysql> DESC tb_emp7;
 +--------+-------------+------+-----+---------+-------+
 4 rows in set (0.04 sec)
 ```
-创建一个名为 double_salary 的触发器，触发的条件是向数据表 tb_emp6 中插入数据之后，再向数据表 tb_emp7 中插入相同的数据，并且 salary 为 tb_emp6 中新插入的 salary 字段值的 2 倍。输入的 SQL 语句和执行过程如下所示。
+创建一个名为`double_salary`的触发器，触发的条件是向数据表`tb_emp6`中插入数据之后，再向数据表`tb_emp7`中插入相同的数据，并且`salary`为`tb_emp6`中新插入的`salary`字段值的 2 倍。输入的 SQL 语句和执行过程如下所示。
 ```sql
 mysql> CREATE TRIGGER double_salary
     -> AFTER INSERT ON tb_emp6
@@ -173,7 +177,7 @@ mysql> CREATE TRIGGER double_salary
     -> VALUES (NEW.id,NEW.name,deptId,2*NEW.salary);
 Query OK, 0 rows affected (0.25 sec)
 ```
-触发器 double_salary 创建完成之后，向表 tb_emp6 中插入记录时，同时向表 tb_emp7 中插入相同的记录，并且 salary 字段为 tb_emp6 中 salary 字段值的 2 倍，如下所示。
+触发器`double_salary`创建完成之后，向表`tb_emp6`中插入记录时，同时向表`tb_emp7`中插入相同的记录，并且`salary`字段为`tb_emp6`中`salary`字段值的 2 倍，如下所示。
 ```sql
 mysql> INSERT INTO tb_emp6
     -> VALUES (1,'A',1,1000),(2,'B',1,500);
@@ -196,28 +200,28 @@ mysql> SELECT * FROM tb_emp7;
 +----+------+--------+--------+
 2 rows in set (0.06 sec)
 ```
-# 查看触发器
+## 查看触发器
 查看触发器是指查看数据库中已经存在的触发器的定义、状态和语法信息等。MySQL 中查看触发器的方法包括`SHOW TRIGGERS`语句和查询`information_schema`数据库下的`triggers`数据表等。
-## SHOW TRIGGERS语句查看触发器信息
-在 MySQL 中，可以通过 SHOW TRIGGERS 语句来查看触发器的基本信息，语法格式如下：
+### SHOW TRIGGERS语句查看触发器信息
+可以通过 `SHOW TRIGGERS` 语句来查看触发器的基本信息：
 ```
 SHOW TRIGGERS;
 ```
-首先创建一个数据表 account，表中有两个字段，分别是 INT 类型的 accnum 和 DECIMAL 类型的 amount。SQL 语句和运行结果如下：
+首先创建一个数据表`account`，表中有两个字段，分别是 INT 类型的`accnum`和`DECIMAL`类型的`amount`。SQL 语句和运行结果如下：
 ```sql
 mysql> CREATE TABLE account(
     -> accnum INT(4),
     -> amount DECIMAL(10,2));
 Query OK, 0 rows affected (0.49 sec)
 ```
-创建一个名为 trigupdate 的触发器，每次 account 表更新数据之后都向 myevent 数据表中插入一条数据。创建数据表 myevent 的 SQL 语句和运行结果如下：
+创建一个名为`trigupdate`的触发器，每次`account`表更新数据之后都向`myevent`数据表中插入一条数据。创建数据表`myevent`的 SQL 语句和运行结果如下：
 ```sql
 mysql> CREATE TABLE myevent(
     -> id INT(11) DEFAULT NULL,
     -> evtname CHAR(20) DEFAULT NULL);
 Query OK, 0 rows affected (0.26 sec)
 ```
-创建 trigupdate 触发器的 SQL 代码如下：
+创建`trigupdate`触发器的 SQL 代码如下：
 ```sql
 mysql> CREATE TRIGGER trigupdate AFTER UPDATE ON account
     -> FOR EACH ROW INSERT INTO myevent VALUES(1,'after update');
@@ -250,7 +254,7 @@ collation_connection: gbk_chinese_ci
 还有一些其他信息，比如触发器的创建时间、SQL 的模式、触发器的定义账户和字符集等，这里不再一一介绍。
 
 `SHOW TRIGGERS`语句用来查看当前创建的所有触发器的信息。因为该语句无法查询指定的触发器，所以在触发器较少的情况下，使用该语句会很方便。如果要查看特定触发器的信息或者数据库中触发器较多时，可以直接从`information_schema`数据库中的`triggers`数据表中查找。
-## 在triggers表中查看触发器信息
+### 在triggers表中查看触发器信息
 在 MySQL 中，所有触发器的信息都存在`information_schema`数据库的`triggers`表中，可以通过查询命令`SELECT`来查看，具体的语法如下：
 ```sql
 SELECT * FROM information_schema.triggers WHERE trigger_name= '触发器名';
@@ -304,23 +308,21 @@ ACTION_REFERENCE_NEW_TABLE: NULL
 SELECT * FROM information_schema.triggers \G
 ```
 这个语句会显示`triggers`数据表中所有的触发器信息。
-# 修改和删除触发器
+## 修改和删除触发器
 修改触发器可以通过删除原触发器，再以相同的名称创建新的触发器。
-## 基本语法
-与其他 MySQL 数据库对象一样，可以使用`DROP`语句将触发器从数据库中删除。
-
-语法格式如下：
+### 基本语法
+可以使用`DROP`语句将触发器从数据库中删除。
 ```sql
 DROP TRIGGER [ IF EXISTS ] [数据库名] <触发器名>
 ```
-语法说明如下：
+语法说明：
 1. 触发器名：要删除的触发器名称。
 2. 数据库名：可选项。指定触发器所在的数据库的名称。若没有指定，则为当前默认的数据库。
 3. 权限：执行`DROP TRIGGER`语句需要`SUPER`权限。
 4. `IF EXISTS`：可选项。避免在没有触发器的情况下删除触发器。
 
 注意：删除一个表的同时，也会自动删除该表上的触发器。另外，触发器不能更新或覆盖，为了修改一个触发器，必须先删除它，再重新创建。
-## 删除触发器
+### 删除触发器
 使用`DROP TRIGGER`语句可以删除 MySQL 中已经定义的触发器。
 
 删除`double_salary`触发器，输入的 SQL 语句和执行过程如下所示。

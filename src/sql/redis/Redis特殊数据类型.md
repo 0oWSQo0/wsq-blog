@@ -1,9 +1,9 @@
 ---
-title: Redis 3种特殊数据类型
-date: 2024-07-10
+title: Redis特殊数据类型
+date: 2024-07-15
 tags: redis
 categories: SQL
-order: 2
+order: 3
 ---
 
 

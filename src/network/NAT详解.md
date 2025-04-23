@@ -1,22 +1,21 @@
+---
+title: NAT详解
+date: 2025-02-10
+tags: network
+categories: 计算机网络
+order: 11
+---
 
 
-
-IP 地址分为公网地址和私有地址。公网地址由 IANA 统一分配，用于连接互联网；私有地址可以自由分配，用于私有网络内部通信。
-
-随着互联网用户的快速增长，2019 年 11 月 25 日全球的公网 IPv4 地址已耗尽。在 IPv4 地址耗尽前，使用 NAT（`Network Address Translation`）技术解决 IPv4 地址不够用的问题，并持续至今。
+随着互联网用户的快速增长，全球的公网 IPv4 地址已耗尽。在 IPv4 地址耗尽前，使用 NAT（`Network Address Translation`）技术解决 IPv4 地址不够用的问题，并持续至今。
 
 NAT 技术就是将私有地址转换成公网地址，使私有网络中的主机可以通过少量公网地址访问互联网。
 
 但 NAT只是一种过渡技术，从根本上解决问题，是采用支持更大地址空间的下一代 IP 技术，即 IPv6 协议，它提供了几乎用不完的地址空间。
 
-![](NAT详解/1.png)
+![NAT技术](NAT详解/1.png)
 
-需要在专用网连接到互联网的路由器上安装 NAT 软件。装有 NAT 软件的路由器叫做 NAT 路由器，它至少有一个有效的外部全球 IP 地址。
-
-所有使用本地地址的主机在和外界通信时，都要在 NAT 路由器上将其本地地址转换成全球 IP 地址，才能和互联网连接。
-
-NAT 解决了 IPv4 地址不够用的问题，另外 NAT 屏蔽了私网用户真实地址，提高了私网用户的安全性。
-# NAT 技术
+## NAT 技术
 IP 地址中预留了 3 个私有地址网段，在私有网络内，可以任意使用。
 
 <table style="width: 400px">
@@ -30,7 +29,7 @@ IP 地址中预留了 3 个私有地址网段，在私有网络内，可以任�
 
 典型的 NAT 组网模型，网络通常是被划分为私网和公网两部分，各自使用独立的地址空间。私网使用私有地址，而公网使用公网地址。为了让主机 A 和 B 访问互联网上的服务器`Server`，需要在网络边界部署一台 NAT 设备用于执行地址转换。NAT 设备通常是路由器或防火墙。
 
-![](NAT详解/4.png)
+![典型NAT组网](NAT详解/4.png)
 
 ## 基本 NAT
 基本 NAT 是最简单的一种地址转换方式，它只对数据包的 IP 层参数进行转换，它可分为静态 NAT 和动态 NAT。
@@ -38,44 +37,44 @@ IP 地址中预留了 3 个私有地址网段，在私有网络内，可以任�
 静态 NAT 是公网 IP 地址和私有 IP 地址有一对一的关系，一个公网 IP 地址对应一个私有 IP 地址，建立和维护一张静态地址映射表。
 
 动态 NAT 是公网 IP 地址和私有 IP 地址有一对多的关系，同一个公网 IP 地址分配给不同的私网用户使用，使用时间必须错开。它包含一个公有 IP 地址池和一张动态地址映射表。
-### 举个动态 NAT 栗子
+### 动态 NAT
 私网主机 A（`10.0.0.1`）需要访问公网的服务器 Server（`61.144.249.229`），在路由器 RT 上配置 NAT，地址池为`219.134.180.11 ~ 219.134.180.20`，地址转换过程如下：
 
-![](NAT详解/5.png)
+![基本NAT](NAT详解/5.png)
 
-A 向 Server 发送报文，网关是`10.0.0.254`，源地址是`10.0.0.1`，目的地址是`61.144.249.229`。
+1. A 向 Server 发送报文，网关是`10.0.0.254`，源地址是`10.0.0.1`，目的地址是`61.144.249.229`。
 
-![](NAT详解/6.png)
+![A发包](NAT详解/6.png)
 
-RT 收到 IP 报文后，查找路由表，将 IP 报文转发至出接口，由于出接口上配置了 NAT，因此 RT 需要将源地址`10.0.0.1`转换为公网地址。
+2. RT 收到 IP 报文后，查找路由表，将 IP 报文转发至出接口，由于出接口上配置了 NAT，因此 RT 需要将源地址`10.0.0.1`转换为公网地址。
 
-![](NAT详解/7.png)
+![RT收包](NAT详解/7.png)
 
-RT 从地址池中查找第一个可用的公网地址`219.134.180.11`，用这个地址替换数据包的源地址，转换后的数据包源地址为`219.134.180.11`，目的地址不变。这叫 SNAT（`Source Network Address Translation`，源地址转换）。同时 RT 在自己的 NAT 表中添加一个表项，记录私有地址`10.0.0.1`到公网地址`219.134.180.11`的映射。RT 再将报文转发给目的地址`61.144.249.229`。
+3. RT 从地址池中查找第一个可用的公网地址`219.134.180.11`，用这个地址替换数据包的源地址，转换后的数据包源地址为`219.134.180.11`，目的地址不变。这叫 SNAT（`Source Network Address Translation`，源地址转换）。同时 RT 在自己的 NAT 表中添加一个表项，记录私有地址`10.0.0.1`到公网地址`219.134.180.11`的映射。RT 再将报文转发给目的地址`61.144.249.229`。
 
-![](NAT详解/8.png)
+![NAT转换](NAT详解/8.png)
 
-Server 收到报文后做相应处理。
+4. Server 收到报文后做相应处理。
 
-Server 发送回应报文，报文的源地址是`61.144.249.229`，目的地址是`219.134.180.11`。
+5. Server 发送回应报文，报文的源地址是`61.144.249.229`，目的地址是`219.134.180.11`。
 
-![](NAT详解/9.png)
+![Server发回应包](NAT详解/9.png)
 
-RT 收到报文，发现报文的目的地址`219.134.180.11`在 NAT 地址池内，于是检查 NAT 表，找到对应表项后，使用私有地址`10.0.0.1`替换公网地址`219.134.180.11`，转换后的报文源地址不变，目的地址为`10.0.0.1`。RT 在将报文转发给 A。这也叫 DNAT（`Destination Network Address Translation`，目的地址转换）。
+6. RT 收到报文，发现报文的目的地址`219.134.180.11`在 NAT 地址池内，于是检查 NAT 表，找到对应表项后，使用私有地址`10.0.0.1`替换公网地址`219.134.180.11`，转换后的报文源地址不变，目的地址为`10.0.0.1`。RT 在将报文转发给 A。这也叫 DNAT（`Destination Network Address Translation`，目的地址转换）。
 
-![](NAT详解/10.png)
+![NAT转换](NAT详解/10.png)
 
-A 收到报文，地址转换过程结束。
+7. A 收到报文，地址转换过程结束。
 
-![](NAT详解/11.png)
+![A收包](NAT详解/11.png)
 
 如果 B 也要访问 Server，则 RT 会从地址池中分配另一个可用公网地址`219.134.180.12`，并在 NAT 表中添加一个相应的表项，记录 B 的私有地址`10.0.0.2`到公网地址`219.134.180.12`的映射关系。
 
-![](NAT详解/12.png)
+![B的NAT转换](NAT详解/12.png)
 
 整个过程下来，NAT 悄悄的改了 IP 数据包的发送和接收端 IP 地址，但对真正的发送方和接收方来说，他们却对这件事情，一无所知。
 
-这就是 基本 NAT 的工作原理。
+这就是基本 NAT 的工作原理。
 
 当 NAT 路由器具有`n`个全球 IP 地址时，专用网内最多可以同时有`n`台主机接入到互联网。这样就可以使专用网内较多数量的主机，轮流使用 NAT 路由器有限数量的全球 IP 地址。
 
@@ -89,35 +88,34 @@ A 收到报文，地址转换过程结束。
 
 NAPT 对数据包的 IP 地址、协议类型、传输层端口号同时进行转换，可以明显提高公网 IP 地址的利用率。
 
-![](NAT详解/13.png)
+![NAPT的NAT表](NAT详解/13.png)
 ### 举个栗子
-私网主机 A（`10.0.0.1`）需要访问公网的服务器 Server 的 WWW 服务（`61.144.249.229`），在路由器 RT 上配置 NAPT，地址池为`219.134.180.11 ~ 219.134.180.20`，地址转换过程如下：
+私网主机 A（`10.0.0.1`）需要访问公网的服务器 Server 的 WWW 服务（`61.144.249.229`），在路由器 RT 上配置 NAPT，地址池为`219.134.180.11~219.134.180.20`，地址转换过程如下：
+1. A 向 Server 发送报文，网关是 RT（`10.0.0.254`），源地址和端口是`10.0.0.1:1024`，目的地址和端口是`61.144.249.229:80`。
 
-A 向 Server 发送报文，网关是 RT（`10.0.0.254`），源地址和端口是`10.0.0.1:1024`，目的地址和端口是`61.144.249.229:80`。
+![A发包](NAT详解/14.png)
 
-![](NAT详解/14.png)
+2. RT 收到 IP 报文后，查找路由表，将 IP 报文转发至出接口，由于出接口上配置了 NAPT，因此 RT 需要将源地址`10.0.0.1:1024`转换为公网地址和端口。
 
-RT 收到 IP 报文后，查找路由表，将 IP 报文转发至出接口，由于出接口上配置了 NAPT，因此 RT 需要将源地址`10.0.0.1:1024`转换为公网地址和端口。
+3. RT 从地址池中查找第一个可用的公网地址`219.134.180.11`，用这个地址替换数据包的源地址，并查找这个公网地址的一个可用端口，例如 2001，用这个端口替换源端口。转换后的数据包源地址为`219.134.180.11:2001`，目的地址和端口不变。同时 RT 在自己的 NAT 表中添加一个表项，记录私有地址`10.0.0.1:1024`到公网地址`219.134.180.11:2001`的映射。RT 再将报文转发给目的地址`61.144.249.229`。
 
-RT 从地址池中查找第一个可用的公网地址`219.134.180.11`，用这个地址替换数据包的源地址，并查找这个公网地址的一个可用端口，例如 2001，用这个端口替换源端口。转换后的数据包源地址为`219.134.180.11:2001`，目的地址和端口不变。同时 RT 在自己的 NAT 表中添加一个表项，记录私有地址`10.0.0.1:1024`到公网地址`219.134.180.11:2001`的映射。RT 再将报文转发给目的地址`61.144.249.229`。
+![NAPT转换](NAT详解/15.png)
 
-![](NAT详解/15.png)
+4. Server 收到报文后做相应处理。
 
-Server 收到报文后做相应处理。
+5. Server 发送回应报文，报文的源地址是`61.144.249.229:80`，目的地址是`219.134.180.11:2001`。
 
-Server 发送回应报文，报文的源地址是`61.144.249.229:80`，目的地址是`219.134.180.11:2001`。
+![Server发回应包](NAT详解/16.png)
 
-![](NAT详解/16.png)
+6. RT 收到报文，发现报文的目的地址在 NAT 地址池内，于是检查 NAT 表，找到对应表项后，使用私有地址和端口`10.0.0.1:1024`替换公网地址`219.134.180.11:2001`，转换后的报文源地址和端口不变，目的地址和端口为`10.0.0.1:1024`。RT 再将报文转发给 A。
 
-RT 收到报文，发现报文的目的地址在 NAT 地址池内，于是检查 NAT 表，找到对应表项后，使用私有地址和端口`10.0.0.1:1024`替换公网地址`219.134.180.11:2001`，转换后的报文源地址和端口不变，目的地址和端口为`10.0.0.1:1024`。RT 再将报文转发给 A。
+![NAPT转换](NAT详解/17.png)
 
-![](NAT详解/17.png)
-
-A 收到报文，地址转换过程结束。
+7. A 收到报文，地址转换过程结束。
 
 如果 B 也要访问 Server，则 RT 会从地址池中分配同一个公网地址`219.134.180.11`，但分配另一个端口 3001，并在 NAT 表中添加一个相应的表项，记录 B 的私有地址`10.0.0.2:1024`到公网地址`219.134.180.12:3001`的映射关系。
 
-![](NAT详解/18.png)
+![B的NAPT转换](NAT详解/18.png)
 
 如果局域网内有多个设备，他们就会映射到不同的公网端口上，毕竟端口最大可达 65535，完全够用。这样大家都可以相安无事。
 
@@ -144,7 +142,7 @@ A 收到报文，地址转换过程结束。
 
 Easy IP 又称为基于接口的地址转换。在地址转换时，Easy IP 的工作原理与 NAPT 相同，对数据包的 IP 地址、协议类型、传输层端口号同时进行转换。但 Easy IP 直接使用公网接口的 IP 地址作为转换后的源地址。Easy IP 适用于拨号接入互联网，动态获取公网 IP 地址的场合。
 
-![](NAT详解/43.png)
+![Easy IP](NAT详解/43.png)
 
 Easy IP 无需配置地址池，只需要配置一个 ACL（访问控制列表），用来指定需要进行 NAT 转换的私有 IP 地址范围。
 ## NAT Server
@@ -152,7 +150,7 @@ Easy IP 无需配置地址池，只需要配置一个 ACL（访问控制列表�
 
 为了满足公网用户访问私网内部服务器的需求，需要使用 NAT Server 功能，将私网地址和端口静态映射成公网地址和端口，供公网用户访问。
 
-![](NAT详解/44.png)
+![NAT Server](NAT详解/44.png)
 
 ### 举个栗子
 A 的私网地址为`10.0.0.1`，端口 8080 提供 Web 服务，在对公网提供 Web 服务时，要求端口号为 80。在 NAT 设备上启动 NAT Server 功能，将私网 IP 地址和端口`10.0.0.1:8080`映射成公网 IP 地址和端口`219.134.180.11:80`，这样公网主机 C 就可以通过`219.134.180.11:80`访问 A 的 Web 服务。
@@ -163,45 +161,32 @@ ALG 能够识别应用层协议内的网络信息，在转换 IP 地址和端口
 ### 举个栗子：ALG 处理 FTP 的 Active 模式
 FTP 是一种基于 TCP 的协议，用于在客户端和服务器间传输文件。FTP 协议工作时建立 2 个通道：`Control`通道和`Data`通道。`Control`用于传输 FTP 控制信息，`Data`通道用于传输文件数据。
 
-私网 A（`10.0.0.1`）访问公网 Server（`61.144.249.229`）的 FTP 服务，在 RT 上配置 NAPT，地址池为`219.134.180.11 ~ 219.134.180.20`，地址转换过程如下：
+私网 A（`10.0.0.1`）访问公网 Server（`61.144.249.229`）的 FTP 服务，在 RT 上配置 NAPT，地址池为`219.134.180.11~219.134.180.20`，地址转换过程如下：
 
-![](NAT详解/45.png)
+![NAT ALG](NAT详解/45.png)
 
-A 发送到 Server 的 FTP `Control`通道建立请求，报文源地址和端口为`10.0.0.1:1024`，目的地址和端口为`61.144.249.229:21`，携带数据是 `IP = 10.0.0.1 port=5001`，即告诉 Server 自己使用 TCP 端口 5001 传输`Data`。
+1. A 发送到 Server 的 FTP `Control`通道建立请求，报文源地址和端口为`10.0.0.1:1024`，目的地址和端口为`61.144.249.229:21`，携带数据是 `IP=10.0.0.1 port=5001`，即告诉 Server 自己使用 TCP 端口 5001 传输`Data`。
 
-![](NAT详解/46.png)
+![A发包](NAT详解/46.png)
 
-RT 收到报文，建立`10.0.0.1:1024`到`219.134.180.11:2001`的映射关系，转换源 IP 地址和 TCP 端口。根据目的端口 21，RT 识别出这是一个 FTP 报文，因此还要检查应用层数据，发现原始数据为`IP = 10.0.0.1 port=5001`，于是为`Data`通道`10.0.0.1:5001`建立第二个映射关系：`10.0.0.1:5001`到`219.134.180.11:2002`，转换后的报文源地址和端口为`219.134.180.11:2001`，目的地址和端口不变，携带数据为`IP = 219.134.180.11 port=2002`。
+2. RT 收到报文，建立`10.0.0.1:1024`到`219.134.180.11:2001`的映射关系，转换源 IP 地址和 TCP 端口。根据目的端口 21，RT 识别出这是一个 FTP 报文，因此还要检查应用层数据，发现原始数据为`IP=10.0.0.1 port=5001`，于是为`Data`通道`10.0.0.1:5001`建立第二个映射关系：`10.0.0.1:5001`到`219.134.180.11:2002`，转换后的报文源地址和端口为`219.134.180.11:2001`，目的地址和端口不变，携带数据为`IP=219.134.180.11 port=2002`。
 
-![](NAT详解/47.png)
+![NAT ALG转换](NAT详解/47.png)
 
-Server 收到报文，向 A 回应`command okay`报文，FTP `Control`通道建立成功。同时 Server 根据应用层数据确定 A 的`Data`通道网络参数为 `219.134.180.11:2002`。
+3. Server 收到报文，向 A 回应`command okay`报文，FTP `Control`通道建立成功。同时 Server 根据应用层数据确定 A 的`Data`通道网络参数为 `219.134.180.11:2002`。
 
-A 需要从 FTP 服务器下载文件，于是发起文件请求报文。Server 收到请求后，发起`Data`通道建立请求，IP 报文的源地址和端口为`61.144.249.229:20`，目的地址和端口为`219.134.180.11:2002`，并携带 FTP 数据。
+4. A 需要从 FTP 服务器下载文件，于是发起文件请求报文。Server 收到请求后，发起`Data`通道建立请求，IP 报文的源地址和端口为`61.144.249.229:20`，目的地址和端口为`219.134.180.11:2002`，并携带 FTP 数据。
 
-![](NAT详解/48.png)
+![Data通道](NAT详解/48.png)
 
-## NAT 缺点
+## NAT其它常见问题
+### NAT 缺点
 由于 NAT/NAPT 都依赖于自己的转换表，因此会有以下的问题：
 * 外部无法主动与 NAT 内部服务器建立连接，因为 NAPT 转换表没有转换记录。
 * 转换表的生成与转换操作都会产生性能开销。
 * 通信过程中，如果 NAT 路由器重启了，所有的 TCP 连接都将被重置。
 
-### 解决办法
-解决的方法主要有两种方法。
-
-**第一种就是改用 IPv6**
-
-IPv6 可用范围非常大，以至于每台设备都可以配置一个公有 IP 地址，就不搞那么多花里胡哨的地址转换了。
-
-**第二种 NAT 穿透技术**
-
-NAT 穿越技术拥有这样的功能，它能够让网络应用程序主动发现自己位于 NAT 设备之后，并且会主动获得 NAT 设备的公有 IP，并为自己建立端口映射条目，注意这些都是 NAT设备后的应用程序自动完成的。
-
-也就是说，在 NAT 穿透技术中，NAT设备后的应用程序处于主动地位，它已经明确地知道 NAT 设备要修改它外发的数据包，于是它主动配合 NAT 设备的操作，主动地建立好映射，这样就不像以前由 NAT 设备来建立映射了。
-
-说人话，就是客户端主动从 NAT 设备获取公有 IP 地址，然后自己建立端口映射条目，然后用这个条目对外通信，就不需要 NAT 设备来进行转换了。
-# 内网穿透
+### 内网穿透
 使用了 NAT 上网的话，前提得内网机器主动请求公网 IP，这样 NAT 才能将内网的 IP 端口转成外网 IP 端口。
 
 反过来公网的机器想主动请求内网机器，就会被拦在 NAT 路由器上，此时由于 NAT 路由器并没有任何相关的 IP 端口的映射记录，因此也就不会转发数据给内网里的任何一台机器。
@@ -210,9 +195,9 @@ NAT 穿越技术拥有这样的功能，它能够让网络应用程序主动发�
 
 说到底，因为 NAT 的存在，我们只能从内网主动发起连接，否则 NAT 设备不会记录相应的映射关系，没有映射关系也就不能转发数据。
 
-所以我们就在公网上加一台服务器x，并暴露一个访问域名，再让内网的服务主动连接服务器x，这样 NAT 路由器上就有对应的映射关系。接着，所有人都去访问服务器x，服务器x将数据转发给内网机器，再原路返回响应，这样数据就都通了。这就是所谓的内网穿透。
+所以我们就在公网上加一台服务器 x，并暴露一个访问域名，再让内网的服务主动连接服务器 x，这样 NAT 路由器上就有对应的映射关系。接着，所有人都去访问服务器 x，服务器 x 将数据转发给内网机器，再原路返回响应，这样数据就都通了。这就是所谓的内网穿透。
 
-像上面提到的服务器x，你也不需要自己去搭，已经有很多现成的方案，比如花某壳。
+像上面提到的服务器 x，你也不需要自己去搭，已经有很多现成的方案，比如花某壳。
 
 ![](NAT详解/21.png)
 
@@ -230,7 +215,7 @@ NAT 穿越技术拥有这样的功能，它能够让网络应用程序主动发�
 ![](NAT详解/23.png)
 
 也就是说，两个在内网的客户端登录qq时都会主动向公网的聊天服务器建立连接，这时两方的 NAT 路由器中都会记录有相应的映射关系。当在其中一个qq上发送消息时，数据会先到服务器，再通过服务器转发到另外一个客户端上。反过来也一样，通过这个方式让两台内网的机子进行数据传输。
-## 两个内网的应用如何直接建立连接
+### 两个内网的应用如何直接建立连接
 上面的情况，是两个客户端通过第三方服务器进行通讯，但有些场景就是要抛开第三端，直接进行两端通信，比如P2P下载，这种该怎么办呢？
 
 这种情况下，其实也还是离不开第三方服务器的帮助。
@@ -239,13 +224,13 @@ NAT 穿越技术拥有这样的功能，它能够让网络应用程序主动发�
 
 流程如下。
 
-step1和2: A 主动去连`server`，此时A对应的`NAT_A`就会留下 A 的内网地址和外网地址的映射关系，`server`也拿到了 A 对应的外网 IP 地址和端口。
+step1 和 2: A 主动去连`server`，此时A对应的`NAT_A`就会留下 A 的内网地址和外网地址的映射关系，`server`也拿到了 A 对应的外网 IP 地址和端口。
 
-step3和4: B 的操作和 A 一样，主动连第三方`server`，`NAT_B`内留下 B 的内网地址和外网地址的映射关系，然后`server`也拿到了 B 对应的外网 IP 地址和端口。
+step3 和 4: B 的操作和 A 一样，主动连第三方`server`，`NAT_B`内留下 B 的内网地址和外网地址的映射关系，然后`server`也拿到了 B 对应的外网 IP 地址和端口。
 
-step5和step6以及step7: 重点来了。此时`server`发消息给 A，让 A 主动发 UDP 消息到 B 的外网 IP 地址和端口。此时`NAT_B`收到这个 A 的 UDP 数据包时，这时候根据`NAT_B`的设置不同，导致这时候有可能`NAT_B`能直接转发数据到 B，那此时 A 和 B 就通了。但也有可能不通，直接丢包，不过丢包没关系，这个操作的目的是给`NAT_A`上留下有关 B 的映射关系。
+step5  和 step6 以及 step7: 重点来了。此时`server`发消息给 A，让 A 主动发 UDP 消息到 B 的外网 IP 地址和端口。此时`NAT_B`收到这个 A 的 UDP 数据包时，这时候根据`NAT_B`的设置不同，导致这时候有可能`NAT_B`能直接转发数据到 B，那此时 A 和 B 就通了。但也有可能不通，直接丢包，不过丢包没关系，这个操作的目的是给`NAT_A`上留下有关 B 的映射关系。
 
-step8和step9以及step10: 跟step5一样熟悉的配方，此时`server`再发消息给 B，让 B 主动发 UDP 消息到 A 的外网 IP 地址和端口。`NAT_B`上也留下了关于 A 到映射关系，这时候由于之前`NAT_A`上有过关于 B 的映射关系，此时`NAT_A`就能正常接受 B 的数据包，并将其转发给 A。到这里 A 和 B 就能正常进行数据通信了。这就是所谓的 NAT 打洞。
+step8 和 step9 以及 step10: 跟 step5 一样熟悉的配方，此时`server`再发消息给 B，让 B 主动发 UDP 消息到 A 的外网 IP 地址和端口。`NAT_B`上也留下了关于 A 到映射关系，这时候由于之前`NAT_A`上有过关于 B 的映射关系，此时`NAT_A`就能正常接受 B 的数据包，并将其转发给 A。到这里 A 和 B 就能正常进行数据通信了。这就是所谓的 NAT 打洞。
 
 step11: 注意，之前我们都是用的 UDP 数据包，目的只是为了在两个局域网的 NAT 上打个洞出来，实际上大部分应用用的都是 TCP 连接，所以，这时候我们还需要在 A 主动向 B 发起 TCP 连接。到此，我们就完成了两端之间的通信。
 
@@ -265,35 +250,114 @@ NAPT 还分为好多种类型，上面的 NAT 打洞方案，都能成功吗？
 
 ![](NAT详解/26.png)
 
-## 总结
-IPV4 地址有限，但通过 NAT 路由器，可以使得整个内网 N 多台机器，对外只使用一个公网 IP，大大节省了 IP 资源。
+## 实战
+### 基本 NAT 实验
+#### 实验拓扑图
 
-内网机子主动连接公网 IP，中间的 NAT 会将内网机子的内网 IP 转换为公网 IP，从而实现内网和外网的数据交互。
+![拓扑图](NAT详解/27.png)
 
-普通的 NAT 技术，只会修改网络包中的发送端和接收端 IP 地址，当内网设备较多时，将有可能导致冲突。因此一般都会使用 NAPT 技术，同时修改发送端和接收端的 IP 地址和端口。
+#### 实验要求
+PC 通过公网地址访问互联网
 
-由于 NAT 的存在，公网 IP 是无法访问内网服务的，但通过内网穿透技术，就可以让公网 IP 访问内网服务。一波操作下来，就可以在公司的网络里访问家里的电脑。
-# NAT 实战
-## 基本 NAT 实验
-### 实验拓扑图
-
-![](NAT详解/27.png)
-
-### 实验要求
-* PC 通过公网地址访问互联网
-
-### 实验步骤
+#### 实验步骤
 根据接口 IP 地址表，配置各个设备的接口地址。
 
-![](NAT详解/28.png)
+| 设备  | 子接口            | IP地址          | 网关         |
+|-----|----------------|---------------|------------|
+| PC  | Ethernet 0/0/1 | 10.0.0.1/24   | 10.0.0.254 |
+| RT  | GE 0/0/0       | 10.0.0.254/24 |            |
+| RT  | GE 0/0/1       | 202.0.0.1/24  |            |
+| ISP | GE 0/0/1       | 202.0.0.2/24  |            |
+
 ![](NAT详解/29.png)
-![](NAT详解/30.png)
-![](NAT详解/31.png)
 
+```shell
+# RT配置
+[RT]interface GigabitEthernet 0/0/0
+[RT-GigabitEthernet0/0/0]ip address 10.0.0.254 24
+Apr 18 2025 15:37:37-08:00 RT %%01IFNET/4/LINK_STATE(l)[0]:The line protocol IP 
+on the interface GigabitEthernet0/0/0 has entered the UP state. 
+[RT-GigabitEthernet0/0/0]quit
+[RT]interface GigabitEthernet 0/0/1
+[RT-GigabitEthernet0/0/1]ip address 202.0.0.1 24
+Apr 18 2025 15:38:03-08:00 RT %%01IFNET/4/LINK_STATE(l)[1]:The line protocol IP 
+on the interface GigabitEthernet0/0/1 has entered the UP state. 
+[RT-GigabitEthernet0/0/1]quit
+[RT]display ip interface brief 
+*down: administratively down
+^down: standby
+(l): loopback
+(s): spoofing
+The number of interface that is UP in Physical is 3
+The number of interface that is DOWN in Physical is 1
+The number of interface that is UP in Protocol is 3
+The number of interface that is DOWN in Protocol is 1
+
+Interface                         IP Address/Mask      Physical   Protocol  
+GigabitEthernet0/0/0              10.0.0.254/24        up         up        
+GigabitEthernet0/0/1              202.0.0.1/24         up         up        
+GigabitEthernet0/0/2              unassigned           down       down      
+NULL0                             unassigned           up         up(s)     
+```
+```shell
+# ISP配置
+[ISP]interface GigabitEthernet 0/0/1
+[ISP-GigabitEthernet0/0/1]ip address 202.0.0.2 24
+Apr 18 2025 15:40:54-08:00 ISP %%01IFNET/4/LINK_STATE(l)[0]:The line protocol IP
+ on the interface GigabitEthernet0/0/1 has entered the UP state. 
+[ISP-GigabitEthernet0/0/1]quit
+[ISP]display ip interface brief
+*down: administratively down
+^down: standby
+(l): loopback
+(s): spoofing
+The number of interface that is UP in Physical is 2
+The number of interface that is DOWN in Physical is 2
+The number of interface that is UP in Protocol is 2
+The number of interface that is DOWN in Protocol is 2
+
+Interface                         IP Address/Mask      Physical   Protocol  
+GigabitEthernet0/0/0              unassigned           down       down      
+GigabitEthernet0/0/1              202.0.0.2/24         up         up        
+GigabitEthernet0/0/2              unassigned           down       down      
+NULL0                             unassigned           up         up(s)  
+```
 在 RT 上配置 NAT 配置。
+```shell
+[RT]nat ?
+  address-group    IP address-group of NAT
+  alg              Application level gateway
+  dns-map          DNS mapping
+  filter-mode      NAT filter mode
+  link-down        Link down reset session function
+  mapping-mode     NAT mapping mode
+  overlap-address  Overlap address pool to temp address pool map
+  static           Specify static NAT
+[RT]interface GigabitEthernet 0/0/1
+[RT-GigabitEthernet0/0/1]nat ?
+  outbound  Specify net address translation
+  server    Specify NAT server
+  static    Specify static NAT
+[RT-GigabitEthernet0/0/1]nat static ?
+  enable    Enable function
+  global    Specify global information of NAT
+  protocol  Specify protocol
+[RT-GigabitEthernet0/0/1]nat static global 202.0.0.3 inside 10.0.0.1
+[RT-GigabitEthernet0/0/1]quit
+[RT]ip route-static 0.0.0.0 0 202.0.0.2
+[RT]display nat static
+  Static Nat Information:
+  Interface  : GigabitEthernet0/0/1
+    Global IP/Port     : 202.0.0.3/---- 
+    Inside IP/Port     : 10.0.0.1/----
+    Protocol : ----     
+    VPN instance-name  : ----                            
+    Acl number         : ----
+    Netmask  : 255.255.255.255 
+    Description : ----
 
-![](NAT详解/32.png)
-
+  Total :    1
+```
 配置基本 NAT 只需要一条命令：把私有 IP 地址转换成公网 IP 地址，在接口视图下配置`nat static global global-address inside host-address`命令。默认路由是网关路由器上的常见配置。使用`display nat static`命令查看 RT 上的静态 NAT 配置。
 
 在 PC 上验证联网功能。
@@ -306,45 +370,92 @@ IPV4 地址有限，但通过 NAT 路由器，可以使得整个内网 N 多台�
 
 ![](NAT详解/35.png)
 
-## NAPT 实验
-### 实验拓扑图
+### NAPT 实验
+#### 实验拓扑图
 
-![](NAT详解/36.png)
+![拓扑图](NAT详解/36.png)
 
-### 实验要求
+#### 实验要求
 * RT 使用 NAPT 功能
-* ISP 分配 4 个可用的公网地址：`202.0.0.3 ~ 202.0.0.6`
+* ISP 分配 4 个可用的公网地址：`202.0.0.3~202.0.0.6`
 * VLAN 10 的用户使用两个公网地址
 * VLAN 20 的用户使用另外两个公网地址
 
-### 实验步骤
+#### 实验步骤
 根据接口 IP 地址表，配置各个设备的接口地址。配置命令可参考上一个实验步骤 1。
 
-![](NAT详解/37.png)
+| 设备   | 子接口            | IP地址          | 网关        |
+|------|----------------|---------------|-----------|
+| PC10 | Ethernet 0/0/1 | 10.0.10.10/24 | 10.0.10.1 |
+| PC20 | Ethernet 0/0/1 | 10.0.20.20/24 | 10.0.20.1 |
+| RT   | GE 0/0/0       | 202.0.0.1/24  |           |
+| RT   | GE 0/0/1       | 10.0.10.1/24  |           |
+| RT   | GE 0/0/2       | 10.0.20.1/24  |           |
+| ISP  | GE 0/0/0       | 202.0.0.2/24  |           |
 
 在 RT 上配置 NAPT 配置。
+```shell
+[RT]acl 2010
+[RT-acl-basic-2010]rule permit source 10.0.10.0 0.0.0.255
+[RT-acl-basic-2010]quit
+[RT]acl 2020
+[RT-acl-basic-2020]rule permit source 10.0.20.0 0.0.0.255
+[RT-acl-basic-2020]quit
+[RT]nat address-group 1 202.0.0.3 202.0.0.4
+[RT]nat address-group 2 202.0.0.5 202.0.0.6
+[RT]interface GigabitEthernet 0/0/0
+[RT-GigabitEthernet0/0/0]nat outbound ?
+  INTEGER<2000-3999>  Apply basic or advanced ACL
 
-![](NAT详解/38.png)
+[RT-GigabitEthernet0/0/0]nat outbound 2010 address-group 1 ?
+  no-pat  Not use PAT
+  <cr>    Please press ENTER to execute command 
+[RT-GigabitEthernet0/0/0]nat outbound 2010 address-group 1
+[RT-GigabitEthernet0/0/0]nat outbound 2020 address-group 2
+[RT-GigabitEthernet0/0/0]quit 
+[RT]ip route-static 0.0.0.0 0 202.0.0.2
+[RT]display nat address-group 
 
+ NAT Address-Group Information:
+ --------------------------------------
+ Index   Start-address      End-address
+ --------------------------------------
+ 1           202.0.0.3        202.0.0.4
+ 2           202.0.0.5        202.0.0.6
+ --------------------------------------
+  Total : 2
+[RT]display nat outbound 
+ NAT Outbound Information:
+ --------------------------------------------------------------------------
+ Interface                     Acl     Address-group/IP/Interface      Type
+ --------------------------------------------------------------------------
+ GigabitEthernet0/0/0         2010                              1       pat
+ GigabitEthernet0/0/0         2020                              2       pat
+ --------------------------------------------------------------------------
+  Total : 2
+```
 在 NAPT 的配置中，使用基本 ACL 来指定私有 IP 地址范围。ACL 2010 指定 VLAN 10 的 IP 地址空间，ACL 2020 指定 VLAN 20 的 IP 地址空间。使用`nat address-group group-index start-address end-address`命令指定公网 IP 地址范围，分别指定了两个 NAT 地址组，编号分别选择了 1 和 2。在外网接口上，使用`nat outbound acl-number address-group group-index`，绑定 NAT 转换关系。
 
 使用`display nat address-group`命令查看 RT 上的 NAT 地址组配置。命令`display nat outbound`查看出方向 NAT 的转换关系。
 
-分别在 PC 10 和 PC 20 上验证上网功能。
+分别在 PC10 和 PC20 上验证上网功能。
 
-![](NAT详解/39.png)
+![PC10验证结果](NAT详解/39.png)
 
 
-![](NAT详解/40.png)
+![PC20验证结果](NAT详解/40.png)
 
 抓包查看 NAT 转换效果。分别抓包 RT 的内网口`G0/0/1`和外网口`G0/0/0`的报文，查看 VLAN 10 的用户出发送的`Echo Request`报文和接收的`Echo Reply`报文都有进行 NAT 转换。
 
-![](NAT详解/41.png)
-![](NAT详解/42.png)
+![RT内网口VLAN10抓包](NAT详解/41.png)
 
-## 其它常用 NAT 命令
-NAT Server 是在接口视图下配置，命令格式为：`nat server protocol { tcp | udp } global global-address global-port inside host-address host-port`。
+![RT外网口抓包](NAT详解/42.png)
 
+### 其它常用 NAT 命令
+NAT Server 是在接口视图下配置，命令格式为：
+```shell
+nat server protocol { tcp | udp } global global-address global-port inside host-address host-port
+```
 检查 NAT Server 配置信息命令：`display nat server`。
 
 检查 NAT 会话命令：`display nat session all`。

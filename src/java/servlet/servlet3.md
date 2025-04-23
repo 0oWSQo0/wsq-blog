@@ -1,51 +1,60 @@
 
 
 
-## ServletConfig接口
-Servlet 容器初始化 Servlet 时，会为这个 Servlet 创建一个 ServletConfig 对象，并将 ServletConfig 对象作为参数传递给 Servlet 。通过 ServletConfig 对象即可获得当前 Servlet 的初始化参数信息。
 
-一个 Web 应用中可以存在多个 ServletConfig 对象，一个 Servlet 只能对应一个 ServletConfig 对象，即 Servlet 的初始化参数仅对当前 Servlet 有效。
+## ServletConfig接口
+`Servlet`容器初始化`Servlet`时，会为这个`Servlet`创建一个`ServletConfig`对象，并将`ServletConfig`对象作为参数传递给`Servlet`。通过`ServletConfig`对象即可获得当前`Servlet`的初始化参数信息。
+
+一个 Web 应用中可以存在多个`ServletConfig`对象，一个`Servlet`只能对应一个`ServletConfig`对象，即`Servlet`的初始化参数仅对当前`Servlet`有效。
 ### 获得 ServletConfig 对象
-获得 ServletConfig 对象一般有 2 种方式：
-直接从带参的 init() 方法中提取
+获得`ServletConfig`对象一般有 2 种方式：
+#### 1. 直接从带参的 init() 方法中提取
 ```java
 public class ServletConfigDemo extends HttpServlet {
     private ServletConfig servletConfig;
+
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         //获取Servlet得名字
         this.servletConfig.getServletName();
     }
+
     @Override
     public void init(ServletConfig config) throws ServletException {
         //从带参init方法中，提取ServletConfig对象
         this.servletConfig = config;
     }
+
 }
 ```
-调用 GenericServlet 提供的 getServletConfig() 方法获得
+#### 2. 调用`GenericServlet`提供的`getServletConfig()`方法获得
 ```java
 //调用 GenericServlet 提供的 getServletConfig 方法获得 ServletConfig 对象
 ServletConfig servletConfig = this.getServletConfig();
 ```
-javax.servlet 包提供了一个 ServletConfig 接口，该接口中提供了以下方法。
+### ServletConfig 接口
+`javax.servlet`包提供了一个`ServletConfig`接口，该接口中提供了以下方法。
 
-
-
-
+| 返回值类型               | 方法                            | 功能描述                                                    |
+|---------------------|-------------------------------|---------------------------------------------------------|
+| String              | getInitParameter(String name) | 根据初始化参数名 name，返回对应的初始化参数值                               |
+| Enumeration<String> | getInitParameterNames()       | 返回 Servlet 所有的初始化参数名的枚举集合，如果该 Servlet 没有初始化参数，则返回一个空的集合 |
+| ServletContext      | getServletContext()           | 返回一个代表当前 Web 应用的 ServletContext 对象                      |
+| String              | getServletName()              | 返回 Servlet 的名字，即 web.xml 中 <servlet-name> 元素的值          |
 
 ### 配置 Servlet 初始化参数
 配置 Servlet 的初始化参数有 2 种方式：
-使用 web.xml 配置初始化参数；
-使用 @WebServlet 配置初始化参数。
+* 使用 web.xml 配置初始化参数；
+* 使用 @WebServlet 配置初始化参数。
+
 1.使用 web.xml 配置初始化参数
 在 web.xml 中可以使用一个或多个 <init-param> 元素为 Servlet 配置初始化参数，代码如下。
-
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="http://xmlns.jcp.org/xml/ns/javaee"
     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
     id="WebApp_ID" metadata-complete="false" version="4.0">
+
     <servlet>
         <servlet-name>MyServlet</servlet-name>
         <servlet-class>net.biancheng.www.MyServlet</servlet-class>
@@ -60,6 +69,7 @@ javax.servlet 包提供了一个 ServletConfig 接口，该接口中提供了以
             <param-value>www.biancheng.net</param-value>
         </init-param>
     </servlet>
+
 </web-app>
 ```
 以上配置说明如下：
@@ -67,15 +77,17 @@ javax.servlet 包提供了一个 ServletConfig 接口，该接口中提供了以
 <param-name> 子元素表示参数的名称。
 <param-value> 子元素表示参数的值。
 2.使用 @WebServlet 配置初始化参数
-通过 @WebServlet 的 initParams 属性也可以为 Servlet 设置初始化参数，代码如下。 
+通过 @WebServlet 的 initParams 属性也可以为 Servlet 设置初始化参数，代码如下。
 ```java
 @WebServlet(urlPatterns = {"/MyServlet"}, initParams = {@WebInitParam(name = "name", value = "编程帮"),
         @WebInitParam(name = "URL", value = "www.biancheng.net")})
 public class MyServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
     }
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         doGet(req, resp);
@@ -84,13 +96,16 @@ public class MyServlet extends HttpServlet {
 ```
 ### 获取 Servlet 初始化参数
 下面我们通过一个例子演示如何通过 ServletConfig 对象读取 Servlet 的初始化参数。
-
-以 servletDemo 工程为例，在 net.biancheng.www 包下，创建名称为 ReadConfigServlet 的类，代码如下。
 ```java
+/**
+* 获取Servlet的初始化参数
+*
+*/
 @WebServlet(urlPatterns = { "/ReadConfigServlet" }, initParams = { @WebInitParam(name = "name", value = "编程帮"),
         @WebInitParam(name = "URL", value = "www.biancheng.net") })
 public class ReadConfigServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
+
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
@@ -113,10 +128,12 @@ public class ReadConfigServlet extends HttpServlet {
         // 关闭流
         writer.close();
     }
+
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         doGet(request, response);
     }
+
 }
 ```
 ## ServletContext接口
@@ -126,7 +143,6 @@ ServletContext 对象的生命周期从 Servlet 容器启动时开始，到容�
 
 Web 应用中的所有 Servlet 共享同一个 ServletContext 对象，不同 Servlet 之间可以通过 ServletContext 对象实现数据通讯，因此 ServletContext 对象也被称为 Context 域对象。
 域对象是服务器在内存上创建的存储空间，该空间用于不同动态资源（例如 Servlet、JSP）之间传递与共享数据。
-
 ### 获得 ServletContext 对象
 获得 ServletContext 对象有以下 4 种方式：
 1. 通过 GenericServlet 提供的 getServletContext() 方法
@@ -142,6 +158,7 @@ Web 应用中的所有 Servlet 共享同一个 ServletContext 对象，不同 Se
 	 //通过 HttpServletRequest的 getServletContext方法获取ServletContext对象
 	 ServletContext servletContext = req.getServletContext();
 
+注意：以上最后两种方法了解即可，后面我们会详细讲解。
 ### ServletContext 的应用
 javax.servlet 包提供了一个 ServletContext 接口，该接口定义了一组方法，Servlet 可以使用这些方法与容器进行通信。
 
@@ -149,8 +166,9 @@ ServletContext 的应用主要有以下 3 个：
 获取上下文初始化参数
 实现 Servlet 之间的数据通讯
 读取 Web 应用下的资源文件
-1. 获取上下文初始化参数
-	 使用 ServletContext 对象获取 Web 应用的上下文初始化参数，分为 2 步：
+
+####  获取上下文初始化参数
+使用 ServletContext 对象获取 Web 应用的上下文初始化参数，分为 2 步：
 1) 设置上下文初始化参数
 2) 调用接口中方法获取初始化参数
 1) 设置上下文初始化参数
@@ -162,10 +180,10 @@ ServletContext 的应用主要有以下 3 个：
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
                       http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
-         version="4.0" metadata-complete="false">
+    version="4.0" metadata-complete="false">
 
     <!--设置全局初始化参数 -->
     <context-param>
@@ -189,15 +207,16 @@ ServletContext 的应用主要有以下 3 个：
 
 下表列举了 ServletContext 接口中用于获取上下文初始化参数的相关方法。
 
+| 返回值类型               | 方法                             | 描述                                                         |
+|---------------------|--------------------------------|------------------------------------------------------------|
+| String              | getInitParameter(String name)	 | 根据初始化参数名 name，返回对应的初始化参数值                                  |
+| Enumeration<String> | getInitParameterNames()        | 返回 Web 应用所有上下文初始化参数名的枚举集合，如果该 Web 应用没有上下文初始化参数，则返回一个空的枚举集合 |
 
-
-
-
-以 servletDemo 为例，在 net.biancheng.www 包下创建一个名称为 ReadContextServlet 的类，代码如下。
 ```java
 @WebServlet("/ReadContextServlet")
 public class ReadContextServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
+
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
@@ -217,13 +236,15 @@ public class ReadContextServlet extends HttpServlet {
         // 关闭流
         writer.close();
     }
+
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         doGet(request, response);
     }
 }
 ```
-实现数据通讯
+
+####
 在 Servlet 中，调用 ServletContext 接口的 setAttribute() 方法可以创建一些属性，这些属性被存放在 ServletContext 对象中。应用中所有 Servlet 都可以对这些属性进行访问和操作，通过它们可以实现应用内不同 Servlet 之间的数据通讯。
 数据通讯的相关方法
 下表列举了 ServletContext 接口实现数据通讯的相关方法。
@@ -531,3 +552,10 @@ Servlet 可以通过 2 种方式获得`RequestDispatcher`对象：
 #### 请求转发的工作原理
 在 Servlet 中，通常使用`forward()`方法将当前请求转发给其他的 Web 资源进行处理。请求转发的工作原理：
 
+![](servlet3/2.png)
+
+请求转发具有以下特点：
+请求转发不支持跨域访问，只能跳转到当前应用中的资源。
+请求转发之后，浏览器地址栏中的 URL 不会发生变化，因此浏览器不知道在服务器内部发生了转发行为，更无法得知转发的次数。
+参与请求转发的 Web 资源之间共享同一 request 对象和 response 对象。
+由于 forward() 方法会先清空 response 缓冲区，因此只有转发到最后一个 Web 资源时，生成的响应才会被发送到客户端。

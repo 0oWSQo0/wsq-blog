@@ -26,6 +26,7 @@ export default sidebar({
   '/js/es6': 'structure',
   '/js/基础': 'structure',
   '/js/CSS': 'structure',
+  '/java/java基础': 'structure',
   '/java/mybatis': 'structure',
   '/java/Spring': 'structure',
   '/java/springBoot': 'structure',

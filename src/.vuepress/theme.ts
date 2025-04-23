@@ -32,7 +32,6 @@ export default hopeTheme({
   metaLocales: {
     editLink: "在 GitHub 上编辑此页",
   },
-
   // 如果想要实时查看任何改变，启用它。注: 这对更新性能有很大负面影响
   hotReload: true,
 
@@ -119,10 +118,12 @@ export default hopeTheme({
       // sandpack: true,
     },
     shiki: {
-      themes: {
-        light: 'github-dark',
-        dark: 'github-light'
-      }
+      lineNumbers: false,
+      theme: 'github-dark-high-contrast',
+      // themes: {
+      //   light: 'andromeeda',
+      //   dark: 'vitesse-light',
+      // }
     }
 
     // 如果你需要 PWA。安装 @vuepress/plugin-pwa 并取消下方注释

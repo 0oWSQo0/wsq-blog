@@ -18,6 +18,7 @@ export default navbar([
     icon: 'devicon:java',
     prefix: '/java/',
     children: [
+      { text: 'Java基础', link: '/java/java基础/', icon: 'devicon:java' },
       { text: 'Mybatis', link: '/java/mybatis/', icon: 'devicon:spring' },
       { text: 'Spring', link: '/java/Spring/', icon: 'devicon:spring' },
       { text: 'springBoot', link: '/java/springBoot/', icon: 'devicon:spring' }
@@ -39,7 +40,7 @@ export default navbar([
     children: [
       { text: 'linux基础', link: '/linux/linux基础/', icon: 'devicon:linux' },
       { text: 'Docker', link: '/linux/docker/', icon: 'mdi:docker' },
-      { text: 'Nginx', link: '/linux/nginx/', icon: 'devicon:nginx' },
+      { text: '运维工具', link: '/linux/tools/', icon: 'devicon:linux' },
     ]
   },
   {
