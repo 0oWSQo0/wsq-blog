@@ -7,7 +7,9 @@
 
 Java异常类层次结构图：
 
-{% asset_img java-basic-exception-1.png %}
+[//]: # (![]&#40;Java基础—异常机制/java-basic-exception-1.png&#41;)
+
+[//]: # ({% asset_img java-basic-exception-1.png %})
 
 ## Throwable
 `Throwable`是 Java 语言中所有错误与异常的超类。

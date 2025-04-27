@@ -37,9 +37,9 @@ ServletConfig servletConfig = this.getServletConfig();
 | 返回值类型               | 方法                            | 功能描述                                                    |
 |---------------------|-------------------------------|---------------------------------------------------------|
 | String              | getInitParameter(String name) | 根据初始化参数名 name，返回对应的初始化参数值                               |
-| Enumeration<String> | getInitParameterNames()       | 返回 Servlet 所有的初始化参数名的枚举集合，如果该 Servlet 没有初始化参数，则返回一个空的集合 |
+| `Enumeration<String>` | getInitParameterNames()       | 返回 Servlet 所有的初始化参数名的枚举集合，如果该 Servlet 没有初始化参数，则返回一个空的集合 |
 | ServletContext      | getServletContext()           | 返回一个代表当前 Web 应用的 ServletContext 对象                      |
-| String              | getServletName()              | 返回 Servlet 的名字，即 web.xml 中 <servlet-name> 元素的值          |
+| String              | getServletName()              | 返回 Servlet 的名字，即 web.xml 中 `<servlet-name>` 元素的值          |
 
 ### 配置 Servlet 初始化参数
 配置 Servlet 的初始化参数有 2 种方式：
@@ -47,7 +47,7 @@ ServletConfig servletConfig = this.getServletConfig();
 * 使用 @WebServlet 配置初始化参数。
 
 1.使用 web.xml 配置初始化参数
-在 web.xml 中可以使用一个或多个 <init-param> 元素为 Servlet 配置初始化参数，代码如下。
+在 web.xml 中可以使用一个或多个 `<init-param>` 元素为 Servlet 配置初始化参数，代码如下。
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -73,11 +73,11 @@ ServletConfig servletConfig = this.getServletConfig();
 </web-app>
 ```
 以上配置说明如下：
-<init-param> 元素是 <servlet> 的子元素， 需要在 <servlet> 元素内使用，表示只对当前 Servlet 有效 。
-<param-name> 子元素表示参数的名称。
-<param-value> 子元素表示参数的值。
-2.使用 @WebServlet 配置初始化参数
-通过 @WebServlet 的 initParams 属性也可以为 Servlet 设置初始化参数，代码如下。
+`<init-param>` 元素是 `<servlet>` 的子元素， 需要在 `<servlet>` 元素内使用，表示只对当前 Servlet 有效 。
+`<param-name>` 子元素表示参数的名称。
+`<param-value>` 子元素表示参数的值。
+2.使用 `@WebServlet` 配置初始化参数
+通过 `@WebServlet` 的 `initParams` 属性也可以为 `Servlet` 设置初始化参数，代码如下。
 ```java
 @WebServlet(urlPatterns = {"/MyServlet"}, initParams = {@WebInitParam(name = "name", value = "编程帮"),
         @WebInitParam(name = "URL", value = "www.biancheng.net")})
@@ -95,7 +95,7 @@ public class MyServlet extends HttpServlet {
 }
 ```
 ### 获取 Servlet 初始化参数
-下面我们通过一个例子演示如何通过 ServletConfig 对象读取 Servlet 的初始化参数。
+下面我们通过一个例子演示如何通过 `ServletConfig` 对象读取 Servlet 的初始化参数。
 ```java
 /**
 * 获取Servlet的初始化参数
@@ -137,11 +137,11 @@ public class ReadConfigServlet extends HttpServlet {
 }
 ```
 ## ServletContext接口
-Servlet 容器启动时，会为每个 Web 应用（webapps 下的每个目录都是一个 Web 应用）创建一个唯一的 ServletContext 对象，该对象一般被称为“Servlet 上下文”。
+Servlet 容器启动时，会为每个 Web 应用（webapps 下的每个目录都是一个 Web 应用）创建一个唯一的 `ServletContext` 对象，该对象一般被称为“Servlet 上下文”。
 
 ServletContext 对象的生命周期从 Servlet 容器启动时开始，到容器关闭或应用被卸载时结束。
 
-Web 应用中的所有 Servlet 共享同一个 ServletContext 对象，不同 Servlet 之间可以通过 ServletContext 对象实现数据通讯，因此 ServletContext 对象也被称为 Context 域对象。
+Web 应用中的所有 Servlet 共享同一个 `ServletContext` 对象，不同 Servlet 之间可以通过 ServletContext 对象实现数据通讯，因此 `ServletContext` 对象也被称为 Context 域对象。
 域对象是服务器在内存上创建的存储空间，该空间用于不同动态资源（例如 Servlet、JSP）之间传递与共享数据。
 ### 获得 ServletContext 对象
 获得 ServletContext 对象有以下 4 种方式：
@@ -160,9 +160,9 @@ Web 应用中的所有 Servlet 共享同一个 ServletContext 对象，不同 Se
 
 注意：以上最后两种方法了解即可，后面我们会详细讲解。
 ### ServletContext 的应用
-javax.servlet 包提供了一个 ServletContext 接口，该接口定义了一组方法，Servlet 可以使用这些方法与容器进行通信。
+javax.servlet 包提供了一个 `ServletContext` 接口，该接口定义了一组方法，Servlet 可以使用这些方法与容器进行通信。
 
-ServletContext 的应用主要有以下 3 个：
+`ServletContext` 的应用主要有以下 3 个：
 获取上下文初始化参数
 实现 Servlet 之间的数据通讯
 读取 Web 应用下的资源文件
@@ -172,9 +172,9 @@ ServletContext 的应用主要有以下 3 个：
 1) 设置上下文初始化参数
 2) 调用接口中方法获取初始化参数
 1) 设置上下文初始化参数
-	 通过 web.xml 中的 <context-param> 元素可以为 Web 应用设置一些全局的初始化参数，这些参数被称为上下文初始化参数。
+	 通过 web.xml 中的 `<context-param>` 元素可以为 Web 应用设置一些全局的初始化参数，这些参数被称为上下文初始化参数。
 
-与 Servlet 的初始化参数不同，应用中的所有 Servlet 都共享同一个上下文初始化参数。在 Web 应用的整个生命周期中，上下文初始化参数会一直存在，并且可以随时被任意一个 Servlet 访问。
+与 `Servlet` 的初始化参数不同，应用中的所有 Servlet 都共享同一个上下文初始化参数。在 Web 应用的整个生命周期中，上下文初始化参数会一直存在，并且可以随时被任意一个 Servlet 访问。
 
 在 web.xml 文件中配置上下文初始化参数，代码如下所示。
 ```xml
@@ -199,18 +199,18 @@ ServletContext 的应用主要有以下 3 个：
 </web-app>
 ```
 对以上标签说明如下：
-<context-param> 元素用来声明上下文初始化参数，必须在根元素 <web-app> 内使用。
-<param-name> 子元素表示参数名，参数名在整个 Web 应用中必须是唯一的。
-<param-value> 子元素表示参数值。
+`<context-param>` 元素用来声明上下文初始化参数，必须在根元素 `<web-app>` 内使用。
+`<param-name>` 子元素表示参数名，参数名在整个 Web 应用中必须是唯一的。
+`<param-value>` 子元素表示参数值。
 2) 调用接口中方法获取初始化参数
-	 Servlet 容器启动时，会为容器内每个 Web 应用创建一个 ServletContext 对象，并将 <context-param> 元素中的上下文初始化参数以键值对的形式存入该对象中，因此我们可以通过 ServletContext 的相关方法获取到这些初始化参数。
+	 Servlet 容器启动时，会为容器内每个 Web 应用创建一个 `ServletContext` 对象，并将 `<context-param>` 元素中的上下文初始化参数以键值对的形式存入该对象中，因此我们可以通过 `ServletContext` 的相关方法获取到这些初始化参数。
 
 下表列举了 ServletContext 接口中用于获取上下文初始化参数的相关方法。
 
 | 返回值类型               | 方法                             | 描述                                                         |
 |---------------------|--------------------------------|------------------------------------------------------------|
 | String              | getInitParameter(String name)	 | 根据初始化参数名 name，返回对应的初始化参数值                                  |
-| Enumeration<String> | getInitParameterNames()        | 返回 Web 应用所有上下文初始化参数名的枚举集合，如果该 Web 应用没有上下文初始化参数，则返回一个空的枚举集合 |
+| `Enumeration<String>` | getInitParameterNames()        | 返回 Web 应用所有上下文初始化参数名的枚举集合，如果该 Web 应用没有上下文初始化参数，则返回一个空的枚举集合 |
 
 ```java
 @WebServlet("/ReadContextServlet")
@@ -244,10 +244,10 @@ public class ReadContextServlet extends HttpServlet {
 }
 ```
 
-####
-在 Servlet 中，调用 ServletContext 接口的 setAttribute() 方法可以创建一些属性，这些属性被存放在 ServletContext 对象中。应用中所有 Servlet 都可以对这些属性进行访问和操作，通过它们可以实现应用内不同 Servlet 之间的数据通讯。
+#### ss
+在 Servlet 中，调用 `ServletContext` 接口的 setAttribute() 方法可以创建一些属性，这些属性被存放在 ServletContext 对象中。应用中所有 Servlet 都可以对这些属性进行访问和操作，通过它们可以实现应用内不同 Servlet 之间的数据通讯。
 数据通讯的相关方法
-下表列举了 ServletContext 接口实现数据通讯的相关方法。
+下表列举了 `ServletContext` 接口实现数据通讯的相关方法。
 
 返回值类型	方法	描述
 void	setAttribute(String name, Object object)	把一个 Java 对象与一个属性名绑定，并将它作为一个属性存放到 ServletContext 中。
@@ -258,14 +258,14 @@ ServletContext 属性与上下文初始化参数对比
 虽然 ServletContext 的属性与上下文初始化参数都是存放在 ServletContext 对象中，但它们是不同的。
 
 不同点	ServletContext 的属性	上下文初始化参数
-创建方式	ServletContext 的属性通过调用 ServletContext 接口的 setAttribute() 方法创建	上下文初始化参数通过 web.xml 使用 <context-param> 元素配置
+创建方式	ServletContext 的属性通过调用 ServletContext 接口的 setAttribute() 方法创建	上下文初始化参数通过 web.xml 使用 `<context-param>` 元素配置
 可进行的操作	ServletContext 的属性可以通过 ServletContext 接口的方法进行读取、新增、修改、移除等操作	上下文初始化参数在容器启动后只能被读取，不能进行新增、修改和移除操作
 生命周期	ServletContext 中属性的生命周期从创建开始，到该属性被移除（remove）或者容器关闭结束	上下文初始化参数的生命周期，从容器启动开始，到 Web 应用被卸载或容器关闭结束
 作用	使用 ServletContext 中的属性可以实现 Servlet 之间的数据通讯	使用上下文初始化参数无法实现数据通讯
 例 2
 我们通过编写一个统计页面访问量的案例，来演示如何通过 ServletContext 对象实现数据通讯。
 
-在 servletDemo 的 net.biancheng.www 包下，创建一个名称为 CountServlet 的 Servlet 类，代码如下。
+在 servletDemo 的 `net.biancheng.www` 包下，创建一个名称为 CountServlet 的 Servlet 类，代码如下。
 ```java
 @WebServlet("/CountServlet")
 public class CountServlet extends HttpServlet {
@@ -320,7 +320,7 @@ public class ShowServlet extends HttpServlet {
 }
 ```
 读取 Web 应用下的资源文件
-在实际开发中，有时会需要读取 Web 应用中的一些资源文件，如配置文件和日志文件等。为此，ServletContext 接口定义了一些读取 Web 资源的方法 ，如下表。
+在实际开发中，有时会需要读取 Web 应用中的一些资源文件，如配置文件和日志文件等。为此，`ServletContext` 接口定义了一些读取 Web 资源的方法 ，如下表。
 
 返回值类型	方法	方法描述
 Set	getResourcePaths(String path)	返回一个 Set 集合，该集合中包含资源目录中的子目录和文件的名称。
@@ -332,10 +332,8 @@ InputStream	getResourceAsStream(String path)	返回映射到资源文件的 Inpu
 例 3
 下面我们通过一个例子演示如何使用 ServletContext 对象读取资源文件。
 
-在 servletDemo 的 src 目录中，创建一个名称为 db.properties 的文件，文件中输入如下所示的配置信息。
-name=编程帮
-url=www.biancheng.net
-desc=编程帮,欢迎你
+在 servletDemo 的 src 目录中，创建一个名称为 `db.properties` 的文件，文件中输入如下所示的配置信息。
+
 
 ```java
 @WebServlet("/ReadServlet")
@@ -550,12 +548,12 @@ Servlet 可以通过 2 种方式获得`RequestDispatcher`对象：
 | void  | include(ServletRequest request,ServletResponse response) | 用于将其他的资源作为当前响应内容包含进来                                                  |
 
 #### 请求转发的工作原理
-在 Servlet 中，通常使用`forward()`方法将当前请求转发给其他的 Web 资源进行处理。请求转发的工作原理：
+在 `Servlet` 中，通常使用`forward()`方法将当前请求转发给其他的 Web 资源进行处理。请求转发的工作原理：
 
 ![](servlet3/2.png)
 
 请求转发具有以下特点：
 请求转发不支持跨域访问，只能跳转到当前应用中的资源。
 请求转发之后，浏览器地址栏中的 URL 不会发生变化，因此浏览器不知道在服务器内部发生了转发行为，更无法得知转发的次数。
-参与请求转发的 Web 资源之间共享同一 request 对象和 response 对象。
-由于 forward() 方法会先清空 response 缓冲区，因此只有转发到最后一个 Web 资源时，生成的响应才会被发送到客户端。
+参与请求转发的 Web 资源之间共享同一 `request` 对象和 `response` 对象。
+由于 `forward()` 方法会先清空 `response` 缓冲区，因此只有转发到最后一个 Web 资源时，生成的响应才会被发送到客户端。

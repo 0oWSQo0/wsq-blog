@@ -8,7 +8,7 @@ SPI（`Service Provider Interface`），是JDK内置的一种服务提供发现�
 
 SPI整体机制图如下：
 
-{% asset_img java-advanced-spi-8.png %}
+[//]: # (![]&#40;java-advanced-spi-8.png&#41;)
 
 当服务的提供者提供了一种接口的实现之后，需要在`classpath`下的`META-INF/services/`目录里创建一个以服务接口命名的文件，这个文件里的内容就是这个接口的具体的实现类。当其他的程序需要这个服务的时候，就可以通过查找这个 jar 包（一般都是以 jar 包做依赖）的`META-INF/services/`中的配置文件，配置文件中有接口的具体实现类名，可以根据这个类名进行加载实例化，就可以使用该服务了。JDK 中查找服务的实现的工具类是：`java.util.ServiceLoader`。
 # SPI机制的简单示例
@@ -164,7 +164,7 @@ while(driversIterator.hasNext()) {
 
 可以看下截图，我在测试项目中添加了两个 jar 包，`mysql-connector-java-6.0.6.jar`和`postgresql-42.0.0.0.jar`，跟踪到`DriverManager`中之后：
 
-{% asset_img java-advanced-spi-1.png %}
+[//]: # ({% asset_img java-advanced-spi-1.png %})
 
 可以看到此时迭代器中有两个驱动，mysql 和 postgresql 的都被加载了。
 ## SPI机制 - Common-Logging
@@ -445,7 +445,8 @@ public static List<String> loadFactoryNames(Class<?> factoryClass, ClassLoader c
 通常怎么使用看完上面的几个例子解析，应该都能知道大概的流程了：有关组织或者公司定义标准。具体厂商或者框架开发者实现。程序猿使用。
 # 定义标准
 定义标准，就是定义接口。比如接口`java.sql.Driver`
-# 具体厂商或者框架开发者实现厂商或者框架开发者开发具体的实现：在META-INF/services目录下定义一个名字为接口全限定名的文件，比如java.sql.Driver文件，文件内容是具体的实现名字，比如me.cxis.sql.MyDriver。写具体的实现me.cxis.sql.MyDriver，都是对接口Driver的实现。# 程序猿使用我们会引用具体厂商的jar包来实现我们的功能：
+# 具体厂商或者框架开发者实现
+厂商或者框架开发者开发具体的实现：在META-INF/services目录下定义一个名字为接口全限定名的文件，比如java.sql.Driver文件，文件内容是具体的实现名字，比如me.cxis.sql.MyDriver。写具体的实现me.cxis.sql.MyDriver，都是对接口Driver的实现。# 程序猿使用我们会引用具体厂商的jar包来实现我们的功能：
 ```java
 ServiceLoader<Driver> loadedDrivers = ServiceLoader.load(Driver.class);
 //获取迭代器
@@ -459,7 +460,7 @@ while(driversIterator.hasNext()) {
 # 使用规范
 最后总结一下jdk spi需要遵循的规范
 # SPI和API的区别是什么
-这里实际包含两个问题，第一个SPI和API的区别？第二个什么时候用API，什么时候用SPI？SPI - “接口”位于“调用方”所在的“包”中概念上更依赖调用方。组织上位于调用方所在的包中。实现位于独立的包中。常见的例子是：插件模式的插件。API - “接口”位于“实现方”所在的“包”中概念上更接近实现方。组织上位于实现方所在的包中。实现和接口在一个包中。参考：difference-between-spi-and-api在新窗口打开设计原则：小议 SPI 和 API在新窗口打开# SPI机制实现原理不妨看下JDK中ServiceLoader<S>方法的具体实现：
+这里实际包含两个问题，第一个SPI和API的区别？第二个什么时候用API，什么时候用SPI？SPI - “接口”位于“调用方”所在的“包”中概念上更依赖调用方。组织上位于调用方所在的包中。实现位于独立的包中。常见的例子是：插件模式的插件。API - “接口”位于“实现方”所在的“包”中概念上更接近实现方。组织上位于实现方所在的包中。实现和接口在一个包中。参考：difference-between-spi-and-api在新窗口打开设计原则：小议 SPI 和 API在新窗口打开# SPI机制实现原理不妨看下JDK中`ServiceLoader<S>`方法的具体实现：
 ```java
 //ServiceLoader实现了Iterable接口，可以遍历所有的服务实现者
 public final class ServiceLoader<S>

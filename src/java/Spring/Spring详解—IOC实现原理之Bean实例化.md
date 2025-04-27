@@ -7,7 +7,7 @@ Spring如何解决循环依赖问题
 Spring中Bean的生命周期
 
 ## BeanFactory中getBean的主体思路
-BeanFactory定义了Bean容器的规范，其中包含根据bean的名字, Class类型和参数等来得到bean实例。
+`BeanFactory`定义了`Bean`容器的规范，其中包含根据bean的名字, `Class`类型和参数等来得到`bean`实例。
 ```java
 // 根据bean的名字和Class类型等来得到bean实例    
 Object getBean(String name) throws BeansException;    
@@ -16,13 +16,13 @@ Object getBean(String name, Object... args) throws BeansException;
 <T> T getBean(Class<T> requiredType) throws BeansException;
 <T> T getBean(Class<T> requiredType, Object... args) throws BeansException;
 ```
-IoC初始化的流程，最终的将Bean的定义即BeanDefinition放到beanDefinitionMap中，本质上是一个ConcurrentHashMap<String, Object>；并且BeanDefinition接口中包含了这个类的Class信息以及是否是单例等；
+IoC初始化的流程，最终的将Bean的定义即`BeanDefinition`放到`beanDefinitionMap`中，本质上是一个`ConcurrentHashMap<String, Object>`；并且`BeanDefinition`接口中包含了这个类的`Class`信息以及是否是单例等；
 
 
-这样我们初步有了实现Object getBean(String name)这个方法的思路：从beanDefinitionMap通过beanName获得BeanDefinition从BeanDefinition中获得beanClassName通过反射初始化beanClassName的实例instance 构造函数从BeanDefinition的getConstructorArgumentValues()方法获取属性值从BeanDefinition的getPropertyValues()方法获取返回beanName的实例instance由于BeanDefinition还有单例的信息，如果是无参构造函数的实例还可以放在一个缓存中，这样下次获取这个单例的实例时只需要从缓存中获取，如果获取不到再通过上述步骤获取。
+这样我们初步有了实现`Object getBean(String name)`这个方法的思路：从beanDefinitionMap通过beanName获得BeanDefinition从BeanDefinition中获得beanClassName通过反射初始化beanClassName的实例instance 构造函数从BeanDefinition的`getConstructorArgumentValues()`方法获取属性值从`BeanDefinition的getPropertyValues()`方法获取返回`beanName`的实例`instance`由于`BeanDefinition`还有单例的信息，如果是无参构造函数的实例还可以放在一个缓存中，这样下次获取这个单例的实例时只需要从缓存中获取，如果获取不到再通过上述步骤获取。
 
 ### Spring中getBean的主体思路
-BeanFactory实现getBean方法在AbstractBeanFactory中，这个方法重载都是调用doGetBean方法进行实现的：
+`BeanFactory`实现getBean方法在AbstractBeanFactory中，这个方法重载都是调用doGetBean方法进行实现的：
 ```java
 public Object getBean(String name) throws BeansException {
   return doGetBean(name, null, null, false);
@@ -191,7 +191,9 @@ protected <T> T doGetBean(
 解析bean的真正name，如果bean是工厂类，name前缀会加&，需要去掉无参单例先从缓存中尝试获取如果bean实例还在创建中，则直接抛出异常如果bean definition 存在于父的bean工厂中，委派给父Bean工厂获取标记这个beanName的实例正在创建确保它的依赖也被初始化真正创建 单例时原型时根据bean的scope创建
 ## Spring如何解决循环依赖问题
 首先我们需要说明，Spring只是解决了单例模式下属性依赖的循环问题；Spring为了解决单例的循环依赖问题，使用了三级缓存。
-Spring单例模式下的属性依赖先来看下这三级缓存/** Cache of singleton objects: bean name --> bean instance */
+Spring单例模式下的属性依赖先来看下这三级缓存
+```
+/** Cache of singleton objects: bean name --> bean instance */
 private final Map<String, Object> singletonObjects = new ConcurrentHashMap<String, Object>(256);
 
 /** Cache of early singleton objects: bean name --> bean instance */
@@ -199,8 +201,8 @@ private final Map<String, Object> earlySingletonObjects = new HashMap<String, Ob
 
 /** Cache of singleton factories: bean name --> ObjectFactory */
 private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<String, ObjectFactory<?>>(16);
-
-第一层缓存（singletonObjects）：单例对象缓存池，已经实例化并且属性赋值，这里的对象是成熟对象；第二层缓存（earlySingletonObjects）：单例对象缓存池，已经实例化但尚未属性赋值，这里的对象是半成品对象；第三层缓存（singletonFactories）: 单例工厂的缓存如下是获取单例中
+```
+第一层缓存（`singletonObjects`）：单例对象缓存池，已经实例化并且属性赋值，这里的对象是成熟对象；第二层缓存（`earlySingletonObjects`）：单例对象缓存池，已经实例化但尚未属性赋值，这里的对象是半成品对象；第三层缓存（`singletonFactories`）: 单例工厂的缓存如下是获取单例中
 
 ```java
 protected Object getSingleton(String beanName, boolean allowEarlyReference) {
@@ -225,17 +227,27 @@ protected Object getSingleton(String beanName, boolean allowEarlyReference) {
   return (singletonObject != NULL_OBJECT ? singletonObject : null);
 }
 ```
-补充一些方法和参数isSingletonCurrentlyInCreation()：判断当前单例bean是否正在建立中，也就是没有初始化完成(好比A的构造器依赖了B对象因此得先去建立B对象， 或则在A的populateBean过程当中依赖了B对象，得先去建立B对象，这时的A就是处于建立中的状态。)allowEarlyReference ：是否容许从singletonFactories中经过getObject拿到对象分析getSingleton()的整个过程，Spring首先从一级缓存singletonObjects中获取。若是获取不到，而且对象正在建立中，就再从二级缓存earlySingletonObjects中获取。若是仍是获取不到且容许singletonFactories经过getObject()获取，就从三级缓存singletonFactory.getObject()(三级缓存)获取，若是获取到了则从三级缓存移动到了二级缓存。从上面三级缓存的分析，咱们能够知道，Spring解决循环依赖的诀窍就在于singletonFactories这个三级cache。这个cache的类型是ObjectFactory，定义以下：public interface ObjectFactory<T> {
+补充一些方法和参数`isSingletonCurrentlyInCreation()`：判断当前单例bean是否正在建立中，也就是没有初始化完成(好比A的构造器依赖了B对象因此得先去建立B对象， 或则在A的populateBean过程当中依赖了B对象，得先去建立B对象，这时的A就是处于建立中的状态。)allowEarlyReference ：是否容许从singletonFactories中经过getObject拿到对象分析getSingleton()的整个过程，Spring首先从一级缓存singletonObjects中获取。若是获取不到，而且对象正在建立中，就再从二级缓存earlySingletonObjects中获取。若是仍是获取不到且容许singletonFactories经过`getObject()`获取，就从三级缓存`singletonFactory.getObject()`(三级缓存)获取，若是获取到了则从三级缓存移动到了二级缓存。从上面三级缓存的分析，咱们能够知道，Spring解决循环依赖的诀窍就在于singletonFactories这个三级cache。这个cache的类型是`ObjectFactory`，定义以下：
+```
+public interface ObjectFactory<T> {
 T getObject() throws BeansException;
 }
-在bean建立过程当中，有两处比较重要的匿名内部类实现了该接口。一处是Spring利用其建立bean的时候，另外一处就是:addSingletonFactory(beanName, new ObjectFactory<Object>() {
+```
+在bean建立过程当中，有两处比较重要的匿名内部类实现了该接口。一处是Spring利用其建立bean的时候，另外一处就是:
+```
+addSingletonFactory(beanName, new ObjectFactory<Object>() {
 @Override   public Object getObject() throws BeansException {
 return getEarlyBeanReference(beanName, mbd, bean);
 }});
-此处就是解决循环依赖的关键，这段代码发生在createBeanInstance以后，也就是说单例对象此时已经被建立出来的。这个对象已经被生产出来了，虽然还不完美（尚未进行初始化的第二步和第三步），可是已经能被人认出来了（根据对象引用能定位到堆中的对象），因此Spring此时将这个对象提早曝光出来让你们认识，让你们使用。好比“A对象setter依赖B对象，B对象setter依赖A对象”，A首先完成了初始化的第一步，而且将本身提早曝光到singletonFactories中，此时进行初始化的第二步，发现本身依赖对象B，此时就尝试去get(B)，发现B尚未被create，因此走create流程，B在初始化第一步的时候发现本身依赖了对象A，因而尝试get(A)，尝试一级缓存singletonObjects(确定没有，由于A还没初始化彻底)，尝试二级缓存earlySingletonObjects（也没有），尝试三级缓存singletonFactories，因为A经过ObjectFactory将本身提早曝光了，因此B可以经过ObjectFactory.getObject拿到A对象(半成品)，B拿到A对象后顺利完成了初始化阶段一、二、三，彻底初始化以后将本身放入到一级缓存singletonObjects中。此时返回A中，A此时能拿到B的对象顺利完成本身的初始化阶段二、三，最终A也完成了初始化，进去了一级缓存singletonObjects中，并且更加幸运的是，因为B拿到了A的对象引用，因此B如今hold住的A对象完成了初始化。
+```
+此处就是解决循环依赖的关键，这段代码发生在createBeanInstance以后，也就是说单例对象此时已经被建立出来的。这个对象已经被生产出来了，虽然还不完美（尚未进行初始化的第二步和第三步），可是已经能被人认出来了（根据对象引用能定位到堆中的对象），因此Spring此时将这个对象提早曝光出来让你们认识，让你们使用。好比“A对象setter依赖B对象，B对象setter依赖A对象”，A首先完成了初始化的第一步，而且将本身提早曝光到singletonFactories中，此时进行初始化的第二步，发现本身依赖对象B，此时就尝试去get(B)，发现B尚未被create，因此走create流程，B在初始化第一步的时候发现本身依赖了对象A，因而尝试get(A)，尝试一级缓存singletonObjects(确定没有，由于A还没初始化彻底)，尝试二级缓存earlySingletonObjects（也没有），尝试三级缓存singletonFactories，因为A经过`ObjectFactory`将本身提早曝光了，因此B可以经过ObjectFactory.getObject拿到A对象(半成品)，B拿到A对象后顺利完成了初始化阶段一、二、三，彻底初始化以后将本身放入到一级缓存`singletonObjects`中。此时返回A中，A此时能拿到B的对象顺利完成本身的初始化阶段二、三，最终A也完成了初始化，进去了一级缓存singletonObjects中，并且更加幸运的是，因为B拿到了A的对象引用，因此B如今hold住的A对象完成了初始化。
 
 ### Spring为何不能解决非单例属性之外的循环依赖？
-Spring为什么不能解决构造器的循环依赖？构造器注入形成的循环依赖： 也就是beanB需要在beanA的构造函数中完成初始化，beanA也需要在beanB的构造函数中完成初始化，这种情况的结果就是两个bean都不能完成初始化，循环依赖难以解决。Spring解决循环依赖主要是依赖三级缓存，但是的在调用构造方法之前还未将其放入三级缓存之中，因此后续的依赖调用构造方法的时候并不能从三级缓存中获取到依赖的Bean，因此不能解决。# Spring为什么不能解决prototype作用域循环依赖？这种循环依赖同样无法解决，因为spring不会缓存‘prototype’作用域的bean，而spring中循环依赖的解决正是通过缓存来实现的。# Spring为什么不能解决多例的循环依赖？多实例Bean是每次调用一次getBean都会执行一次构造方法并且给属性赋值，根本没有三级缓存，因此不能解决循环依赖。
+Spring为什么不能解决构造器的循环依赖？构造器注入形成的循环依赖： 也就是beanB需要在beanA的构造函数中完成初始化，beanA也需要在beanB的构造函数中完成初始化，这种情况的结果就是两个bean都不能完成初始化，循环依赖难以解决。Spring解决循环依赖主要是依赖三级缓存，但是的在调用构造方法之前还未将其放入三级缓存之中，因此后续的依赖调用构造方法的时候并不能从三级缓存中获取到依赖的Bean，因此不能解决。
+# Spring为什么不能解决prototype作用域循环依赖？
+这种循环依赖同样无法解决，因为spring不会缓存‘prototype’作用域的bean，而spring中循环依赖的解决正是通过缓存来实现的。
+# Spring为什么不能解决多例的循环依赖？
+多实例Bean是每次调用一次getBean都会执行一次构造方法并且给属性赋值，根本没有三级缓存，因此不能解决循环依赖。
 ### 那么其它循环依赖如何解决？
 生成代理对象产生的循环依赖这类循环依赖问题解决方法很多，主要有：使用@Lazy注解，延迟加载使用@DependsOn注解，指定加载先后关系修改文件名称，改变循环依赖类的加载顺序使用@DependsOn产生的循环依赖这类循环依赖问题要找到@DependsOn注解循环依赖的地方，迫使它不循环依赖就可以解决问题。多例循环依赖这类循环依赖问题可以通过把bean改成单例的解决。构造器循环依赖这类循环依赖问题可以通过使用@Lazy注解解决。
 
@@ -244,10 +256,10 @@ Spring 只帮我们管理单例模式 Bean 的完整生命周期，对于 protot
 
 
 ### Spring 容器中 Bean 的生命周期流程
-如果 BeanFactoryPostProcessor 和 Bean 关联, 则调用postProcessBeanFactory方法.(即首先尝试从Bean工厂中获取Bean)如果 InstantiationAwareBeanPostProcessor 和 Bean 关联，则调用postProcessBeforeInstantiation方法根据配置情况调用 Bean 构造方法实例化 Bean。利用依赖注入完成 Bean 中所有属性值的配置注入。如果 InstantiationAwareBeanPostProcessor 和 Bean 关联，则调用postProcessAfterInstantiation方法和postProcessProperties调用xxxAware接口 (上图只是给了几个例子) 第一类Aware接口如果 Bean 实现了 BeanNameAware 接口，则 Spring 调用 Bean 的 setBeanName() 方法传入当前 Bean 的 id 值。如果 Bean 实现了 BeanClassLoaderAware 接口，则 Spring 调用 setBeanClassLoader() 方法传入classLoader的引用。如果 Bean 实现了 BeanFactoryAware 接口，则 Spring 调用 setBeanFactory() 方法传入当前工厂实例的引用。第二类Aware接口如果 Bean 实现了 EnvironmentAware 接口，则 Spring 调用 setEnvironment() 方法传入当前 Environment 实例的引用。如果 Bean 实现了 EmbeddedValueResolverAware 接口，则 Spring 调用 setEmbeddedValueResolver() 方法传入当前 StringValueResolver 实例的引用。如果 Bean 实现了 ApplicationContextAware 接口，则 Spring 调用 setApplicationContext() 方法传入当前 ApplicationContext 实例的引用。...如果 BeanPostProcessor 和 Bean 关联，则 Spring 将调用该接口的预初始化方法 postProcessBeforeInitialzation() 对 Bean 进行加工操作，此处非常重要，Spring 的 AOP 就是利用它实现的。如果 Bean 实现了 InitializingBean 接口，则 Spring 将调用 afterPropertiesSet() 方法。(或者有执行@PostConstruct注解的方法)如果在配置文件中通过 init-method 属性指定了初始化方法，则调用该初始化方法。如果 BeanPostProcessor 和 Bean 关联，则 Spring 将调用该接口的初始化方法 postProcessAfterInitialization()。此时，Bean 已经可以被应用系统使用了。如果在 <bean> 中指定了该 Bean 的作用范围为 scope="singleton"，则将该 Bean 放入 Spring IoC 的缓存池中，将触发 Spring 对该 Bean 的生命周期管理；如果在 <bean> 中指定了该 Bean 的作用范围为 scope="prototype"，则将该 Bean 交给调用者，调用者管理该 Bean 的生命周期，Spring 不再管理该 Bean。如果 Bean 实现了 DisposableBean 接口，则 Spring 会调用 destory() 方法将 Spring 中的 Bean 销毁；(或者有执行@PreDestroy注解的方法)如果在配置文件中通过 destory-method 属性指定了 Bean 的销毁方法，则 Spring 将调用该方法对 Bean 进行销毁。Bean的完整生命周期经历了各种方法调用，这些方法可以划分为以下几类：(结合上图，需要有如下顶层思维)Bean自身的方法： 这个包括了Bean本身调用的方法和通过配置文件中<bean>的init-method和destroy-method指定的方法Bean级生命周期接口方法： 这个包括了BeanNameAware、BeanFactoryAware、ApplicationContextAware；当然也包括InitializingBean和DiposableBean这些接口的方法（可以被@PostConstruct和@PreDestroy注解替代)容器级生命周期接口方法： 这个包括了InstantiationAwareBeanPostProcessor 和 BeanPostProcessor 这两个接口实现，一般称它们的实现类为“后处理器”。工厂后处理器接口方法： 这个包括了AspectJWeavingEnabler, ConfigurationClassPostProcessor, CustomAutowireConfigurer等等非常有用的工厂后处理器接口的方法。工厂后处理器也是容器级的。在应用上下文装配配置文件之后立即调用。
+如果 BeanFactoryPostProcessor 和 Bean 关联, 则调用`postProcessBeanFactory`方法.(即首先尝试从Bean工厂中获取Bean)如果 InstantiationAwareBeanPostProcessor 和 Bean 关联，则调用postProcessBeforeInstantiation方法根据配置情况调用 Bean 构造方法实例化 Bean。利用依赖注入完成 Bean 中所有属性值的配置注入。如果 InstantiationAwareBeanPostProcessor 和 Bean 关联，则调用`postProcessAfterInstantiation`方法和`postProcessProperties`调用xxxAware接口 (上图只是给了几个例子) 第一类Aware接口如果 Bean 实现了 BeanNameAware 接口，则 Spring 调用 Bean 的 setBeanName() 方法传入当前 Bean 的 id 值。如果 Bean 实现了 BeanClassLoaderAware 接口，则 Spring 调用 setBeanClassLoader() 方法传入classLoader的引用。如果 Bean 实现了 BeanFactoryAware 接口，则 Spring 调用 `setBeanFactory()` 方法传入当前工厂实例的引用。第二类Aware接口如果 Bean 实现了 EnvironmentAware 接口，则 Spring 调用 `setEnvironment()` 方法传入当前 Environment 实例的引用。如果 Bean 实现了 EmbeddedValueResolverAware 接口，则 Spring 调用 setEmbeddedValueResolver() 方法传入当前 StringValueResolver 实例的引用。如果 Bean 实现了 ApplicationContextAware 接口，则 Spring 调用 `setApplicationContext()` 方法传入当前 ApplicationContext 实例的引用。...如果 BeanPostProcessor 和 Bean 关联，则 Spring 将调用该接口的预初始化方法 `postProcessBeforeInitialzation()` 对 Bean 进行加工操作，此处非常重要，Spring 的 AOP 就是利用它实现的。如果 Bean 实现了 InitializingBean 接口，则 Spring 将调用 afterPropertiesSet() 方法。(或者有执行`@PostConstruct`注解的方法)如果在配置文件中通过 init-method 属性指定了初始化方法，则调用该初始化方法。如果 `BeanPostProcessor` 和 Bean 关联，则 Spring 将调用该接口的初始化方法 `postProcessAfterInitialization()`。此时，Bean 已经可以被应用系统使用了。如果在 `<bean>` 中指定了该 Bean 的作用范围为 scope="singleton"，则将该 Bean 放入 Spring IoC 的缓存池中，将触发 Spring 对该 Bean 的生命周期管理；如果在 `<bean>` 中指定了该 Bean 的作用范围为 `scope="prototype"`，则将该 Bean 交给调用者，调用者管理该 Bean 的生命周期，Spring 不再管理该 Bean。如果 Bean 实现了 DisposableBean 接口，则 Spring 会调用 destory() 方法将 Spring 中的 Bean 销毁；(或者有执行`@PreDestroy`注解的方法)如果在配置文件中通过 `destory-method` 属性指定了 Bean 的销毁方法，则 Spring 将调用该方法对 Bean 进行销毁。Bean的完整生命周期经历了各种方法调用，这些方法可以划分为以下几类：(结合上图，需要有如下顶层思维)Bean自身的方法： 这个包括了Bean本身调用的方法和通过配置文件中`<bean>`的init-method和`destroy-method`指定的方法Bean级生命周期接口方法： 这个包括了`BeanNameAware`、BeanFactoryAware、ApplicationContextAware；当然也包括`InitializingBean`和`DiposableBean`这些接口的方法（可以被`@PostConstruct和@PreDestroy`注解替代)容器级生命周期接口方法： 这个包括了InstantiationAwareBeanPostProcessor 和 `BeanPostProcessor` 这两个接口实现，一般称它们的实现类为“后处理器”。工厂后处理器接口方法： 这个包括了AspectJWeavingEnabler, ConfigurationClassPostProcessor, `CustomAutowireConfigurer`等等非常有用的工厂后处理器接口的方法。工厂后处理器也是容器级的。在应用上下文装配配置文件之后立即调用。
 
 ## Spring Bean生命周期案例
-定义Bean（这里是User）, 并让它实现BeanNameAware,BeanFactoryAware,ApplicationContextAware接口和InitializingBean,DisposableBean接口：
+定义Bean（这里是User）, 并让它实现`BeanNameAware,BeanFactoryAware,ApplicationContextAware`接口和InitializingBean,DisposableBean接口：
 
 ```java 
 package tech.pdai.springframework.entity;
@@ -263,9 +275,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-/**
- * @author pdai
- */
 @Slf4j
 @ToString
 public class User implements BeanFactoryAware, BeanNameAware, ApplicationContextAware,
@@ -348,66 +357,65 @@ public class User implements BeanFactoryAware, BeanNameAware, ApplicationContext
 
 }
 ```
-定义BeanFactoryPostProcessor的实现类/**
-* @author pdai
-	*/
-	@Slf4j
-	@Component
-	public class MyBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
+定义`BeanFactoryPostProcessor`的实现类
+```java
+@Slf4j
+@Component
+public class MyBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
 
-	@Override
-	public void postProcessBeanFactory(ConfigurableListableBeanFactory configurableListableBeanFactory) throws BeansException {
-	log.info("execute BeanFactoryPostProcessor#postProcessBeanFactory");
-	}
-	}
-	定义InstantiationAwareBeanPostProcessor的实现类/**
-* @author pdai
-	*/
-	@Slf4j
-	@Component
-	public class MyInstantiationAwareBeanPostProcessor implements InstantiationAwareBeanPostProcessor {
-	@Override
-	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
-	log.info("execute InstantiationAwareBeanPostProcessor#postProcessBeforeInstantiation for {}", beanName);
-	return InstantiationAwareBeanPostProcessor.super.postProcessBeforeInstantiation(beanClass, beanName);
-	}
+@Override
+public void postProcessBeanFactory(ConfigurableListableBeanFactory configurableListableBeanFactory) throws BeansException {
+log.info("execute BeanFactoryPostProcessor#postProcessBeanFactory");
+}
+}
+```
+定义`InstantiationAwareBeanPostProcessor`的实现类
+```java
+@Slf4j
+@Component
+public class MyInstantiationAwareBeanPostProcessor implements InstantiationAwareBeanPostProcessor {
+@Override
+public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
+log.info("execute InstantiationAwareBeanPostProcessor#postProcessBeforeInstantiation for {}", beanName);
+return InstantiationAwareBeanPostProcessor.super.postProcessBeforeInstantiation(beanClass, beanName);
+}
 
-	@Override
-	public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
-	log.info("execute InstantiationAwareBeanPostProcessor#postProcessAfterInstantiation for {}", beanName);
-	return InstantiationAwareBeanPostProcessor.super.postProcessAfterInstantiation(bean, beanName);
-	}
+@Override
+public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
+log.info("execute InstantiationAwareBeanPostProcessor#postProcessAfterInstantiation for {}", beanName);
+return InstantiationAwareBeanPostProcessor.super.postProcessAfterInstantiation(bean, beanName);
+}
 
-	@Override
-	public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) throws BeansException {
-	log.info("execute InstantiationAwareBeanPostProcessor#postProcessProperties for {}", beanName);
-	return InstantiationAwareBeanPostProcessor.super.postProcessProperties(pvs, bean, beanName);
-	}
-	}
-	定义BeanPostProcessor的实现类/**
-* @author pdai
-	*/
-	@Slf4j
-	@Component
-	public class MyBeanPostProcessor implements BeanPostProcessor {
+@Override
+public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) throws BeansException {
+log.info("execute InstantiationAwareBeanPostProcessor#postProcessProperties for {}", beanName);
+return InstantiationAwareBeanPostProcessor.super.postProcessProperties(pvs, bean, beanName);
+}
+}
+```
+定义BeanPostProcessor的实现类
+```java
+@Slf4j
+@Component
+public class MyBeanPostProcessor implements BeanPostProcessor {
 
-	@Override
-	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-	log.info("execute BeanPostProcessor#postProcessBeforeInitialization for {}", beanName);
-	return BeanPostProcessor.super.postProcessBeforeInitialization(bean, beanName);
-	}
+@Override
+public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+log.info("execute BeanPostProcessor#postProcessBeforeInitialization for {}", beanName);
+return BeanPostProcessor.super.postProcessBeforeInitialization(bean, beanName);
+}
 
-	@Override
-	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-	log.info("execute BeanPostProcessor#postProcessAfterInitialization for {}", beanName);
-	return BeanPostProcessor.super.postProcessAfterInitialization(bean, beanName);
-	}
-	}
-	通过Java配置方式初始化Bean/**
-* @author pdai
-	*/
-	@Configuration
-	public class BeansConfig {
+@Override
+public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+log.info("execute BeanPostProcessor#postProcessAfterInitialization for {}", beanName);
+return BeanPostProcessor.super.postProcessAfterInitialization(bean, beanName);
+}
+}
+```
+通过Java配置方式初始化Bean
+```java
+@Configuration
+public class BeansConfig {
 
 	@Bean(name = "user", initMethod = "doInit", destroyMethod = "doDestroy")
 	public User create() {
@@ -416,55 +424,51 @@ public class User implements BeanFactoryAware, BeanNameAware, ApplicationContext
 	user.setAge(18);
 	return user;
 	}
+}
+```
+测试的主方法
+```java
+@Slf4j
+public class App {
+	public static void main(String[] args) {
+	log.info("Init application context");
+	// create and configure beans
+	AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
+	"tech.pdai.springframework");
+
+	// retrieve configured instance
+	User user = (User) context.getBean("user");
+
+	// print info from beans
+	log.info(user.toString());
+
+	log.info("Shutdown application context");
+	context.registerShutdownHook();
 	}
-	测试的主方法/**
-* Cglib proxy demo.
-*
-* @author pdai
-	*/
-	@Slf4j
-	public class App {
-
-	/**
-	* main interface.
-	*
-	* @param args args
-		*/
-		public static void main(String[] args) {
-		log.info("Init application context");
-		// create and configure beans
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
-		"tech.pdai.springframework");
-
-		// retrieve configured instance
-		User user = (User) context.getBean("user");
-
-		// print info from beans
-		log.info(user.toString());
-
-		log.info("Shutdown application context");
-		context.registerShutdownHook();
-		}
-		}
-		输出结果（剔除无关输出）：12:44:42.547 [main] INFO tech.pdai.springframework.App - Init application context
-		...
-		12:44:43.134 [main] INFO tech.pdai.springframework.processor.MyBeanFactoryPostProcessor - execute BeanFactoryPostProcessor#postProcessBeanFactory
-		...
-		12:44:43.216 [main] DEBUG org.springframework.beans.factory.support.DefaultListableBeanFactory - Creating shared instance of singleton bean 'user'
-		12:44:43.216 [main] INFO tech.pdai.springframework.processor.MyInstantiationAwareBeanPostProcessor - execute InstantiationAwareBeanPostProcessor#postProcessBeforeInstantiation for user
-		12:44:43.236 [main] INFO tech.pdai.springframework.entity.User - execute User#new User()
-		12:44:43.237 [main] INFO tech.pdai.springframework.entity.User - execute User#setName(pdai)
-		12:44:43.237 [main] INFO tech.pdai.springframework.entity.User - execute User#setAge(18)
-		12:44:43.237 [main] INFO tech.pdai.springframework.processor.MyInstantiationAwareBeanPostProcessor - execute InstantiationAwareBeanPostProcessor#postProcessAfterInstantiation for user
-		12:44:43.237 [main] INFO tech.pdai.springframework.processor.MyInstantiationAwareBeanPostProcessor - execute InstantiationAwareBeanPostProcessor#postProcessProperties for user
-		12:44:43.242 [main] INFO tech.pdai.springframework.entity.User - execute BeanNameAware#setBeanName
-		12:44:43.242 [main] INFO tech.pdai.springframework.entity.User - execute BeanFactoryAware#setBeanFactory
-		12:44:43.242 [main] INFO tech.pdai.springframework.entity.User - execute ApplicationContextAware#setApplicationContext
-		12:44:43.242 [main] INFO tech.pdai.springframework.processor.MyBeanPostProcessor - execute BeanPostProcessor#postProcessBeforeInitialization for user
-		12:44:43.242 [main] INFO tech.pdai.springframework.entity.User - execute InitializingBean#afterPropertiesSet
-		12:44:43.243 [main] INFO tech.pdai.springframework.entity.User - execute User#doInit
-		12:44:43.243 [main] INFO tech.pdai.springframework.processor.MyBeanPostProcessor - execute BeanPostProcessor#postProcessAfterInitialization for user
-		12:44:43.270 [main] INFO tech.pdai.springframework.App - User(name=pdai, age=18)
-		12:44:43.270 [main] INFO tech.pdai.springframework.App - Shutdown application context
-		12:44:43.276 [SpringContextShutdownHook] INFO tech.pdai.springframework.entity.User - execute DisposableBean#destroy
-		12:44:43.276 [SpringContextShutdownHook] INFO tech.pdai.springframework.entity.User - execute User#doDestroy
+}
+```
+输出结果（剔除无关输出）：
+```
+12:44:42.547 [main] INFO tech.pdai.springframework.App - Init application context
+...
+12:44:43.134 [main] INFO tech.pdai.springframework.processor.MyBeanFactoryPostProcessor - execute BeanFactoryPostProcessor#postProcessBeanFactory
+...
+12:44:43.216 [main] DEBUG org.springframework.beans.factory.support.DefaultListableBeanFactory - Creating shared instance of singleton bean 'user'
+12:44:43.216 [main] INFO tech.pdai.springframework.processor.MyInstantiationAwareBeanPostProcessor - execute InstantiationAwareBeanPostProcessor#postProcessBeforeInstantiation for user
+12:44:43.236 [main] INFO tech.pdai.springframework.entity.User - execute User#new User()
+12:44:43.237 [main] INFO tech.pdai.springframework.entity.User - execute User#setName(pdai)
+12:44:43.237 [main] INFO tech.pdai.springframework.entity.User - execute User#setAge(18)
+12:44:43.237 [main] INFO tech.pdai.springframework.processor.MyInstantiationAwareBeanPostProcessor - execute InstantiationAwareBeanPostProcessor#postProcessAfterInstantiation for user
+12:44:43.237 [main] INFO tech.pdai.springframework.processor.MyInstantiationAwareBeanPostProcessor - execute InstantiationAwareBeanPostProcessor#postProcessProperties for user
+12:44:43.242 [main] INFO tech.pdai.springframework.entity.User - execute BeanNameAware#setBeanName
+12:44:43.242 [main] INFO tech.pdai.springframework.entity.User - execute BeanFactoryAware#setBeanFactory
+12:44:43.242 [main] INFO tech.pdai.springframework.entity.User - execute ApplicationContextAware#setApplicationContext
+12:44:43.242 [main] INFO tech.pdai.springframework.processor.MyBeanPostProcessor - execute BeanPostProcessor#postProcessBeforeInitialization for user
+12:44:43.242 [main] INFO tech.pdai.springframework.entity.User - execute InitializingBean#afterPropertiesSet
+12:44:43.243 [main] INFO tech.pdai.springframework.entity.User - execute User#doInit
+12:44:43.243 [main] INFO tech.pdai.springframework.processor.MyBeanPostProcessor - execute BeanPostProcessor#postProcessAfterInitialization for user
+12:44:43.270 [main] INFO tech.pdai.springframework.App - User(name=pdai, age=18)
+12:44:43.270 [main] INFO tech.pdai.springframework.App - Shutdown application context
+12:44:43.276 [SpringContextShutdownHook] INFO tech.pdai.springframework.entity.User - execute DisposableBean#destroy
+12:44:43.276 [SpringContextShutdownHook] INFO tech.pdai.springframework.entity.User - execute User#doDestroy
+```

@@ -280,12 +280,12 @@ Java 中的每一个枚举都继承自`java.lang.Enum`类。当定义一个枚�
 
 所有枚举实例都可以调用`Enum`类的方法，常用方法：
 
-| 方法名称    | 描述 |
-| :--: | :--: |
-| values()    | 以数组形式返回枚举类型的所有成员 |
-| valueOf()   | 将普通字符串转换为枚举实例 |
-| compareTo() | 比较两个枚举成员在定义时的顺序 |
-| ordinal()   | 获取枚举成员的索引位置 |
+|    方法名称     |        描述        |
+|:-----------:|:----------------:|
+|  values()   | 以数组形式返回枚举类型的所有成员 |
+|  valueOf()  |  将普通字符串转换为枚举实例   |
+| compareTo() | 比较两个枚举成员在定义时的顺序  |
+|  ordinal()  |   获取枚举成员的索引位置    |
 
 通过调用枚举类型实例的`values()`方法可以将枚举的所有成员以数组形式返回，也可以通过该方法获取枚举类型的成员。
 ```java
@@ -463,14 +463,14 @@ public String getURL(DataBaseType type) {
 ### EnumSet 类
 `EnumSet`是枚举类型的高性能`Set`实现，它要求放入它的枚举常量必须属于同一枚举类型。`EnumSet`提供了许多工厂方法以便于初始化。
 
-| 方法名称                      | 描述 |
-| :--: | :--: |
-| allOf(Class<E> element type)	| 创建一个包含指定枚举类型中所有枚举成员的 EnumSet 对象 |
-| complementOf(EnumSet<E> s)    | 创建一个与指定 EnumSet 对象 s 相同的枚举类型 EnumSet 对象，并包含所有 s 中未包含的枚举成员 |
-| copyOf(EnumSet<E> s)          | 创建一个与指定 EnumSet 对象 s 相同的枚举类型 EnumSet 对象，并与 s 包含相同的枚举成员 |
-| noneOf(<Class<E> elementType) | 创建指定枚举类型的空 EnumSet 对象 |
-| of(E first,e...rest)          | 创建包含指定枚举成员的 EnumSet 对象 |
-| range(E from ,E to)           | 创建一个 EnumSet 对象，该对象包含了 from 到 to 之间的所有枚举成员 |
+|             方法名称              | 描述                                                        |
+|:-----------------------------:|:----------------------------------------------------------|
+| `allOf(Class<E> element type)`	 | 创建一个包含指定枚举类型中所有枚举成员的 EnumSet 对象                           |
+|  `complementOf(EnumSet<E> s)`   | 创建一个与指定 EnumSet 对象 s 相同的枚举类型 EnumSet 对象，并包含所有 s 中未包含的枚举成员 |
+|     `copyOf(EnumSet<E> s)`      | 创建一个与指定 EnumSet 对象 s 相同的枚举类型 EnumSet 对象，并与 s 包含相同的枚举成员    |
+| `noneOf(<Class<E> elementType)` | 创建指定枚举类型的空 EnumSet 对象                                     |
+|     `of(E first,e...rest)`      | 创建包含指定枚举成员的 EnumSet 对象                                    |
+|      `range(E from ,E to)`      | 创建一个 EnumSet 对象，该对象包含了 from 到 to 之间的所有枚举成员                |
 
 `EnumSet`作为`Set`接口实现，它支持对包含的枚举常量的遍历。
 ```java

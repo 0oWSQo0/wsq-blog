@@ -7,15 +7,15 @@
 MyBatis 的二级缓存是`Application`级别的缓存，它可以提高对数据库查询的效率，以提高应用的性能。
 ### MyBatis的缓存机制整体设计以及二级缓存的工作模式
 
-{% asset_img mybatis-y-cache-7.png %}
+![](MyBatis详解—二级缓存实现机制/mybatis-y-cache-7.png)
 
 如图所示，当开一个会话时，一个`SqlSession`对象会使用一个`Executor`对象来完成会话操作，MyBatis 的二级缓存机制的关键就是对这个`Executor`对象做文章。如果用户配置了`cacheEnabled=true`，那么 MyBatis 在为`SqlSession`对象创建`Executor`对象时，会对`Executor`对象加上一个装饰者：`CachingExecutor`，这时`SqlSession`使用`CachingExecutor`对象来完成操作请求。`CachingExecutor`对于查询请求，会先判断该查询请求在`Application`级别的二级缓存中是否有缓存结果，如果有查询结果，则直接返回缓存结果；如果缓存中没有，再交给真正的`Executor`对象来完成查询操作，之后`CachingExecutor`会将真正`Executor`返回的查询结果放置到缓存中，然后在返回给用户。
 
-{% asset_img mybatis-y-cache-8.png %}
+![](MyBatis详解—二级缓存实现机制/mybatis-y-cache-8.png)
 
 `CachingExecutor`是`Executor`的装饰者，以增强`Executor`的功能，使其具有缓存查询的功能，这里用到了设计模式中的装饰者模式，`CachingExecutor`和`Executor`的接口的关系如下类图所示：
 
-{% asset_img mybatis-y-cache-9.png %}
+![](MyBatis详解—二级缓存实现机制/mybatis-y-cache-9.png)
 
 ### MyBatis二级缓存的划分
 MyBatis 并不是简单地对整个`Application`就只有一个`Cache`缓存对象，它将缓存划分的更细，即是`Mapper`级别的，即每一个`Mapper`都可以拥有一个`Cache`对象，具体如下：
@@ -24,7 +24,7 @@ MyBatis 并不是简单地对整个`Application`就只有一个`Cache`缓存对�
 
 MyBatis 将`Application`级别的二级缓存细分到`Mapper`级别，即对于每一个`Mapper.xml`，如果在其中使用了`<cache>`节点，则 MyBatis 会为这个`Mapper`创建一个`Cache`缓存对象，如下图所示：
 
-{% asset_img mybatis-y-cache-10.png %}
+![](MyBatis详解—二级缓存实现机制/mybatis-y-cache-10.png)
 
 注：上述的每一个`Cache`对象，都会有一个自己所属的`namespace`命名空间，并且会将`Mapper`的`namespace`作为它们的`ID`；
 
@@ -32,7 +32,7 @@ MyBatis 将`Application`级别的二级缓存细分到`Mapper`级别，即对于
 
 如果你想让多个`Mapper`公用一个`Cache`的话，你可以使用`<cache-ref namespace="">`节点，来指定你的这个`Mapper`使用到了哪一个`Mapper`的`Cache`缓存。
 
-{% asset_img mybatis-y-cache-11.png %}
+![](MyBatis详解—二级缓存实现机制/mybatis-y-cache-11.png)
 
 ### 使用二级缓存，必须要具备的条件
 MyBatis 对二级缓存的支持粒度很细，它会指定某一条查询语句是否使用二级缓存。
@@ -60,7 +60,7 @@ MyBatis 自身提供了丰富的，并且功能强大的二级缓存的实现，
 
 MyBatis 定义了大量的`Cache`的装饰器来增强`Cache`缓存的功能，如下类图所示。
 
-{% asset_img mybatis-y-cache-12.png %}
+![](MyBatis详解—二级缓存实现机制/mybatis-y-cache-12.png)
 
 对于每个`Cache`而言，都有一个容量限制，MyBatis 各供了各种策略来对`Cache`缓存的容量进行控制，以及对`Cache`中的数据进行刷新和置换。MyBatis 主要提供了以下几个刷新和置换策略：
 * `LRU(Least Recently Used)`：最近最少使用算法，即如果缓存中容量已经满了，会将缓存中最近最少被使用的缓存记录清除掉，然后添加新的记录；
@@ -94,7 +94,7 @@ MyBatis 定义了大量的`Cache`的装饰器来增强`Cache`缓存的功能，�
 ### 当前MyBatis二级缓存的工作机制
 MyBatis 二级缓存的一个重要特点：即松散的`Cache`缓存管理和维护
 
-{% asset_img mybatis-y-cache-21.png %}
+![](MyBatis详解—二级缓存实现机制/mybatis-y-cache-21.png)
 
 一个`Mapper`中定义的增删改查操作只能影响到自己关联的`Cache`对象。如上图所示的`Mapper namespace1`中定义的若干 CRUD 语句，产生的缓存只会被放置到相应关联的`Cache1`中，即`Mapper namespace2,namespace3,namespace4`中的 CRUD 的语句不会影响到`Cache1`。
 

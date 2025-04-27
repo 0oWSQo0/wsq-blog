@@ -29,11 +29,11 @@ Spring 里面的`bean`就类似是定义的一个组件，而这个组件的作�
 * 用图例说明一下?
 	传统程序设计下，都是主动去创建相关对象然后再组合起来：
 
-{% asset_img spring-framework-ioc-1.png %}
+![](Spring详解—控制反转IOC/spring-framework-ioc-1.png)
 
 当有了 IoC/DI 的容器后，在客户端类中不再主动去创建这些对象了，如图
 
-{% asset_img spring-framework-ioc-2.png %}
+![](Spring详解—控制反转IOC/spring-framework-ioc-2.png)
 
 ## IoC 能做什么
 IoC 不是一种技术，只是一种思想，一个重要的面向对象编程的法则，它能指导我们如何设计出松耦合、更优良的程序。

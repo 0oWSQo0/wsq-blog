@@ -85,7 +85,7 @@ sudo /etc/init.d/redis-server restart
 | dbfilename                        | dump.rdb                                     | 指定本地存储数据库的文件名，默认为 dump.rdb   |
 | dir                               | ./                                           | 指定本地数据库存放目录   |
 | slaveof \<masterip> \<masterport> | 主从复制配置选项                                     | 当本机为 slave 服务时，设置 master 服务的 IP 地址及端口，在 Redis 启动时，它会自动与 master 主机进行数据同步   |
-| requirepass                       | foobared 默认关闭                                | 密码配置项，默认关闭，用于设置 Redis 连接密码。如果配置了连接密码，客户端连接 Redis 时需要通过<password> 密码认证   |
+| requirepass                       | foobared 默认关闭                                | 密码配置项，默认关闭，用于设置 Redis 连接密码。如果配置了连接密码，客户端连接 Redis 时需要通过`<password>` 密码认证   |
 | maxmemory \<bytes>                | 最大内存限制配置项                                    | 指定 Redis 最大内存限制，Redis 在启动时会把数据加载到内存中，达到最大内存后，Redis 会尝试清除已到期或即将到期的 Key，当此方法处理 后，若仍然到达最大内存设置，将无法再进行写入操作，但可以进行读取操作   |
 | appendfilename                    | appendonly.aof                               | 指定 AOF 持久化时保存数据的文件名，默认为 appendonly.aof   |
 | glueoutputbuf                     | yes                                          | 设置向客户端应答时，是否把较小的包合并为一个包发送，默认开启状态   |

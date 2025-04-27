@@ -43,7 +43,7 @@ Servlet3.0 中增加了注解支持，例如：`@WebServlet、@WebInitParm、@We
 ```java
 @WebServlet(urlPatterns = "/MyServlet")
 ```
-如果 @WebServlet 中需要设置多个属性，则属性之间必须使用逗号隔开。
+如果 `@WebServlet` 中需要设置多个属性，则属性之间必须使用逗号隔开。
 ```java
 @WebServlet(
 		asyncSupported = true,
@@ -338,7 +338,7 @@ public class MyServlet extends HttpServlet {
 * 配置多个`<url-pattern>`子元素
 * 在`@WebServlet`的`urlPatterns`属性中使用字符串数组
 
-#### 1. 配置多个 <servlet-mapping> 元素
+#### 1. 配置多个 `<servlet-mapping>` 元素
 Servlet2.5 规范之前，`<servlet-mapping>`元素只允许包含一个 `<url-pattern>` 子元素，若要实现多重映射，只能通过配置多个`<servlet-mapping>`元素实现。
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -361,7 +361,7 @@ Servlet2.5 规范之前，`<servlet-mapping>`元素只允许包含一个 `<url-p
     </servlet-mapping>
 </web-app>
 ```
-#### 2. 配置多个 <url-pattern> 子元素
+#### 2. 配置多个 `<url-pattern>` 子元素
 从 Servlet2.5 开始，`<servlet-mapping>`元素可以包含多个`<url-pattern>`子元素，每个`<url-pattern>`代表一个虚拟路径的映射规则。因此，通过在一个`<servlet-mapping>`元素中配置多个`<url-pattern>`子元素，也可以实现多重映射。
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -384,7 +384,7 @@ Servlet2.5 规范之前，`<servlet-mapping>`元素只允许包含一个 `<url-p
 #### 3. @WebServlet 实现多重映射
 Servlet3.0 增加了对`@WebServlet`注解的支持，我们可以在`urlPatterns`属性中，以字符串数组的形式指定一组映射规则来实现多重映射。
 
-以 servletDemo 为例，在 @WebServlet 注解的 urlPatterns 属性中添加一组虚拟路径，代码如下。
+以 servletDemo 为例，在 `@WebServlet` 注解的 `urlPatterns` 属性中添加一组虚拟路径，代码如下。
 
 ```java
 @WebServlet(urlPatterns = { "/myServlet", "/myServlet4" })
@@ -539,4 +539,4 @@ public class VirtualPathServlet extends HttpServlet {
 		<url-pattern>/</url-pattern>
 </servlet-mapping>
 ```
-Tomcat 服务器中的 Web 应用没有缺省`Servlet`时，会将`DefaultServlet 作为其缺省`Servlet`。当客户端访问 Tomcat 服务器中某个静态 HTML 文件或者图片时，`DefaultServlet`会判断该 HTML 或图片是否存在，若存在，则将数据以流的形式返回客户端，否则会报告 404 错误。
+Tomcat 服务器中的 Web 应用没有缺省`Servlet`时，会将`DefaultServlet` 作为其缺省`Servlet`。当客户端访问 Tomcat 服务器中某个静态 HTML 文件或者图片时，`DefaultServlet`会判断该 HTML 或图片是否存在，若存在，则将数据以流的形式返回客户端，否则会报告 404 错误。

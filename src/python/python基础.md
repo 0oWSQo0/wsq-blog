@@ -7,11 +7,11 @@ Python 安装包下载地址：`https://www.python.org/downloads/`
 
 打开该链接，可以看到有两个版本的 Python，分别是 Python3.x 和 Python2.x：
 
-![](1.png)
+![](python基础/1.png)
 
 点击上图中的版本号或者`Download`按钮进入对应版本的下载页面，滚动到最后即可看到各个平台的 Python 安装包。
 
-![](2.png)
+![](python基础/2.png)
 
 点击`Windows installer (64-bit)`进行下载。双击下载得到的`exe`，就可以正式开始安装 Python 了。
 

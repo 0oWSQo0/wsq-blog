@@ -16,9 +16,9 @@ JdbcTemplate 的全限定命名为`org.springframework.jdbc.core.JdbcTemplate`�
 |-------------------------------------------------------------------------------|-------------------------------------------------------------------|
 | public int update(String sql)<br>public int update(String sql,Object... args) | 用于执行新增、更新、删除等语句；<br>sql：需要执行的 SQL 语句；<br>args 表示需要传入到 SQL 语句中的参数  |
 | public void execute(String sql)<br>public T execute(String sql, PreparedStatementCallback action) | 可以执行任意 SQL，一般用于执行 DDL 语句；<br>sql：需要执行的 SQL 语句；<br>action 表示执行完 SQL 语句后，要调用的函数 |
-| public <T> List<T> query(String sql, RowMapper<T> rowMapper, @Nullable Object... args)   | 用于执行查询语句；<br>sql：需要执行的 SQL 语句；<br>rowMapper：用于确定返回的集合（List）的类型；<br>args：表示需要传入到 SQL 语句的参数 |
-| public <T> T queryForObject(String sql, RowMapper<T> rowMapper, @Nullable Object... args)  | 同上                                                                |
-|  public int[] batchUpdate(String sql, List<Object[]> batchArgs, final int[] argTypes)    | 用于批量执行新增、更新、删除等语句；<br>sql：需要执行的 SQL 语句；<br>argTypes：需要注入的 SQL 参数的 JDBC 类型；<br>batchArgs：表示需要传入到 SQL 语句的参数 |
+| `public <T> List<T> query(String sql, RowMapper<T> rowMapper, @Nullable Object... args)`   | 用于执行查询语句；<br>sql：需要执行的 SQL 语句；<br>rowMapper：用于确定返回的集合（List）的类型；<br>args：表示需要传入到 SQL 语句的参数 |
+| `public <T> T queryForObject(String sql, RowMapper<T> rowMapper, @Nullable Object... args)`  | 同上                                                                |
+|  `public int[] batchUpdate(String sql, List<Object[]> batchArgs, final int[] argTypes)`    | 用于批量执行新增、更新、删除等语句；<br>sql：需要执行的 SQL 语句；<br>argTypes：需要注入的 SQL 参数的 JDBC 类型；<br>batchArgs：表示需要传入到 SQL 语句的参数 |
 
 ## 示例
 1.创建一个用户信息（`user`）表。

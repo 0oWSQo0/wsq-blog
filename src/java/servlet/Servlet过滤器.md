@@ -105,15 +105,15 @@ Servlet 容器接收请求，并针对本次请求分别创建一个 request 对
 
 |       属性名       | 类型             | 描述                                                                                      |
 |:---------------:|:---------------|:----------------------------------------------------------------------------------------|
-|   filterName    | String         | 指定过滤器的 name 属性，等价于 <filter-name>。                                                       |
-|   urlPatterns   | String[]       | 指定过滤器的 URL 匹配模式。等价于 <url-pattern> 标签。                                                   |
+|   filterName    | String         | 指定过滤器的 name 属性，等价于 `<filter-name>`。                                                       |
+|   urlPatterns   | String[]       | 指定过滤器的 URL 匹配模式。等价于 `<url-pattern>` 标签。                                                   |
 |      value      | String[]       | 该属性等价于 urlPatterns 属性，但是两者不能同时使用。                                                       |
-|  servletNames   | String[]       | 指定过滤器将应用于哪些 Servlet。取值是 @WebServlet 中 filterName 属性的取值，或者 web.xml 中 <servlet-name> 的取值。 |
+|  servletNames   | String[]       | 指定过滤器将应用于哪些 Servlet。取值是 @WebServlet 中 filterName 属性的取值，或者 web.xml 中 `<servlet-name>` 的取值。 |
 | dispatcherTypes | DispatcherType | 指定过滤器拦截的资源被 Servlet 容器调用的方式。具体取值包括： ASYNC、ERROR、FORWARD、INCLUDE、REQUEST。                |
-|   initParams    | WebInitParam[] | 指定一组过滤器初始化参数，等价于 <init-param> 标签。                                                       |
-| asyncSupported  | boolean        | 声明过滤器是否支持异步操作模式，等价于 <async-supported> 标签。                                               |
-|   description   | String         | 指定过滤器的描述信息，等价于 <description> 标签。                                                        |
-|   displayName   | String         | 指定过滤器的显示名，等价于 <display-name> 标签。                                                        |
+|   initParams    | WebInitParam[] | 指定一组过滤器初始化参数，等价于 `<init-param>` 标签。                                                       |
+| asyncSupported  | boolean        | 声明过滤器是否支持异步操作模式，等价于 `<async-supported>` 标签。                                               |
+|   description   | String         | 指定过滤器的描述信息，等价于 `<description>` 标签。                                                        |
+|   displayName   | String         | 指定过滤器的显示名，等价于 `<display-name>` 标签。                                                        |
 
 使用`@WebFilter`注解配置过滤器。
 ```java

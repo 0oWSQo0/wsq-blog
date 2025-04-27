@@ -201,7 +201,7 @@ ctx.stroke();
 * `ctx.textBaseline`：文本的垂直位置，默认值为`alphabetic`。
 
 `fillText()`方法用来在指定位置绘制实心字符。
-```js
+```text
 ctx.fillText(text, x, y [, maxWidth])
 ```
 该方法接受四个参数：
@@ -553,8 +553,6 @@ ctx.fillRect(0, 0, 100, 100);
 ```
 #### transform()
 `ctx.transform()`方法接受一个变换矩阵的六个元素作为参数，完成缩放、旋转、移动和倾斜等变形。
-
-它的使用格式如下。
 ```js
 ctx.transform(a, b, c, d, e, f);
 /*
@@ -589,7 +587,7 @@ ctx.setTransform(1, 0, 0, 1, 0, 0);
 ctx.fillRect(0, 0, 100, 100);
 ```
 上面代码中，第一个`fillRect()`方法绘制的矩形，左上角从`(0, 0)`平移到`(50, 50)`。`setTransform()`方法取消了这个变换（已绘制的图形不受影响），将画布恢复到默认状态（变换矩形`1, 0, 0, 1, 0, 0`），所以第二个矩形的左上角回到`(0, 0)`。
-## <canvas>元素的方法
+## canvas 元素的方法
 除了`CanvasRenderingContext2D`对象提供的方法，`<canvas>`元素本身也有自己的方法。
 ```js
 HTMLCanvasElement.toDataURL()
@@ -620,7 +618,7 @@ var lowQuality = canvas.toDataURL('image/jpeg', 0.3);
 ### HTMLCanvasElement.toBlob()
 
 `HTMLCanvasElement.toBlob()`方法用于将`<canvas>`图像转成一个`Blob`对象，默认类型是`image/png`。
-```js
+```
 // 格式
 canvas.toBlob(callback, mimeType, quality)
 
@@ -629,7 +627,7 @@ canvas.toBlob(function (blob) {...}, 'image/jpeg', 0.95)
 ```
 `toBlob()`方法可以接受三个参数：
 * `callback`：回调函数。它接受生成的`Blob`对象作为参数
-* `mimeType`：字符串，图像的 MIMEType 类型，默认是`image/png`
+* `mimeType`：字符串，图像的`MIMEType`类型，默认是`image/png`
 * `quality`：浮点数，0到1之间，表示图像的质量，只对`image/jpeg`和`image/webp`类型的图像有效
 
 注意，该方法没有返回值。

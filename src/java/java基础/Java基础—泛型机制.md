@@ -129,11 +129,11 @@ public class GenericsDemo24{
 
 定义泛型方法语法格式
 
-{% asset_img java-basic-generic-4.png %}
+[//]: # ({% asset_img java-basic-generic-4.png %})
 
 调用泛型方法语法格式
 
-{% asset_img java-basic-generic-5.png %}
+[//]: # ({% asset_img java-basic-generic-5.png %})
 
 说明一下，定义泛型方法时，必须在返回值前边加一个`<T>`，来声明这是一个泛型方法，持有一个泛型`T`，然后才可以用泛型`T`作为方法的返回值。
 

@@ -13,8 +13,8 @@ categories: java
 
 Java 集合类型分为`Collection`和`Map`，它们是 Java 集合的根接口，这两个接口又包含了一些子接口或实现类。下图分别为`Collection`和`Map`的子接口及其实现类。黄色块为集合的接口，蓝色块为集合的实现类。
 
-{% asset_img 1.png Collection接口基本结构 %}
-{% asset_img 2.png Map接口基本结构 %}
+![Collection接口基本结构](Java 集合/1.png)
+![Map接口基本结构](Java 集合/2.png)
 
 Java集合接口的作用：
 

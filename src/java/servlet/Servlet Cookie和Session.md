@@ -158,7 +158,7 @@ public class LoginTimeServlet extends HttpServlet {
     }
 }
 ```
-RemoveCookieServlet 的 Servlet 类
+`RemoveCookieServlet` 的 `Servlet` 类
 ```java
 package net.biancheng.www.cookie;
 
@@ -196,7 +196,7 @@ public class RemoveCookieServlet extends HttpServlet {
     }
 }
 ```
-## Session 是服务器端会话技术。当浏览器访问 Web 服务器的资源时，服务器可以为每个用户浏览器创建一个 Session 对象，每个浏览器独占一个 Session 对象。
+Session 是服务器端会话技术。当浏览器访问 Web 服务器的资源时，服务器可以为每个用户浏览器创建一个 Session 对象，每个浏览器独占一个 Session 对象。
 
 由于每个浏览器独占一个 Session，所以用户在访问服务器的资源时，可以把数据保存在各自的 Session 中。当用户再次访问该服务器中的其它资源时，其它资源可以从 Session 中取出数据，为用户服务。
 ### Session 的工作原理
@@ -248,8 +248,8 @@ HttpSession session=request.getSession();
 `Session`对象在服务器中驻留一段时间后没有被使用，就会被销毁，这个时间就是`Session`的过期时间。
 
 `Session`的默认过期时间为 30 分钟，我们可以通过如下两种方式设置过期时间。
-#### 使用 <session-config> 元素
-在 web.xml 中，使用 <session-config> 及其子元素 <session-timeout> 可以配置 Session 的默认过期时间。
+#### 使用 `<session-config>` 元素
+在 web.xml 中，使用 `<session-config>` 及其子元素 `<session-timeout>` 可以配置 Session 的默认过期时间。
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"

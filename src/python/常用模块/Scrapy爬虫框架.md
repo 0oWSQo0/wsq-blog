@@ -30,14 +30,14 @@ Scrapy 框架提供了一些常用的命令用来创建项目、查看配置信�
 
 | 命令           | 格式                             | 说明               |
 |--------------|:-------------------------------|:-----------------|
-| startproject | scrapy startproject <项目名>      | 创建一个新项目          |
-| genspider    | scrapy genspider <爬虫文件名> <域名>	 | 新建爬虫文件           |
-| runspider    | scrapy runspider <爬虫文件>        | 运行一个爬虫文件，不需要创建项目 |
-| crawl        | scrapy crawl <spidername>      | 运行一个爬虫项目，必须要创建项目 |
-| list         | scrapy list                    | 列出项目中所有爬虫文件      |
-| view         | scrapy view <url地址>            | 从浏览器中打开 url 地址   |
-| shell        | csrapy shell <url地址>           | 命令行交互模式          |
-| settings     | scrapy settings                | 查看当前项目的配置信息      |
+| startproject | `scrapy startproject <项目名>`      | 创建一个新项目          |
+| genspider    | `scrapy genspider <爬虫文件名> <域名>`	 | 新建爬虫文件           |
+| runspider    | `scrapy runspider <爬虫文件>`        | 运行一个爬虫文件，不需要创建项目 |
+| crawl        | `scrapy crawl <spidername>`      | 运行一个爬虫项目，必须要创建项目 |
+| list         | `scrapy list`                    | 列出项目中所有爬虫文件      |
+| view         | `scrapy view <url地址> `           | 从浏览器中打开 url 地址   |
+| shell        | `csrapy shell <url地址>`           | 命令行交互模式          |
+| settings     | `scrapy settings`                | 查看当前项目的配置信息      |
 
 ```shell
 scrapy startproject Baidu

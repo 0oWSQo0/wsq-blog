@@ -15,13 +15,14 @@ Java 程序通过流来完成输入/输出，所有的输入/输出以流的形�
 
 数据流的处理只能按照数据序列的顺序来进行，即前一个数据处理完之后才能处理后一个数据。数据流以输入流的形式被程序获取，再以输出流的形式将数据输出到其它设备。
 
-{% asset_img 1.png 输入流模式 %}
-{% asset_img 2.png 输出流模式 %}
+![输入流模式](Java输入输出流/1.png)
+
+![输出流模式](Java输入输出流/2.png)
 
 ## 输入流
 Java 流相关的类都封装在`java.io`包中，而且每个数据流都是一个对象。所有输入流类都是`InputStream`抽象类（字节输入流）和`Reader`抽象类（字符输入流）的子类。
 
-{% asset_img 3.png InputStream类的层次结构图 %}
+![InputStream类的层次结构图](Java输入输出流/3.png)
 
 `InputStream`类中所有方法遇到错误时都会引发`IOException`异常。如下是该类中包含的常用方法。
 
@@ -43,7 +44,7 @@ Java 中的字符是 Unicode 编码，即双字节的，而`InputerStream`是用
 ## 输出流
 所有输出流类都是`OutputStream`抽象类（字节输出流）和`Writer`抽象类（字符输出流）的子类。其中`OutputStream`类是字节输出流的抽象类，是所有字节输出流的父类。
 
-{% asset_img 4.png OutputStream类的层次结构图 %}
+![OutputStream类的层次结构图](Java输入输出流/4.png)
 
 `OutputStream`类用于以二进制的形式将数据写入目标设备，该类是抽象类，不能被实例化。`OutputStream`类提供了一系列跟数据输出有关的方法。
 

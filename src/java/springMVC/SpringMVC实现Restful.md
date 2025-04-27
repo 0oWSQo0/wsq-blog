@@ -1,7 +1,7 @@
 
 
 
-在 Spring MVC 中，我们可以通过 @RequestMapping +@PathVariable 注解的方式，来实现 RESTful 风格的请求。
+在 Spring MVC 中，我们可以通过`@RequestMapping +@PathVariable`注解的方式，来实现 RESTful 风格的请求。
 ## 通过@RequestMapping 注解的路径设置
 当请求中携带的参数是通过请求路径传递到服务器中时，我们就可以在`@RequestMapping`注解的`value`属性中通过占位符`{xxx}`来表示传递的参数，示例代码如下。
 ```java

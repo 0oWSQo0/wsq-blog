@@ -149,6 +149,6 @@ redis-server restart
 | rdbcompression | yes/no         | 当数据存储至本地数据库时是否要压缩数据，默认为 yes                                           |
 | dbfilename     | dump.rdb       | 指定本地存储数据库的文件名，默认为 dump.rdb                                            |
 | dir            | ./             | 	指定本地数据库存放目录                                                          |
-| requirepass    | foobared       | 密码配置项，默认关闭，用于设置 Redis 连接密码。如果配置了连接密码，客户端连接 Redis 时需要通过<password> 密码认证 |
+| requirepass    | foobared       | 密码配置项，默认关闭，用于设置 Redis 连接密码。如果配置了连接密码，客户端连接 Redis 时需要通过`<password> `密码认证 |
 | appendfilename | appendonly.aof | 指定 AOF 持久化时保存数据的文件名，默认为 appendonly.aof                                |
 | glueoutputbuf  | yes            | 设置向客户端应答时，是否把较小的包合并为一个包发送，默认开启状态                                      |

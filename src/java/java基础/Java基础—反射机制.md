@@ -55,7 +55,7 @@ flowchart LR
 ```
 类的加载
 
-![](java_jvm_classload_3.png)
+[//]: # (![]&#40;java_jvm_classload_3.png&#41;)
 
 ## 反射的使用
 在 Java 中，`Class`类与`java.lang.reflect`类库一起对反射技术进行了全力的支持。在反射包中，我们常用的类主要有：
@@ -719,7 +719,7 @@ public class HelloReflect {
 ```
 来看执行流程
 
-![](Java基础—反射机制/java-basic-reflection-1)
+![](Java基础—反射机制/java-basic-reflection-1.png)
 
 ### 反射获取类实例
 首先调用了`java.lang.Class`的静态方法，获取类信息。

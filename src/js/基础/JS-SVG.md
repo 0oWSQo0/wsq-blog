@@ -47,7 +47,7 @@ SVG 文件还可以转为 BASE64 编码，然后作为 Data URI 写入网页。
 <img src="data:image/svg+xml;base64,[data]">
 ```
 ## 语法
-### <svg>标签
+### `<svg>`标签
 SVG 代码都放在顶层标签`<svg>`之中。
 ```svg
 <svg width="100%" height="100%">
@@ -67,7 +67,7 @@ SVG 代码都放在顶层标签`<svg>`之中。
 注意，视口必须适配所在的空间。上面代码中，视口的大小是 50x50，由于 SVG 图像的大小是 100x100，所以视口会放大去适配 SVG 图像的大小，即放大了四倍。
 
 如果不指定`width`属性和`height`属性，只指定`viewBox`属性，则相当于只给定 SVG 图像的长宽比。这时，SVG 图像的大小默认是所在的 HTML 元素的大小。
-### <circle>标签
+### `<circle>`标签
 `<circle>`标签代表圆形。
 ```svg
 <svg width="300" height="180">
@@ -96,7 +96,7 @@ SVG 的 CSS 属性与网页元素有所不同。
 * `stroke`：描边色
 * `stroke-width`：边框宽度
 
-### <line>标签
+### `<line>`标签
 `<line>`标签用来绘制直线。
 ```svg
 <svg width="300" height="180">
@@ -104,7 +104,7 @@ SVG 的 CSS 属性与网页元素有所不同。
 </svg>
 ```
 上面代码中，`<line>`标签的`x1`属性和`y1`属性，表示线段起点的横坐标和纵坐标；`x2`属性和`y2`属性，表示线段终点的横坐标和纵坐标；`style`属性表示线段的样式。
-### <polyline>标签
+### `<polyline>`标签
 `<polyline>`标签用于绘制一根折线。
 ```svg
 <svg width="300" height="180">
@@ -112,7 +112,7 @@ SVG 的 CSS 属性与网页元素有所不同。
 </svg>
 ```
 `<polyline>`的`points`属性指定了每个端点的坐标，横坐标与纵坐标之间与逗号分隔，点与点之间用空格分隔。
-### <rect>标签
+### `<rect>`标签
 `<rect>`标签用于绘制矩形。
 ```svg
 <svg width="300" height="180">
@@ -120,7 +120,7 @@ SVG 的 CSS 属性与网页元素有所不同。
 </svg>
 ```
 `<rect>`的`x`属性和`y`属性，指定了矩形左上角端点的横坐标和纵坐标；`width`属性和`height`属性指定了矩形的宽度和高度（单位像素）。
-### <ellipse>标签
+### `<ellipse>`标签
 `<ellipse>`标签用于绘制椭圆。
 ```svg
 <svg width="300" height="180">
@@ -128,7 +128,7 @@ SVG 的 CSS 属性与网页元素有所不同。
 </svg>
 ```
 `<ellipse>`的`cx`属性和`cy`属性，指定了椭圆中心的横坐标和纵坐标（单位像素）；`rx`属性和`ry`属性，指定了椭圆横向轴和纵向轴的半径（单位像素）。
-### <polygon>标签
+### `<polygon>`标签
 `<polygon>`标签用于绘制多边形。
 ```svg
 <svg width="300" height="180">
@@ -136,7 +136,7 @@ SVG 的 CSS 属性与网页元素有所不同。
 </svg>
 ```
 `<polygon>`的`points`属性指定了每个端点的坐标，横坐标与纵坐标之间与逗号分隔，点与点之间用空格分隔。
-### <path>标签
+### `<path>`标签
 `<path>`标签用于制路径。
 ```svg
 <svg width="300" height="180">
@@ -157,7 +157,7 @@ SVG 的 CSS 属性与网页元素有所不同。
 * `L`：画直线到（`lineto`）
 * `Z`：闭合路径
 
-### <text>标签
+### `<text>`标签
 `<text>`标签用于绘制文本。
 ```svg
 <svg width="300" height="180">
@@ -165,7 +165,7 @@ SVG 的 CSS 属性与网页元素有所不同。
 </svg>
 ```
 `<text>`的`x`属性和`y`属性，表示文本区块基线（`baseline`）起点的横坐标和纵坐标。文字的样式可以用`class`或`style`属性指定。
-### <use>标签
+### `<use>`标签
 `<use>`标签用于复制一个形状。
 ```svg
 <svg viewBox="0 0 30 10" xmlns="http://www.w3.org/2000/svg">
@@ -176,7 +176,7 @@ SVG 的 CSS 属性与网页元素有所不同。
 </svg>
 ```
 `<use>`的`href`属性指定所要复制的节点，`x`属性和`y`属性是`<use>`左上角的坐标。另外，还可以指定`width`和`height`坐标。
-### <g>标签
+### `<g>`标签
 `<g>`标签用于将多个形状组成一个组（`group`），方便复用。
 ```svg
 <svg width="300" height="100">
@@ -189,7 +189,7 @@ SVG 的 CSS 属性与网页元素有所不同。
   <use href="#myCircle" x="200" y="0" fill="white" stroke="blue" />
 </svg>
 ```
-### <defs>标签
+### `<defs>`标签
 `<defs>`标签用于自定义形状，它内部的代码不会显示，仅供引用。
 ```svg
 <svg width="300" height="100">
@@ -205,7 +205,7 @@ SVG 的 CSS 属性与网页元素有所不同。
   <use href="#myCircle" x="200" y="0" fill="white" stroke="blue" />
 </svg>
 ```
-### <pattern>标签
+### `<pattern>`标签
 `<pattern>`标签用于自定义一个形状，该形状可以被引用来平铺一个区域。
 ```svg
 <svg width="500" height="500">
@@ -218,7 +218,7 @@ SVG 的 CSS 属性与网页元素有所不同。
 </svg>
 ```
 上面代码中，`<pattern>`标签将一个圆形定义为`dots`模式。`patternUnits="userSpaceOnUse"`表示`<pattern>`的宽度和长度是实际的像素值。然后，指定这个模式去填充下面的矩形。
-### <image>标签
+### `<image>`标签
 `<image>`标签用于插入图片文件。
 ```svg
 <svg viewBox="0 0 100 100" width="100" height="100">
@@ -227,7 +227,7 @@ SVG 的 CSS 属性与网页元素有所不同。
 </svg>
 ```
 上面代码中，`<image>`的`xlink:href`属性表示图像的来源。
-### <animate>标签
+### `<animate>`标签
 `<animate>`标签用于产生动画效果。
 ```svg
 <svg width="500px" height="500px">
@@ -250,7 +250,7 @@ SVG 的 CSS 属性与网页元素有所不同。
 <animate attributeName="x" from="0" to="500" dur="2s" repeatCount="indefinite" />
 <animate attributeName="width" to="500" dur="2s" repeatCount="indefinite" />
 ```
-### <animateTransform>标签
+### `<animateTransform>`标签
 `<animate>`标签对 CSS 的`transform`属性不起作用，如果需要变形，就要使用`<animateTransform>`标签。
 ```svg
 <svg width="500px" height="500px">
