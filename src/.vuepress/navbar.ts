@@ -48,7 +48,7 @@ export default navbar([
     icon: 'devicon:centos',
     prefix: '/computer/',
     children: [
-      { text: '其它', link: '/computer/其它/', icon: 'devicon:network' }
+      { text: '网络', link: '/network/', icon: 'devicon:network' }
     ]
   }
   // {

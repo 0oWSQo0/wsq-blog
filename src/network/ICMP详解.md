@@ -237,7 +237,7 @@ PS C:\Users\ThinkPad> ping /?
 ```
 * **ping -t**：不间断地`ping`指定计算机，直到管理员中断。
 ```shell
-PS C:\Users\ThinkPad> ping -t 172.16.10.1 -t
+PS C:\Users\ThinkPad> ping -t 172.16.10.1
 
 正在 Ping 172.16.10.1 具有 32 字节的数据:
 来自 172.16.10.1 的回复: 字节=32 时间=4ms TTL=64
@@ -278,6 +278,8 @@ PS C:\Users\ThinkPad> ping -a 172.16.10.89
 `ping`工具只能测试目的设备的连通性，但是看不到数据包的传输路径。所以在网络不通的情况下，无法知道网络问题发生在哪个位置。`tracert`工具可以查看数据包的整条传输路径，包括途中经过的中间设备。
 
 ![tracert](ICMP详解/tracert-1.png)
+
+tracert 使用 UDP 封装跟踪数据。
 
 IP 头部的 TTL 字段是为避免数据包循环转发而设计的。每经过一个路由器，数据包头中的 TTL 值减 1。如果 TTL 值为 0 则丢弃报文，并向源设备回应一个`Time Exceeded`消息，告知错误类型。`tracert`就是基于 TTL 字段和 ICMP 协议实现的。在 Windows 中命令是`tracert`，在 Unix、MacOS 中命令是`traceroute`。
 

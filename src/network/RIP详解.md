@@ -301,7 +301,7 @@ R1 的直连网段`1.0.0.0/8`变为不可达后，R1 立即发送`Response`报�
 
 ![](RIP详解/rip-25.png)
 
-```
+```shell
 [RTA]rip
 [RTA-rip-1]version 2 
 [RTA-rip-1]network 10.0.0.0
@@ -360,7 +360,7 @@ RIPV1、V2兼容问题：
 ![](RIP详解/31.png)
 
 RT1 配置：
-```
+```shell
 <Huawei>system-view
 [Huawei]sysname RT1
 [RT1]interface GigabitEthernet 0/0/0
@@ -369,7 +369,6 @@ RT1 配置：
 [RT1]interface GigabitEthernet 0/0/1
 [RT1-GigabitEthernet0/0/1]ip address 172.16.1.254 24
 [RT1-GigabitEthernet0/0/1]quit
-[RT1]
 [RT1]rip 1
 [RT1-rip-1]version 2
 [RT1-rip-1]network 192.168.1.0

@@ -4,14 +4,14 @@ import navbar from "./navbar.js";
 import sidebar from "./sidebar.js";
 
 export default hopeTheme({
-  hostname: "https://wsq01.github.io",
+  hostname: "https://0oWSQo0.github.io",
   author: {
     name: "WSQ",
-    url: "https://wsq01.github.com",
+    url: "https://0oWSQo0.github.com",
   },
   iconAssets: "iconify",
   logo: "logo.png",
-  repo: "https://wsq01.github.com",
+  repo: "https://0oWSQo0.github.com",
   docsDir: "src",
   // 导航栏
   navbar,

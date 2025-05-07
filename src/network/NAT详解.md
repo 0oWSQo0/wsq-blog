@@ -82,7 +82,7 @@ IP 地址中预留了 3 个私有地址网段，在私有网络内，可以任�
 
 为了更加有效地利用 NAT 路由器上的全球 IP 地址，现在常用的 NAT 转换表把运输层的端口号也利用上。这样，就可以使多个拥有本地地址的主机，共用一个 NAT 路由器上的全球 IP 地址，因而可以同时和互联网上的不同主机进行通信。
 
-使用端口号的 NAT 叫做网络地址与端口号转换 NAPT(`Network Address and Port Translation`)，而不使用端口号的 NAT 就叫做基本的 NAT。
+使用端口号的 NAT 叫做网络地址与端口号转换 NAPT(`Network Address and Port Translation`，网络地址端口转换)，而不使用端口号的 NAT 就叫做基本的 NAT。
 ## NAPT
 在基础 NAT 中，私有地址和公网地址存在一对一地址转换的对应关系，即一个公网地址同时只能分配给一个私有地址。它只解决了公网和私网的通信问题，并没有解决公网地址不足的问题。
 
@@ -275,13 +275,9 @@ PC 通过公网地址访问互联网
 # RT配置
 [RT]interface GigabitEthernet 0/0/0
 [RT-GigabitEthernet0/0/0]ip address 10.0.0.254 24
-Apr 18 2025 15:37:37-08:00 RT %%01IFNET/4/LINK_STATE(l)[0]:The line protocol IP 
-on the interface GigabitEthernet0/0/0 has entered the UP state. 
 [RT-GigabitEthernet0/0/0]quit
 [RT]interface GigabitEthernet 0/0/1
 [RT-GigabitEthernet0/0/1]ip address 202.0.0.1 24
-Apr 18 2025 15:38:03-08:00 RT %%01IFNET/4/LINK_STATE(l)[1]:The line protocol IP 
-on the interface GigabitEthernet0/0/1 has entered the UP state. 
 [RT-GigabitEthernet0/0/1]quit
 [RT]display ip interface brief 
 *down: administratively down
@@ -303,8 +299,6 @@ NULL0                             unassigned           up         up(s)
 # ISP配置
 [ISP]interface GigabitEthernet 0/0/1
 [ISP-GigabitEthernet0/0/1]ip address 202.0.0.2 24
-Apr 18 2025 15:40:54-08:00 ISP %%01IFNET/4/LINK_STATE(l)[0]:The line protocol IP
- on the interface GigabitEthernet0/0/1 has entered the UP state. 
 [ISP-GigabitEthernet0/0/1]quit
 [ISP]display ip interface brief
 *down: administratively down
@@ -342,6 +336,9 @@ NULL0                             unassigned           up         up(s)
   enable    Enable function
   global    Specify global information of NAT
   protocol  Specify protocol
+# 接口视图下配置静态NAT
+# nat static global{ global-address} inside {host-address }
+# global参数用于配置外部公有地址，inside参数用于配置内部私有地址
 [RT-GigabitEthernet0/0/1]nat static global 202.0.0.3 inside 10.0.0.1
 [RT-GigabitEthernet0/0/1]quit
 [RT]ip route-static 0.0.0.0 0 202.0.0.2
@@ -401,6 +398,9 @@ NULL0                             unassigned           up         up(s)
 [RT]acl 2020
 [RT-acl-basic-2020]rule permit source 10.0.20.0 0.0.0.255
 [RT-acl-basic-2020]quit
+# 创建地址池
+# nat address-group group-index start-address end-address
+# 配置公有地址范围，其中group-index为地址池编号，start-address、end-address分别为地址池起始地址、结束地址
 [RT]nat address-group 1 202.0.0.3 202.0.0.4
 [RT]nat address-group 2 202.0.0.5 202.0.0.6
 [RT]interface GigabitEthernet 0/0/0
@@ -410,6 +410,7 @@ NULL0                             unassigned           up         up(s)
 [RT-GigabitEthernet0/0/0]nat outbound 2010 address-group 1 ?
   no-pat  Not use PAT
   <cr>    Please press ENTER to execute command 
+# 接口下关联ACL与地址池进行动态地址转换，no-pat参数指定不进行端口转换
 [RT-GigabitEthernet0/0/0]nat outbound 2010 address-group 1
 [RT-GigabitEthernet0/0/0]nat outbound 2020 address-group 2
 [RT-GigabitEthernet0/0/0]quit 
@@ -451,10 +452,26 @@ NULL0                             unassigned           up         up(s)
 
 ![RT外网口抓包](NAT详解/42.png)
 
+### EasyIP 实验
+#### 实验拓扑图
+
+![拓扑图](NAT详解/36.png)
+
+#### 实验要求
+* RT 使用 Easy IP 功能，让内网所有地址通过`202.0.0.1`访问公网
+
+#### 实验步骤
+```shell
+[RT]acl 2010
+[RT-acl-basic-2010]rule permit source 10.0.0.0 0.0.255.255
+[RT-acl-basic-2010]quit
+[RT]interface GigabitEthernet 0/0/1
+[RT-GigabitEthernet0/0/1]nat outbound 2010
+```
 ### 其它常用 NAT 命令
 NAT Server 是在接口视图下配置，命令格式为：
 ```shell
-nat server protocol { tcp | udp } global global-address global-port inside host-address host-port
+nat server protocol { tcp|udp } global global-address global-port inside host-address host-port
 ```
 检查 NAT Server 配置信息命令：`display nat server`。
 

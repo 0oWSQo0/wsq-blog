@@ -6,7 +6,6 @@ categories: 计算机网络
 order: 11
 ---
 
-
 ## DHCP出现
 电脑或手机需要 IP 地址才能上网。大刘有两台电脑和两台手机，小美有一台笔记本电脑、一台平板电脑和两台手机，老王、阿丽、敏敏也有几台终端设备。如果为每台设备手动配置 IP 地址，那会非常繁琐，一点儿也不方便。特别是手机、笔记本电脑、平板电脑等设备，每移动到一个新的地方，接入不同的网络，都要重新设置 IP 地址，实在是太麻烦了。
 
@@ -23,9 +22,9 @@ DHCP 能够分配其它的配置参数，客户端仅用一个消息就获取它
 
 ![动态分配](DHCP详解/dhcp-3.png)
 
-大刘他们的设备使用 DHCP 功能后，只要连接到网络，就可以进行 TCP/IP 通信。对于路由器和交换机，通常是手动配置 IP 地址等参数。
+设备使用 DHCP 功能后，只要连接到网络，就可以进行 TCP/IP 通信。对于路由器和交换机，通常是手动配置 IP 地址等参数。
 
-DHCP 是一种`Client/Server`模式的网络协议，由`DHCP Client`向`DHCP Server`提出配置申请，`DHCP Server`返回为`DHCP Client`分配的配置信息。这里的`Client`和`Server`是应用程序，可以运行在电脑、服务器、路由器等设备上。
+DHCP 是一种`C/S`模式的网络协议，由`DHCP Client`向`DHCP Server`提出配置申请，`DHCP Server`返回为`DHCP Client`分配的配置信息。这里的`Client`和`Server`是应用程序，可以运行在电脑、服务器、路由器等设备上。
 
 ![DHCP应用程序](DHCP详解/dhcp-4.png)
 
@@ -266,9 +265,11 @@ RT（路由器）配置`DHCP Server`，PC 动态获取 IP 地址等网络参数�
 ```shell
 <Huawei>system-view 
 [Huawei]sysname RT
+# 开启DHCP功能
 [RT]dhcp enable
 [RT]interface GigabitEthernet 0/0/0
 [RT-GigabitEthernet0/0/0]ip address 10.0.0.1 24
+# 开启接口采用接口地址池的DHCP服务端功能
 [RT-GigabitEthernet0/0/0]dhcp select interface
 [RT-GigabitEthernet0/0/0]dhcp server ?
   dns-list             Configure DNS servers
@@ -287,8 +288,13 @@ RT（路由器）配置`DHCP Server`，PC 动态获取 IP 地址等网络参数�
   option184            DHCP option 184
   recycle              Recycle IP address
   static-bind          Static bind
+# 指定接口地址池下的DNS服务器地址
 [RT-GigabitEthernet0/0/0]dhcp server dns-list 114.114.114.114
+# 配置DHCP服务器接口地址池中IP地址的租用有效期限功能
+# dhcp server lease { day day [ hour hour [ minute minute ] ] | unlimited }
 [RT-GigabitEthernet0/0/0]dhcp server lease day 0 hour 1
+# 配置接口地址池中不参与自动分配的IP地址范围
+# dhcp server excluded-ip-address start-ip-address [end-ip-address]
 [RT-GigabitEthernet0/0/0]dhcp server excluded-ip-address 10.0.0.254 
 [RT-GigabitEthernet0/0/0]dhcp select interface
 [RT-GigabitEthernet0/0/0]display ip pool interface GigabitEthernet0/0/0 
@@ -365,18 +371,22 @@ RT（路由器）配置`DHCP Server`，PC 动态获取 IP 地址等网络参数�
 
 ```shell
 <Huawei>system-view 
-Enter system view, return user view with Ctrl+Z.
 [Huawei]sysname RT
 [RT]dhcp enable
-# Info: The operation may take a few seconds. Please wait for a moment.done.
+# 创建全局地址池
 [RT]ip pool dhcpserver01
-# Info: It's successful to create an IP address pool.
+# 配置全局地址池可动态分配的IP地址范围
 [RT-ip-pool-dhcpserver01]network 10.0.0.0 mask 24
+# 配置DHCP客户端的网关地址
 [RT-ip-pool-dhcpserver01]gateway-list 10.0.0.1
+# 配置DHCP客户端的DNS服务器地址
+[RT-ip-pool-dhcpserver01]dns-list 114.114.114.114
+# 配置IP地址租期
 [RT-ip-pool-dhcpserver01]lease day 0 hour 1
 [RT-ip-pool-dhcpserver01]quit
 [RT]interface GigabitEthernet 0/0/0
 [RT-GigabitEthernet0/0/0]ip address 10.0.0.1 24
+# 使能接口的DHCP服务器功能
 [RT-GigabitEthernet0/0/0]dhcp select global
 [RT-GigabitEthernet0/0/0]quit
 [RT]display ip pool name dhcpserver01  
@@ -384,7 +394,7 @@ Enter system view, return user view with Ctrl+Z.
   Pool-No        : 0
   Lease          : 0 Days 1 Hours 0 Minutes
   Domain-name    : -
-  DNS-server0    : -               
+  DNS-server0    : 114.114.114.114               
   NBNS-server0   : -               
   Netbios-type   : -               
   Position       : Local           Status           : Unlocked
