@@ -246,10 +246,10 @@ IPSec 并不是一个单一的协议，而是一个框架。
 | AH(认证包头协议)          | 实际保护流量的安全协议                                 |   |
 | ESP(负载安全封装协议)       | 实际保护流量的安全协议                                 |   |
 
-IPSec 的框架包含若干个协议。最重要的就是 IKE 和两个安全协议（AH、ESP）。其中 IKE（Internet 秘钥交换协议）是核心和根本，这是个混合协议，它包含三个协议：
-* Oakley：提供了 IPSec 对各种技术的支持。例如对新的加密和散列算法的支持。实际上它是为 IPSec 提供一种框架
-* SKEME：定义密钥交换的机制。
-* ISAKMP：定义了消息交换的体系结构，包含对等体间消息的格式及状态转变
+IPSec 的框架包含若干个协议。最重要的就是 IKE(`Internet Key Exchange`) 和两个安全协议（AH、ESP）。其中 IKE（Internet 秘钥交换协议）是核心和根本，这是个混合协议，它包含三个协议：
+* Oakley：密钥生成协议，提供了 IPSec 对各种技术的支持。例如对新的加密和散列算法的支持。实际上它是为 IPSec 提供一种框架
+* SKEME(`Secure Key Exchange Mechanism`)：定义密钥交换的机制。
+* ISAKMP(`Internet Secure Association and Key Management Mechanism`)：定义了消息交换的体系结构，包含对等体间消息的格式及状态转变
 
 其实我们只要关注  ISAKMP 就好了，它是整个 IKE 的核心。ISAKMP 负责 IPSecVPN 中非常重要的几项工作：负责建立和维护 SA（IKE SA 及 IPsecSA）、协商协议 参数（如加密、验证协议等）、对等体身份验证、协商密钥、以及对密钥的管理。ISAKMP 还定义了消 息交换的体系结构，包含对等体之间用于 IPSec 协商的报文格式、状态机等。
 
