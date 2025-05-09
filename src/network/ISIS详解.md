@@ -1,4 +1,10 @@
-
+---
+title: IS-IS详解
+date: 2025-03-10
+tags: network
+categories: 计算机网络
+order: 19
+---
 
 
 ## IS-IS
@@ -104,16 +110,9 @@ IS-IS 路由的`Cost`等于源设备到目的网段所有出接口的`Cost`总�
 | wide              | wide        | wide        |
 
 
-默认情况下，IS-IS Cost 类型为 Narrow 时， Cost 值为 10 。无论接口的带宽是多少，值都是 10 。简单的方法，就是手动修改接口 Cost 。既然路由都能动态生成，那么 Cost 还要手动修改，显然不合适。肯定有自动计算接口 Cost 的功能，使用 auto-cost enable 命令激活。接口的 Cost 值 = ( bandwidth-reference / 接口带宽值 ) × 10 。bandwidth-reference 值默认是 100 ，可通过命令修改。比如千兆接口的带宽是 1000Mbps ，结果是 1 ，即 Cost 值为 1 。当然，只有 Cost 类型为 Wide 或 Wide-compatible 时，自动计算才生效。如果 Cost 类型为 Narrow 、Narrow-compatible 或 Compatible 时，根据带宽和度量值的对应关系表设置 Cost 值。
+默认情况下，IS-IS `Cost`类型为`Narrow`时，`Cost`值为 10。无论接口的带宽是多少，值都是 10。简单的方法，就是手动修改接口`Cost`。既然路由都能动态生成，那么`Cost`还要手动修改，显然不合适。肯定有自动计算接口`Cost`的功能，使用`auto-cost enable`命令激活。接口的`Cost`值 = ( `bandwidth-reference` / 接口带宽值 ) × 10。`bandwidth-reference`值默认是 100，可通过命令修改。比如千兆接口的带宽是`1000Mbps`，结果是 1，即`Cost`值为 1。当然，只有`Cost`类型为`Wide`或`Wide-compatible`时，自动计算才生效。如果`Cost`类型为`Narrow`、`Narrow-compatible`或`Compatible`时，根据带宽和度量值的对应关系表设置`Cost`值。
 
-|   |   |
-|---|---|
-|   |   |
-|   |   |
-|   |   |
-|   |   |
-
-
+![](ISIS详解/cost.png)
 
 ## 三张表
 IS-IS 维护了三张重要的数据表，分别是邻居表、LSDB、IS-IS 路由表。
@@ -146,3 +145,123 @@ LSDB 的`Seq Num`表示 LSP 的序列号，用来表示 LSP 的新旧。R1 也�
 R2 通过 IS-IS 学习到`Level-1`路由`1.1.1.0/24`和`Level-2`路由`3.3.3.0/24`。`Level-1`路由根据`Level-1 LSDB`计算出的路由，`Level-2`路由根据`Level-2 LSDB`计算出的路由。当到达目的网段，既有`Level-1`路由，又有`Level-2`路由时，优选`Level-1`路由，与路由`Cost`无关。查看 R2 的全局路由表：
 ![](ISIS详解/table-8.png)
 
+## 协议报文
+IS-IS 的协议报文直接采用数据链路层封装，对比 OSPF 少了 IP 层封装，IS-IS 报文的封装效率更高。IS-IS 报文直接封装在以太网数据帧中，使用几种 PDU：
+### IIH (IS-IS Hello)
+IIH PDU 用于建立和维护 IS-IS 的邻居关系。有三种 IIH PDU：`Level-1 LAN IIH、Level-2 LAN IIH`和`P2P IIH`。其中`Level-1 LAN IIH`和`Level-2 LAN IIH`用于`Broadcast`类型的网络，`Level-1`设备只发送和侦听`Level-1 LAN IIH`，`Level-2`设备只发送和侦听`Level-2 LAN IIH`，`Level-1-2`设备发送和侦听两种类型的`LAN IIH`。`P2P IIH`用于 P2P 类型的网络中。
+
+### LSP (Link-State Packet)
+ISIS 使用 LSP 存放链路状态信息，LSP 是一种独立的 PDU。LSP 分为`Level-1 LSP`和`Level-2 LSP`，根据邻居关系类型，发送对应的 LSP。比如`Level-1`邻居关系，交互`Level-1 LSP`，`Level-1-2`邻居关系，`Level-1 LSP`和`Level-2 LSP`都会交互。
+
+### CSNP (Complete Sequence Number PDU)
+CSNP 用于 LSDB 同步，包含路由器 LSDB 所有 LSP 摘要。CSNP 也分为`Level-1 CSNP`和`Level-2 CSNP`，不同邻居关系交互不同类型的 CSNP。CSNP 包含设备的 LSDB 所有 LSP 摘要信息，一条 LSP 的摘要信息包括 LSP 的 LSP ID、序列号、剩余生存时间、校验和，这四个信息是 LSP 头部的关键信息。
+
+### PSNP (Partial Sequence Number PDU)
+PSNP 只包含一部分 LSP 的摘要信息，用于请求 LSP 更新，也分为`Level-1 PSNP`和`Level-2 PSNP`。PSNP 还用于 P2P 网络中，对收到的 LSP 进行确认。
+
+### IS-IS PDU
+IS-IS PDU 报文结构主要是三个部分：通用的头部、PDU 特有的头部、可变长部分。通用的头部，是指所有 IS-IS PDU 都有的、相同格式的头部。每种 PDU 都有自己特有的头部。可变长部分，使用三元组格式存储内容，也就是 TLV ，全称`Type-Length-Value`，也就是类型、长度、值的三元组。
+
+![](ISIS详解/isis-pdu.png)
+
+TLV 的各元素描述如下：
+
+`Type`（类型）：`1byte` ，表示 TLV 的类型，不同 TLV 类型携带不同的信息。
+
+| 类型组 | 名称        | 使用这个TLV的PDU | 备注                       |
+|-----|-----------|-------------|--------------------------|
+| 1   | 区域地址      | IIH、LSP     | 设备所在区域的地址                |
+| 2   | IS邻居      | LSP         | 设备的IS-IS邻居，到达邻居的Cost     |
+| 6   | IS邻居      | LAN IIH     | 设备LAN发现的IS-IS邻居          |
+| 8   | 填充        | IIH         | 报文填充                     |
+| 9   | LSP条目     | CSNP、PSNP   | 各条LSP的摘要信息               |
+| 10  | 认证        | 所有报文        | 认证信息                     |
+| 128 | IP内部可达性信息 | LSP         | IS-IS域内的目的网段，到达目的网段的Cost |
+| 130 | IP外部可达性信息 | LSP         | IS-IS域内的目的网段，到达目的网段的Cost |
+| 132 | IP接口地址    | IIH、LSP     | 设备的接口IP地址                |
+
+`Length`（长度）：`1byte`，表示`Value`的长度。不同 TLV 类型，长度也不同。
+
+`Value`（值）：字节数的长度是`Length`的值，表示 TLV 的有效内容。
+
+![](ISIS详解/tlv.png)
+
+每种 PDU 都有一定数量的 TLV，TLV 非常灵活、方便扩展。不对协议做大改动的情况下，引入新的 TLV 就可以实现新功能的支持，这就是 TLV 的绝对优势。
+## LSP
+IS-IS 使用 LSP 来描述网络拓扑和网段信息，有两种 LSP：`Level-1 LSP`和`Level-2 LSP`。LSP 由 PDU 通用头部和 LSP 报文组成，LSP 报文包含 LSP 特有头部和 TLV。
+
+![](ISIS详解/lsp.png)
+
+LSP 字段及说明：
+* PDU 长度（`PDU Length`）：PDU 的总长度，单位是字节。
+* 剩余生存时间（`Remaining Lifetime`）：LSP 的剩余存活时间，单位是秒。
+* LSP 标识符（`LSP ID`）：三部分组成：设备的系统 ID 、伪节点 ID 、分配编号，用于标识不同的 LSP。
+* 序列号（`Sequence Number`）：LSP 的序列号，用于区分 LSP 的新旧。
+* 校验和（`Checksum`）：校验和。
+* P（`Partition Repair`）：如果设备支持区域划分修复特性，那么生成的 LSP 中 P 值设为 1。
+* ATT（`Attached bits`）：关联位，`Level-1-2`路由器，既连着`Level-1`区域，又连着`Level-2`区域，生成的`Level-1 LSP`中 ATT 值为 1。
+* OL（`Overload bit`）：过载位，通常 IS-IS 设备生成的 LSP 中 OL 值为 0。值为 1 时，表示设备已经过载，只计算生成 LSP 设备的直连路由，不计算其它网段的路由。
+* IS 类型（`IS Type`）：二进制值为 01 时，表示 `Level-1` 路由器。二进制值为 11 时，表示`Level-2`路由器。
+
+![](ISIS详解/is-type.png)
+
+使用`display isis lsdb`命令加上`verbose`关键字，可查看 LSP 的详细信息。R2 的输出如下：
+
+![](ISIS详解/isis-lsdb.png)
+
+## 网络类型
+IS-IS 支持两种网络类型：`Broadcast`（广播）和 P2P（点对点）。IS-IS 会根据接口的数据链路层封装，决定接口的 IS-IS 网络类型。在以太网接口激活 IS-IS 时，接口类型为`Broadcast`，在广域网接口激活时，比如 PPP 或 HDLC 等，接口网络类型为 P2P。
+
+### Broadcast 网络类型
+在`Broadcast`网络中，会进行 DIS 选举，跟 OSPF 的 DR 类似。`Broadcast`类型的接口上使用两种 IIH PDU，分别是`Level-1 LAN IIH`和`Level-2 LAN IIH`。使用哪种 PDU，取决于设备接口的`Level`。`Level-1 LAN IIH`的目的 MAC 地址是组播地址`0180-c200-0014`，`Level-2 LAN IIH`的目的 MAC 地址是组播地址`0180-c200-0015`。
+
+DIS 会周期性泛洪 CSNP，确保网络中的 IS-IS 设备有一样的 LSDB。CSNP 包含 DIS 所有 LSP 的摘要信息，使用 TLV 装载 LSP 摘要。同一个`Broadcast`网络中的其它 IS-IS 设备收到 CSNP 后，与自己的 LSDB 对比，如果一致，就忽略这条 CSNP；如果缺少某些 LSP，就向 DIS 发送 PSNP，请求 LSP 的完整信息。DIS 就把对应的 LSP 发送给对方。收到 LSP 后更新到自己的 LSDB 中，无需向 DIS 进行确认。
+### P2P 网络类型
+P2P 网络无需选举 DIS，使用 P2P IIH 发现和维护 IS-IS 邻居关系。默认时，`Hello`报文发送间隔是 10 秒。建立邻接关系后，开始交互 LSP。收到 LSP 后，使用 PSNP 进行确认，告诉对方自己收到了 LSP。如果一段时候后，对方没收到 PSNP，就会对 LSP 进行重传。CSNP 只在邻居关系建立后，双方进行一次交互，后面不再发送。收到 CSNP 后，和自己的 LSDB 对比，相同则忽略这条 CSNP ，缺少某些 LSP，就向邻居发送 PSNP 请求 LSP 的完整信息。
+### NBMA 网络类型
+IS-IS 不支持 NBMA 网络类型。比如在`Frame-Relay`环境中，IS-IS 只能在接口上使用 P2P 网络类型，不支持修改成`Broadcast`。`Frame-Relay`接口使用一条 PVC 连接一台设备，如果一个接口要连接多台设备，就需要使用子接口接入 NBMA 网络，当然也是 P2P 类型的子接口。
+
+![](ISIS详解/nbma.png)
+
+## DIS 和 伪节点
+网络类型是`Broadcast`时，IS-IS 会选举 DIS（指定中间系统），DIS 在 LAN 中虚拟出一个伪节点（`Pseudonodes`），并生成伪节点 LSP。
+
+伪节点不是一台真实的物理设备，而是 DIS 生成的一台虚拟设备。LAN 内设备的 LSP 只需描述和伪节点的邻居关系即可，不需要描述和其它非伪节点的邻居关系。伪节点的 LSP 包括伪节点和 LAN 中所有设备的邻居关系，根据伪节点的 LSP 就能计算出 LAN 内的拓扑，DIS 生成伪节点的 LSP。伪节点和伪节点的 LSP 让 LSP 的数量减少，当拓扑发生变化时，泛洪的 LSP 数量也减少了，设备的负担自然也减小了。
+
+为了保证 LSDB 的同步，DIS 会在 LAN 内周期性泛洪 CSNP，LAN 中设备收到后，会进行一致性检查，保证本地 LSDB 和 DIS 同步。
+
+![](ISIS详解/dis-1.png)
+
+R1、R2、R3、R4 连在一台交换机上，都是`Level-1`设备，属于同一个区域，就需要进行 DIS 选举。R4 和 R5 使用 P2P 链路互联，不需要选举 DIS，也不存在伪节点。
+
+![](ISIS详解/dis-2.png)
+
+如果 R4 的`GE0/0/0`接口选举为 DIS，那么 R4 会生成一个伪节点，并生成伪节点的 LSP。图中有 R1 和 R4 的 LSP，以及伪节点的 LSP。
+
+先查看 LSDB，因为所有设备属于同一个区域，所以 LSDB 是相同的。R1 使用`display isis lsdb`命令查看：
+
+![](ISIS详解/dis-3.png)
+
+可以看到每台设备生成的 LSP，R4 生成了两个`Level-1 LSP`，LSP ID 是`0000.0000.0004.01-00`的 LSP，就是 R4 作为 DIS 生成的伪节点 LSP。
+
+查看 R1 生成的 LSP 详情：
+
+![](ISIS详解/dis-4.png)
+
+LSP 中的邻居是`0000.0000.0004.01`，也就是伪节点，以及一个 IP 网段`10.1.1.0/24`。R2 和 R3 生成的`Level-1 LSP`也类似。实际上，每台路由器会和所有路由器建立 IS-IS 邻居关系，但是生成的 LSP 只描述自己和伪节点的邻居关系。
+
+再看伪节点 LSP 的详情：
+
+![](ISIS详解/dis-5.png)
+
+DIS 生成一个`Level-1`伪节点 LSP，并描述了和 R1、R2、R3、R4 的邻居关系。随着这条 LSP 的泛洪，区域内的其它设备就可以计算出 LAN 内的拓扑。
+
+IS-IS 在 LAN 中选举 DIS 的顺序如下：
+* 接口 DIS 优先级最高的设备成为 DIS。DIS 优先级的值越大，优先级越高。
+* 如果 DIS 优先级相同，那么接口 MAC 地址最大的设备称为 DIS。
+
+注意事项：
+* 在一个 LAN 中部署 IS-IS，LAN 中所有设备都会和 DIS 以及非 DIS 设备建立邻居关系。
+* 在一个 LAN 中，`Level-1`和`Level-2`的 DIS 独立选举，互不干扰。完全有可能出现一种情况：`Level-1 DIS`和`Level-2 DIS`不是同一个设备。
+* IS-IS 没有备份 DIS，当 DIS 发生故障时，立即选举新的 DIS。
+* DIS 可抢占。比如一个已经选举出 DIS 的 LAN 中，新加一台优先级更高的设备，那么这台设备会抢占 DIS 的角色，成为新的 DIS。

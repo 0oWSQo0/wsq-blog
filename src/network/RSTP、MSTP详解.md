@@ -1,4 +1,10 @@
-
+---
+title: RSTP、MSTP详解
+date: 2025-01-10
+tags: network
+categories: 计算机网络
+order: 9
+---
 
 
 ## STP 的弊端

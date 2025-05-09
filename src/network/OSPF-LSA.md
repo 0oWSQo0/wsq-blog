@@ -37,7 +37,7 @@ OSPF 是链路状态协议，路由器彼此之间通过发送 LSA(`LinkState Ad
 
 LSA 头部一共 20 字节。
 
-[LSA 头部信息](OSPF-LSA/lsa-header-2.png)
+![LSA 头部信息](OSPF-LSA/lsa-header-2.png)
 
 LSA 头部信息字段含义：
 * 链路状态老化时间（`Link-State Age`）：表示 LSA 的老化时间，也就是说，LSA 存在了多长时间，单位是秒。路由器生成 LSA 时，这个值为 0，随着 LSA 在网络中传输，老化时间逐渐累加。当 LSA 存储到路由器的 LSDB 后，LSA 的老化时间也在递增，当到达`MaxAge`（最大老化时间）时，这个 LSA 不在用于路由计算。

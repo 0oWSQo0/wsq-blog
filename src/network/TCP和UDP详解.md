@@ -1,4 +1,10 @@
-
+---
+title: TCP和UDP详解
+date: 2025-01-15
+tags: network
+categories: 计算机网络
+order: 9
+---
 
 
 传输层的作用是建立应用程序间的端到端连接，为数据传输提供可靠或不可靠的通信服务。传输层有两个重要协议，分别是 TCP(`Transmission Control Protocol`，传输控制协议) 和 UDP(`User Datagram Protocol`，用户数据报协议)。TCP 是面向连接的可靠传输协议，UDP 是无连接的不可靠传输协议。

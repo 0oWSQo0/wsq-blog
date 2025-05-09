@@ -1,6 +1,10 @@
-
-
-
+---
+title: Wireshark使用教程
+date: 2025-01-05
+tags: network
+categories: 计算机网络
+order: 6
+---
 
 
 wireshark 是非常流行的网络封包分析软件，简称小鲨鱼，可以截取各种网络封包，显示网络封包的详细信息。

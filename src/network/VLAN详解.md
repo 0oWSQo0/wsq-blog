@@ -209,10 +209,11 @@ MAC 地址表不仅记录了交换机端口和 MAC 地址的对应关系，还�
 * 将 PC（即主机）与 SW 相连接口配置为`Access`接口，接口的 PVID 配置为 VLAN 5。
 
 #### 实验步骤
-SW 1 上的配置如下：
-```
+SW 1 上的配置：
+```shell
 [SW1]vlan 5
 [SW1-vlan5]quit
+# 进入接口视图
 [SW1]interface Ethernet 0/0/1
 [SW1-Ethernet0/0/1]port link-type trunk
 [SW1-Ethernet0/0/1]port trunk allow-pass vlan 5
@@ -261,7 +262,7 @@ VID  Status  Property      MAC-LRN Statistics Description
 #### 实验步骤
 SW1 的`E0/0/2`接口，只允许通过 VLAN 2，PC1 又需要访问 VLAN 10，但是无法识别 VLAN 标签信息，因此配置`Hybrid`的 PVID 为 VLAN 2，同时放通 VLAN 2 和 VLAN 10。`E0/0/3`接口配置同理。`E0/0/1`接口需要放通 VLAN 2、VLAN 3 和 VLAN 10 的流量，对端交换机又需要识别 VLAN 标签，因此以带 VLAN 标签的形式放通 VLAN 2、VLAN 3 和 VLAN 10 的流量。SW1 上的配置如下：
 
-```
+```shell
 [SW1]vlan batch 2 3 10
 [SW1]interface Ethernet 0/0/2
 [SW1-Ethernet0/0/2]port link-type hybrid
@@ -280,7 +281,7 @@ SW1 的`E0/0/2`接口，只允许通过 VLAN 2，PC1 又需要访问 VLAN 10，�
 
 ```
 SW2 的`E0/0/1`接口配置和 SW1 的 E0/0/1 接口同理。SW2 的`E0/0/10`接口，只允许通过 VLAN 10，Server1 又需要放通 VLAN 2 和 VLAN 3 的流量，因此配置`Hybrid`的 PVID 为 VLAN 10，同时放通 VLAN 2、VLAN 3 和 VLAN 10。SW2 上的配置如下：
-```
+```shell
 [SW2]vlan batch 2 3 10
 [SW2]interface Ethernet 0/0/1
 [SW2-Ethernet0/0/1]port link-type hybrid
@@ -327,3 +328,112 @@ VID  Status  Property      MAC-LRN Statistics Description
 --------------------------------------------------------------------------------
 10   enable  default       enable  disable    VLAN 0010   
 ```
+### 单臂路由实验
+#### 实验拓扑图
+
+![](VLAN详解/dot1q-1.png)
+
+#### 实验要求
+PC1 能 ping 通 PC5
+
+#### 实验步骤
+1. 根据接口 IP 地址表，配置路由器的子接口 IP 地址。
+```shell
+[RT]interface GigabitEthernet 0/0/1.10
+[RT-GigabitEthernet0/0/1.10]dot1q ?
+  termination  Termination
+[RT-GigabitEthernet0/0/1.10]dot1q termination ?
+  vid  Configure PE VLAN ID
+[RT-GigabitEthernet0/0/1.10]dot1q termination vid 10
+[RT-GigabitEthernet0/0/1.10]ip address 192.168.10.254 24
+[RT-GigabitEthernet0/0/1.10]arp ?
+  broadcast  ARP broadcast enable
+  learning   ARP learning
+[RT-GigabitEthernet0/0/1.10]arp broadcast ?
+  enable  Enable ARP broadcast function
+[RT-GigabitEthernet0/0/1.10]arp broadcast enable 
+[RT-GigabitEthernet0/0/1.10]quit
+[RT]interface GigabitEthernet 0/0/1.20
+[RT-GigabitEthernet0/0/1.20]dot1q termination vid 20
+[RT-GigabitEthernet0/0/1.20]ip address 192.168.20.254 24
+[RT-GigabitEthernet0/0/1.20]arp broadcast enable 
+[RT-GigabitEthernet0/0/1.20]quit 
+```
+* 命令`interface interface-type interface-number.sub-interface number`创建子接口。子接口编号范围是`1~4096`，与 VLAN ID 保持一致。
+* 命令`dot1q termination vid`配置 802.1Q 封装并指定端口的 PVID，确保路由器子接口与对端的交换机端口封装模式一致。
+* 命令`arp broadcast enable`启动子接口的 ARP 广播功能。默认状态下，ARP 广播功能是禁用的，收到 ARP 广播帧会直接丢弃。
+
+```shell
+[RT]display ip interface brief 
+*down: administratively down
+^down: standby
+(l): loopback
+(s): spoofing
+The number of interface that is UP in Physical is 4
+The number of interface that is DOWN in Physical is 2
+The number of interface that is UP in Protocol is 3
+The number of interface that is DOWN in Protocol is 3
+
+Interface                         IP Address/Mask      Physical   Protocol  
+GigabitEthernet0/0/0              unassigned           down       down      
+GigabitEthernet0/0/1              unassigned           up         down      
+GigabitEthernet0/0/1.10           192.168.10.254/24    up         up        
+GigabitEthernet0/0/1.20           192.168.20.254/24    up         up        
+GigabitEthernet0/0/2              unassigned           down       down      
+NULL0                             unassigned           up         up(s)
+```
+```shell
+[RT]display ip routing-table 
+Route Flags: R - relay, D - download to fib
+------------------------------------------------------------------------------
+Routing Tables: Public
+         Destinations : 10       Routes : 10       
+
+Destination/Mask    Proto   Pre  Cost      Flags NextHop         Interface
+
+      127.0.0.0/8   Direct  0    0           D   127.0.0.1       InLoopBack0
+      127.0.0.1/32  Direct  0    0           D   127.0.0.1       InLoopBack0
+127.255.255.255/32  Direct  0    0           D   127.0.0.1       InLoopBack0
+   192.168.10.0/24  Direct  0    0           D   192.168.10.254  GigabitEthernet0/0/1.10
+ 192.168.10.254/32  Direct  0    0           D   127.0.0.1       GigabitEthernet0/0/1.10
+ 192.168.10.255/32  Direct  0    0           D   127.0.0.1       GigabitEthernet0/0/1.10
+   192.168.20.0/24  Direct  0    0           D   192.168.20.254  GigabitEthernet0/0/1.20
+ 192.168.20.254/32  Direct  0    0           D   127.0.0.1       GigabitEthernet0/0/1.20
+ 192.168.20.255/32  Direct  0    0           D   127.0.0.1       GigabitEthernet0/0/1.20
+255.255.255.255/32  Direct  0    0           D   127.0.0.1       InLoopBack0
+```
+2. 根据 VLAN 划分表，配置 SW 连接路由器端口的 VLAN。
+```shell
+[SW]interface GigabitEthernet 0/0/1
+[SW-GigabitEthernet0/0/1]port link-type trunk 
+[SW-GigabitEthernet0/0/1]port trunk allow-pass vlan 10 20
+[SW-GigabitEthernet0/0/1]quit 
+[SW]display vlan
+The total number of vlans is : 3
+--------------------------------------------------------------------------------
+U: Up;         D: Down;         TG: Tagged;         UT: Untagged;
+MP: Vlan-mapping;               ST: Vlan-stacking;
+#: ProtocolTransparent-vlan;    *: Management-vlan;
+--------------------------------------------------------------------------------
+
+VID  Type    Ports                                                          
+--------------------------------------------------------------------------------
+1    common  UT:GE0/0/1(U)      GE0/0/2(D)      GE0/0/3(D)      GE0/0/4(D)      
+                GE0/0/5(D)      GE0/0/6(D)      GE0/0/7(D)      GE0/0/8(D)      
+                GE0/0/9(D)      GE0/0/10(D)     GE0/0/11(D)     GE0/0/12(D)     
+                GE0/0/13(D)     GE0/0/14(D)     GE0/0/15(D)     GE0/0/16(D)     
+                GE0/0/17(D)     GE0/0/18(D)     GE0/0/19(D)     GE0/0/20(D)     
+                GE0/0/21(D)     GE0/0/22(D)     GE0/0/23(D)     GE0/0/24(D)     
+
+10   common  TG:GE0/0/1(U)                                                      
+20   common  TG:GE0/0/1(U)                                                      
+
+VID  Status  Property      MAC-LRN Statistics Description      
+--------------------------------------------------------------------------------
+1    enable  default       enable  disable    VLAN 0001                         
+10   enable  default       enable  disable    VLAN 0010                         
+20   enable  default       enable  disable    VLAN 0020   
+```
+3. 测试：`PC1 ping PC5`成功，通过路由器的子接口实现 VLAN 间路由。
+
+![](VLAN详解/dot1q-2.png)
