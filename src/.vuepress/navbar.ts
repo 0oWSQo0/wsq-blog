@@ -45,10 +45,11 @@ export default navbar([
   },
   {
     text: '计算机基础',
-    icon: 'devicon:centos',
+    icon: 'devicon:windows11',
     prefix: '/computer/',
     children: [
-      { text: '网络', link: '/network/', icon: 'devicon:network' }
+      { text: '网络', link: '/network/', icon: 'devicon:networkx' },
+      { text: '其他', link: '/computer/', icon: 'devicon:haskell' },
     ]
   }
   // {

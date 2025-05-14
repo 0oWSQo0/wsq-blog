@@ -1,9 +1,9 @@
 ---
 title: ARP详解
-date: 2025-01-20
+date: 2025-01-15
 tags: network
 categories: 计算机网络
-order: 6
+order: 4
 ---
 
 从网络分层上看，我们知道二层网络中，使用 MAC 地址进行传输，MAC 地址做为数据链路层的设备标识符。

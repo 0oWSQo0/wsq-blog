@@ -1,9 +1,9 @@
 ---
 title: DNS详解
-date: 2025-01-15
+date: 2025-02-15
 tags: network
 categories: 计算机网络
-order: 5
+order: 10
 ---
 
 我们平时在访问网站时，不使用 IP 地址，而是网站域名。但是抓包发现：交互报文是以 IP 地址进行的。那么 IP 地址是从哪来的呢？这是因为 DNS 把网站域名自动转换为 IP 地址。

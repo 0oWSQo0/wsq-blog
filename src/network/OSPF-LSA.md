@@ -1,9 +1,9 @@
 ---
 title: OSPF-LSA
-date: 2025-02-25
+date: 2025-05-10
 tags: network
 categories: 计算机网络
-order: 15
+order: 27
 ---
 
 

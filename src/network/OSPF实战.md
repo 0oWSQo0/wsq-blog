@@ -1,9 +1,9 @@
 ---
 title: OSPF实战
-date: 2025-03-05
+date: 2025-05-20
 tags: network
 categories: 计算机网络
-order: 17
+order: 29
 ---
 
 
@@ -41,7 +41,7 @@ order: 17
 ```
 举个栗子：`network 192.168.1.0 0.0.0.255`，IP 地址是`192.168.1.0`，通配符掩码是`0.0.0.255`。通配符掩码中，比特位为 0 的需要匹配，比特位为 1 的不需要匹配。命令中匹配的 IP 地址是`192.168.1.0`至`192.168.1.255`。
 
-[](OSPF实战/1.png)
+![](OSPF实战/1.png)
 
 计算方法是，把`192.168.1.0`用二进制表示，把通配符掩码`0.0.0.255`也换算成二进制，每个比特位对应。前 24 位全为 0，后 8 位全为 1。匹配的 IP 地址，以`192.168.1`开头，后面是 0 至 255 的任意值。接口 IP 地址在这个范围内，且 IP 地址掩码长度大于或等于`network`命令的 0 比特位数，就在接口上激活 OSPF。
 
@@ -58,7 +58,7 @@ order: 17
 ```
 ## OSPF 单区域实验
 
-[](OSPF实战/2.png)
+![](OSPF实战/2.png)
 
 路由器 RT1 的两个接口分别连接`172.16.1.0/24`和`172.16.2.0/24`网段，另一个接口连接路由器 RT2。RT2 创建`Loopback`接口，配置 IP 地址`172.16.255.2/24`，模拟 RT2 的直连网段。在 RT1 和 RT2 上运行 OSPF，让 PC 可以访问全部网段。
 
@@ -94,7 +94,7 @@ RT2 配置：
 [RT2]ospf 1 router-id 2.2.2.2
 [RT2-ospf-1]area 0
 [RT2-ospf-1-area-0.0.0.0]network 172.16.12.0 0.0.0.3
-[RT2-ospf-1-area-0.0.0.]network 172.16.255.0 0.0.0.255
+[RT2-ospf-1-area-0.0.0.0]network 172.16.255.0 0.0.0.255
 ```
 配置完成后，RT1 和 RT2 建立邻接关系，交换 LSA。查看 RT1 的邻居表：
 ```shell
@@ -255,8 +255,7 @@ OSPF routing table status : <Active>
 
 Destination/Mask    Proto   Pre  Cost      Flags NextHop         Interface
 
-   172.16.255.0/24  OSPF    10   1           D   172.16.12.2     GigabitEthernet
-0/0/2
+   172.16.255.0/24  OSPF    10   1           D   172.16.12.2     GigabitEthernet0/0/2
 
 OSPF routing table status : <Inactive>
          Destinations : 0        Routes : 0
@@ -274,16 +273,14 @@ OSPF routing table status : <Active>
 
 Destination/Mask    Proto   Pre  Cost      Flags NextHop         Interface
 
-     172.16.1.0/24  OSPF    10   2           D   172.16.12.1     GigabitEthernet
-0/0/2
-     172.16.2.0/24  OSPF    10   2           D   172.16.12.1     GigabitEthernet
-0/0/2
+     172.16.1.0/24  OSPF    10   2           D   172.16.12.1     GigabitEthernet0/0/2
+     172.16.2.0/24  OSPF    10   2           D   172.16.12.1     GigabitEthernet0/0/2
 
 OSPF routing table status : <Inactive>
          Destinations : 0        Routes : 0
 ```
 ## Silent-Interface
-[](OSPF实战/8.png)
+![](OSPF实战/8.png)
 
 上个实验的拓扑图中，RT1 的`GE0/0/0`和`GE0/0/1`接口连接终端网段，只有终端 PC，没有 OSPF 路由器。然而，接口已经激活了 OSPF，会周期性的发送`Hello`报文，但是 PC 无法识别、也不需要识别`Hello`报文。这时，可以把 RT1 的`GE0/0/0`和`GE0/0/1`配置成静默接口（`Silent-Interface`），接口就会禁止收发`Hello`报文。
 
@@ -350,7 +347,7 @@ RT1 的配置：
 ```
 ## OSPF 多区域实验
 
-[](OSPF实战/10.png)
+![](OSPF实战/10.png)
 
 RT1 和 RT2 是两台汇聚交换机，各自下挂两个终端网段，同时上连核心交换机 RT3。在三台路由器上部署 OSPF，使用多区域 OSPF 的设计，实现全网各个网段的数据互通。
 
@@ -451,14 +448,10 @@ OSPF routing table status : <Active>
 
 Destination/Mask    Proto   Pre  Cost      Flags NextHop         Interface
 
-     172.16.1.0/24  OSPF    10   2           D   172.16.0.1      GigabitEthernet
-0/0/1
-     172.16.2.0/24  OSPF    10   2           D   172.16.0.1      GigabitEthernet
-0/0/1
-     172.16.9.0/24  OSPF    10   2           D   172.16.0.5      GigabitEthernet
-0/0/2
-    172.16.10.0/24  OSPF    10   2           D   172.16.0.5      GigabitEthernet
-0/0/2
+     172.16.1.0/24  OSPF    10   2           D   172.16.0.1      GigabitEthernet0/0/1
+     172.16.2.0/24  OSPF    10   2           D   172.16.0.1      GigabitEthernet0/0/1
+     172.16.9.0/24  OSPF    10   2           D   172.16.0.5      GigabitEthernet0/0/2
+    172.16.10.0/24  OSPF    10   2           D   172.16.0.5      GigabitEthernet0/0/2
 
 OSPF routing table status : <Inactive>
          Destinations : 0        Routes : 0
@@ -522,7 +515,7 @@ OSPF routing table status : <Inactive>
 ```
 ## OSPF Cost 值
 
-[](OSPF实战/14.png)
+![](OSPF实战/14.png)
 
 R1 和 R2 连接到相同的一个网段：`192.168.100.0/24`，同时下连 R3。R1、R2、R3 都激活 OSPF，在相同的`Area`中，接口的`Cost`又是默认值，这时 R3 的路由表中，到达`192.168.100.0/24`会有两条等价路由：
 ```shell
@@ -585,7 +578,7 @@ OSPF routing table status : <Inactive>
 ```
 配置生效。
 ## OSPF 特殊区域
-[](OSPF实战/18.png)
+![](OSPF实战/18.png)
 
 R1、R2、R3 运行 OSPF，R3 把自己的静态路由引入 OSPF，让域内的路由器学习到外部路由。
 ### 1、基本配置
@@ -748,7 +741,7 @@ OSPF routing table status : <Inactive>
 R1 路由表只有一条`0.0.0.0/0`的默认路由，极大简化了路由表。同时，R1 的 LSDB 也非常简洁。
 ### 4、Area1 配置为 NSSA
 
-[](OSPF实战/25.png)
+![](OSPF实战/25.png)
 
 网络发生变化，`Area1`的 R1 连着一个外部路由，需要引入 OSPF，让域内路由器获得外部路由，但又希望保持`Stub`区域特性，那么可以把`Area1`配置为 NSSA。在上个实验的基础上，R1 配置：
 ```bash
@@ -873,11 +866,11 @@ OSPF routing table status : <Inactive>
 ```
 R1 的 LSDB 中，只有`Type-1、Type-2、Type-7 LSA`和一条描述的默认路由`Type-3 LSA`。当 NSSA 内同时存在`Type-3 LSA`和`Type-7 LSA`描述的默认路由时，路由器优先使用`Type-3 LSA`的默认路由，忽略`Type-7 LSA`的默认路由。
 ## Virtual Link
-[](OSPF实战/31.png)
+![](OSPF实战/31.png)
 
 R1、R2、R3 运行 OSPF，规划两个区域`Area0`和`Area23`。R3 有两条路由到达`192.168.2.0/24`网段，因为 R3 不能使用非 0 区域的`Type-3 LSA`来计算区域间路由，因此无论路径的`Cost`如何，R3 都会选择 R1 到达目的网段。查看 R3 的 OSPF 路由表：
 
-[](OSPF实战/32.png)
+![](OSPF实战/32.png)
 
 如果向让 R3 从 R2 到达`192.168.2.0/24`，即使用高带宽链路转发，一个简单的方法是，在 R2 和 R3 之间跨越`Area23`建立一条`Virtual Link`，通过这条`Virtual Link`，R2 直接把`Type-1 LSA`发送给 R3。
 
@@ -895,16 +888,16 @@ R3 配置如下：
 ```
 配置完成后，R2 和 R3 建立一条`Virtual Link`，`Virtual Link`穿过`Area23`，在 R3 查看`Virtual Link`信息：
 
-[](OSPF实战/33.png)
+![](OSPF实战/33.png)
 
 `Virtual Link`建立完成后，状态为`Full`，Cost 为 1，再看下 R3 的 OSPF 路由表：
 
-[](OSPF实战/34.png)
+![](OSPF实战/34.png)
 
 `192.168.2.0/24`路由的下一跳变成了`192.168.23.2`，说明到达这个网段的下一跳切换到了 R2，达到预期目标。
 
 ## OSPF 报文认证
-[](OSPF实战/35.png)
+![](OSPF实战/35.png)
 
 OSPF 支持两种报文认证方式：区域认证和接口认证。R1、R2、R3、R4 运行 OSPF，`Area0` 开启区域认证，MD5 的验证方式，密码为`123456`。R3 和 R4 之间开启 OSPF 接口认证，使用明文的认证方式，密码为 `654321`。R1、R2、R3 的区域认证配置如下：
 ```shell

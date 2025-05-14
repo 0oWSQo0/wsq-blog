@@ -37,5 +37,5 @@ export default sidebar({
   '/linux/Bash': 'structure',
   '/sql/mysql': 'structure',
   '/sql/redis': 'structure',
-  '/computer/其它': 'structure'
+  '/computer': 'structure'
 });

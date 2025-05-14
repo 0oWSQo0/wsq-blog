@@ -1,9 +1,9 @@
 ---
 title: IPv6详解
-date: 2025-01-25
+date: 2025-02-10
 tags: network
 categories: 计算机网络
-order: 7
+order: 9
 ---
 
 

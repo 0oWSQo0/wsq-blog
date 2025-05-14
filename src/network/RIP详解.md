@@ -1,9 +1,9 @@
 ---
 title: RIP详解
-date: 2025-02-05
+date: 2025-04-30
 tags: network
 categories: 计算机网络
-order: 10
+order: 25
 ---
 
 路由信息协议 RIP（`Routing Information Protocol`）是一种基于距离矢量（`Distance-Vector`）算法的协议，使用跳数作为度量来衡量到达目的网络的距离。
@@ -282,14 +282,12 @@ R1 和 R2 两台路由器运行了 RIP，开始交互 RIP 路由。R1 将`1.0.0.
 ![](RIP详解/rip-23.png)
 
 触发更新是指当路由信息发生变化时，立即向邻居设备发送触发更新报文。从而加速了网络收敛。
-## 毒性路由
+### 毒性路由
 度量值为 16 跳的路由是不可达的，当一个网络变为不可达时，路由器立即发送一个 16 跳的路由更新，通知网络中的路由器目的网络已经不可达，这种路由叫做毒性路由。
 
 ![](RIP详解/rip-24.png)
 
 R1 的直连网段`1.0.0.0/8`变为不可达后，R1 立即发送`Response`报文通告这个更新，报文里的`1.0.0.0/8`路由度量值设置为 16。R2 收到这个`Response`报文后，发现`1.0.0.0/8`不可达了，于是从路由表中移除这条路由。其中，R2 虽然将路由从路由表中删除，但是依然保存在 RIP 数据库中，同时启动垃圾回收计时器。
-
-
 
 ## RIP配置
 ### RIP基本配置
@@ -380,3 +378,15 @@ RT1 配置：
 * `network 192.168.1.0`：`network`命令用于网段的激活。
 * `network 172.16.0.0`：需要注意的是`network`命令指定的必须是主类网络地址，而不是子网地址。如果使用`network 172.16.1.0`命令，那么系统会报错，因为`172.16.1.0`是一个子网地址，而不是主类地址。
 
+### RIP 手工路由汇总
+```shell
+[RT2]interface GigabitEthernet 0/0/0
+[RT2-GigabitEthernet0/0/0]rip summary-address 172.16.0.0 255.255.0.0
+```
+### 配置路由认证
+```shell
+[RT2]interface GigabitEthernet 0/0/0
+[RT2-GigabitEthernet0/0/0]rip authentication-mode md5 usual 123456
+# 第二种方式
+[RT2-GigabitEthernet0/0/0]rip authentication-mode simple 123456
+```

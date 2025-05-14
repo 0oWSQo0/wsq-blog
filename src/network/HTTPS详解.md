@@ -1,4 +1,10 @@
-
+---
+title: HTTPS详解
+date: 2025-03-15
+tags: network
+categories: 计算机网络
+order: 16
+---
 
 
 # HTTP 与 HTTPS
@@ -49,8 +55,6 @@ TLS 的握手过程，如下图：
 
 ## TLS 第一次握手
 客户端首先会发一个`Client Hello`消息，字面意思我们也能理解到，这是跟服务器「打招呼」。
-
-![](HTTPS详解/5.png)
 
 消息里面有客户端使用的 TLS 版本号、支持的密码套件列表，以及生成的随机数（`Client Random`），这个随机数会被服务端保留，它是生成对称加密密钥的材料之一。
 ## TLS 第二次握手

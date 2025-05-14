@@ -1,9 +1,9 @@
 ---
 title: OSPF特性
-date: 2025-03-01
+date: 2025-05-15
 tags: network
 categories: 计算机网络
-order: 16
+order: 28
 ---
 
 

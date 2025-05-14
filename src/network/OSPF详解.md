@@ -1,9 +1,9 @@
 ---
 title: OSPF详解
-date: 2025-02-20
+date: 2025-05-05
 tags: network
 categories: 计算机网络
-order: 14
+order: 26
 ---
 
 
