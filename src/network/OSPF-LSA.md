@@ -33,7 +33,7 @@ OSPF 是链路状态协议，路由器彼此之间通过发送 LSA(`LinkState Ad
 ## LSA头部
 除`Hello`报文外，其他的 OSPF 报文都携带 LSA 头部信息。虽然 LSA 有多种类型，但是这些 LSA 使用相同的 LSA 头部。
 
-[LSA 头部报文位置](OSPF-LSA/lsa-header-1.png)
+![LSA 头部报文位置](OSPF-LSA/lsa-header-1.png)
 
 LSA 头部一共 20 字节。
 
@@ -51,7 +51,7 @@ LSA 头部信息字段含义：
 
 每个 LSA 头部的链路状态类型、链路状态 ID、通告路由器这三个字段唯一标识一个 LSA。如果出现三个字段都相同的多条 LSA，还可以根据链路状态老化时间、链路状态序列号、校验和字段来判断 LSA 的新旧。
 ## LSA 详解
-[LSA](OSPF-LSA/lsa-detail.png)
+![LSA](OSPF-LSA/lsa-detail.png)
 
 图中网络部署了 OSPF，R1、R2、R3 都连接在一台二层交换机上，三台路由器的`G0/0`接口都激活了 OSPF，并且都属于`Area0`。通过设置，R3 的 `G0/0` 接口成为 DR。R1 的`G0/1`连接的网段和 R2 的`G0/1`连接网段也激活了 OSPF，也属于`Area0`。R3 和 R4 使用`Serial1/0`接口连接，接口采用 PPP 封装，激活了 OSPF，且属于`Area1`。R4 还连接着外部网络，连接的接口没激活 OSPF，并将外部路由引入到了 OSPF 域。R1 的`Router-ID`是`1.1.1.1`，R2 的`Router-ID`是`2.2.2.2`，R3 的`Router-ID`是`3.3.3.3`，R4 的`Router-ID`是`4.4.4.4`。
 
@@ -64,7 +64,7 @@ LSA 头部信息字段含义：
 ### Type-1 LSA
 每一台运行 OSPF 的路由器都会生成 `Type-1 LSA`，这个 LSA 描述了路由器的直连接口状态和接口`Cost`，同一个区域的接口共用一个`Type-1 LSA`描述。当路由器的多个接口属于不同区域，就分别为每个区域单独生成一个`Type-1 LSA`，LSA 只描述各种区域的接口信息。
 
-[Type-1 LSA](OSPF-LSA/type-1-lsa-1.png)
+![Type-1 LSA](OSPF-LSA/type-1-lsa-1.png)
 
 在`Type-1 LSA`中，LSA 头部的链路状态类型字段值为 1，链路状态 ID 字段值是生成`Type-1 LSA`的路由器的`Router-ID`。
 
@@ -82,7 +82,7 @@ B 位（`Border Bit`）：如果值为 1，表示路由器是两个区域的边�
 |------|--------------|--------------|------------------|
 | 1    | 点对点连接到另一台路由器 | 邻居的Router-ID | 生成LSA的路由器的接口IP地址 |
 | 2    | 连接到一个传输网络    | DR的接口IP地址    | 生成LSA的路由器的接口IP地址 |
-| 3    | 连接到一个传输网络    | 网络IP地址       | 网络掩码             |
+| 3    | 连接到一个末梢网络    | 网络IP地址       | 网络掩码             |
 | 4    | 虚链路          | 邻居的Router-ID | 生成LSA的路由器的接口IP地址 |
 
 链路 ID（`Link ID`）：`Link`的标识，不同的链路类型，链路 ID 的定义也不同。
@@ -91,7 +91,7 @@ B 位（`Border Bit`）：如果值为 1，表示路由器是两个区域的边�
 
 度量值（`Metric`）：`Cost`值。由于 TOS 和 TOS 度量值在 RFC2328 中不再支持，保留仅仅只是为了兼容早期的 OSPF 版本，可以忽略和 TOS 相关的字段。
 
-[](OSPF-LSA/type-1-lsa-2.png)
+![](OSPF-LSA/type-1-lsa-2.png)
 
 以 R1 为例，`G0/0`和`G0/1`都激活了 OSPF，都接入了`Area0`，因此路由器会生成一个`Type-1 LSA`，描述两个接口的状况，并在`Area0`内泛洪。R1 的`G0/1`是一个以太网接口，且没有建立 OSPF 邻接关系，这个接口的`Link`内容是：
 * `Link Type = 3`，表示连接到一个末梢网络
@@ -107,7 +107,7 @@ R1 的`G0/0`和 R3 建立了邻接关系，接口的关键信息是：
 
 R1 生成的这个`Type-1 LSA`包含两个`Link`，在整个`Area0`内泛洪。
 
-[](OSPF-LSA/type-1-lsa-3.png)
+![](OSPF-LSA/type-1-lsa-3.png)
 
 R3 的情况比较特殊，两个接口分别连接两个区域，`G0/0`连接的`Area0`，`Serial1/0`连接的`Area1`，显然是一台 ABR。R3 会生成两个`Type-1 LSA`，一个在`Area0`内泛洪，描述的是`G0/0`接口信息，包含一个描述`G0/0`接口的`Link`：
 * `Link Type = 2`，表示连接到一个传输网络
@@ -138,20 +138,20 @@ R3 生成的另一个`Type-1 LSA`，在`Area1`内泛洪，描述的是接口`Ser
 
 在 MA 网络中，OSPF 会选举 DR 和 BDR，所有`DRother`路由器只能和 DR 及 BDR 建立邻接关系，`DRother`路由器之间不会建立`Full`的 OSPF 邻接关系。在 MA 网络中，DR 会生成`Type-2 LSA`，在区域内泛洪`Type-2 LSA`，列出 MA 网络中所有路由器的`Router-ID`，包括 DR 本身，和这个网络的掩码。
 
-[](OSPF-LSA/type-2-lsa-1.png)
+![](OSPF-LSA/type-2-lsa-1.png)
 
 在`Type-2 LSA`中，LSA 头部的 链路状态类型 字段值为 2，链路状态 ID 字段值是生成`Type-2 LSA`的路由器的`Router-ID`。
 
 网络掩码（`Network Mask`）：这个 MA 网络的网络掩码。
 相连的路由器的`Router-ID`：连接到这个 MA 网络的路由器的`Router-ID`。和 DR 建立邻接关系的邻居`Router-ID`，以及 DR 自己的`Router-ID`。如果有多台路由器接入 MA 网络，就使用多个字段描述。
 
-[](OSPF-LSA/type-2-lsa-2.png)
+![](OSPF-LSA/type-2-lsa-2.png)
 
 R1、R2、R3 路由器的`G0/0`接口都接入到同一台二层交换机，另外这三个接口处于同一个 MA 网络，会选举 DR 和 BDR，由于人为把 R3 的`G0/0`接口的 DR 优先级调高，因此 R3 成为这个 MA 网络的 DR。这样，R3 会在`Area0`内泛洪一个`Type-2 LSA`，这个 LSA 中包含 R1、R2、R3 三台路由器的`Router-ID`，以及这个 MA 网络的掩码：`255.255.255.0`。`Area1`内没有 MA 网络，因此不存在`Type-2 LSA`。
 
 经过`Type-1`、`Type-2 LSA`在区域内泛洪，OSPF 能够描绘出一个区域内的完整拓扑，包括设备每个接口的`Cost`，并发现各个网段的信息，也就是网络地址和网络掩码。这个区域内的所有路由器的 LSDB 是完全一致的，这样路由器才能准确计算出到达区域各个网段的路由。经过`Type-1`、`Type-2 LSA`泛洪和计算得出的路由，叫做区域内部路由（`Intra-Area Route`）。
 
-[](OSPF-LSA/type-2-lsa-3.png)
+![](OSPF-LSA/type-2-lsa-3.png)
 
 R3 是一台 ABR，两个接口分别连接`Area0`和`Area1`，分别维护这两个区域的 LSDB。然后，R3 以自己为根，运行 SPF 算法，获得到达各个网段的最短路径。
 
@@ -161,13 +161,13 @@ R3 是一台 ABR，两个接口分别连接`Area0`和`Area1`，分别维护这�
 
 `Type-3 LSA`是 ABR 生成的，用来解决区域之间的路由传递问题。由于 ABR 同时连接着非骨干区域和骨干区域`Area0`，它会分别维护不同区域的 LSDB，并且计算出直连区域的区域内部路由，它向某个区域发送`Type-3 LSA`，是向这个区域通告到达其它区域的区域间路由。
 
-[](OSPF-LSA/type-3-lsa-1.png)
+![](OSPF-LSA/type-3-lsa-1.png)
 
 在`Type-3 LSA`中，LSA 头部的链路状态 ID 字段值是区域间路由的目的网络地址。
 网络掩码（`Netmask`）：区域间路由的目的网络掩码。
 度量值（`Metric`）：路由的`Cost`。
 
-[](OSPF-LSA/type-3-lsa-2.png)
+![](OSPF-LSA/type-3-lsa-2.png)
 
 R3 已经知道了`Area0`和`Area1`内各个网段的区域内部路由，现在为这些区域内的路由生成`Type-3 LSA`，并通告到另一个区域中。R3 把描述了到达`Area1`内`192.168.34.0/24`网段的路由的`Type-3`通告给`Area0`。这个`Type-3 LSA`中：
 * 链路状态 ID 是目的网络地址`192.168.34.0`，
@@ -177,11 +177,11 @@ R3 已经知道了`Area0`和`Area1`内各个网段的区域内部路由，现在
 
 收到`Type-3 LSA`后，R1 和 R2 就有到达`192.168.34.0/24`网段的区域间路由，并且路由的`Cost`是 49，即 48 + 1，其中 1 是它们`G0/0`接口的`Cost`，也就是它们到达目的网段的`Cost`。
 
-[](OSPF-LSA/type-3-lsa-3.png)
+![](OSPF-LSA/type-3-lsa-3.png)
 
 另外，R3 也会把描述到达`Area0`内三个网段的路由的`Type-3 LSA`通告到`Area1`。这样，R4 就能够学习到这三条区域间路由。
 
-[](OSPF-LSA/type-3-lsa-4.png)
+![](OSPF-LSA/type-3-lsa-4.png)
 
 假如新增路由器 R5，R5 分别和 R1、R2 直连，直连网段分别是`192.168.1.0/24`、`192.168.2.0/24`，接口都在`Area2`中，其它内容不变。
 
@@ -202,18 +202,18 @@ R3 已经知道了`Area0`和`Area1`内各个网段的区域内部路由，现在
 ### Type-4 LSA
 通过`Type-1`、`Type-2 LSA`，路由器能够知道区域内部网络拓扑，并发现区域内的网段信息，单个区域内的路由计算没有问题。通过`Type-3 LSA`的泛洪，实现区域间的路由传递。这样，`Type-1`、`Type-2`和`Type-3 LSA`这三类 LSA 解决了 OSPF 域内的路由计算问题。
 
-[](OSPF-LSA/type-4-lsa-1.png)
+![](OSPF-LSA/type-4-lsa-1.png)
 
 然而域外的路由（比如 RIP 路由、静态路由等）如何获得？解决办法就是可以通过 ASBR 把域外的路由引入 OSPF，OSPF 使用`Type-5 LSA`描述这些外部的路由，`Type-5 LSA`能在整个 OSPF 域内泛洪，除了一些特殊的区域，这样所有的路由器都知道这些到达外部的路由，但是只知道到达外部路由还不够，还要知道引入这些外部路由的 ASBR 的位置。与 ASBR 同一个区域的路由器通过`Type-1`、`Type-2 LSA`计算出到达 ASBR 的路由，然而这两种 LSA 只能在自己区域内泛洪，其它区域的路由器不知道如何到达 ASBR。这就需要用到`Type-4 LSA`了。`Type-4 LSA`叫做 ASBR 汇总 LSA（`ASBR Summary LSA`），由 ABR 生成的，它实际上是一条到达 ASBR 的主机路由。
 
-[](OSPF-LSA/type-4-lsa-2.png)
+![](OSPF-LSA/type-4-lsa-2.png)
 
 `Type-4 LSA`的格式和`Type-3 LSA`是一样的。在`Type-4 LSA`中：
 * 链路状态 ID 字段值是 ASBR 的`Router-ID`
 * 网络掩码字段值全是 0
 * 度量值字段值是 ABR 自己到达 ASBR 的`Cost`值。
 
-[](OSPF-LSA/type-4-lsa-3.png)
+![](OSPF-LSA/type-4-lsa-3.png)
 
 R4 作为 ASBR 把外部路由`10.0.0.0/8`引入到 OSPF 域。R4 生成`Type-5 LSA`描述这条外部路由。由于 R3 和 R4 在同一个区域，R3 通过`Area1`内泛洪的`Type-1 LSA`计算出到达 ASBR R4 的最佳路径。一旦在 R4 上执行引入外部路由的命令（`import-route`命令），R4 就会在生成的`Type-1 LSA`中把 E 位值设为 1，宣告自己是 ASBR。然而，`Area0`的 R1 和 R2 通过`Type-5 LSA`只知道`10.0.0.0/8`这个外部网络，但不知道如何到达 ASBR，也就无法进行路由计算。因此，R3 作为和 ASBR 同一个区域的 ABR，会生成`Type-4 LSA`描述这个 ASBR，并在`Area0`内泛洪，这样`Area0`内的 R1 和 R2 才能计算出到达`10.0.0.0/8`的外部路由，并加载到路由表。
 
@@ -221,7 +221,7 @@ R4 作为 ASBR 把外部路由`10.0.0.0/8`引入到 OSPF 域。R4 生成`Type-5 
 ### Type-5 LSA
 当 ASBR 把外部路由引入 OSPF 时，会生成`Type-5 LSA`，用来描述这些外部路由。这种类型的 LSA 一旦生成后，就会在整个 OSPF 域内传播，除了一些特殊区域。`Type-5 LSA`，也就是 AS 外部 LSA（`AS External LSA`）。
 
-[](OSPF-LSA/type-5-lsa-1.png)
+![](OSPF-LSA/type-5-lsa-1.png)
 
 在`Type-5 LSA`中，LSA 头部的 链路状态 ID 字段值是外部路由的目的网络地址。
 
@@ -235,18 +235,18 @@ E 位：用来表示外部路由使用的度量值类型。OSPF 有两种外部�
 
 外部路由标记（`External Route Tag`）：外部路由才能携带的标记，常用于部署路由策略。举个栗子，在 OSPF 域外有两种业务：办公和生产，现在 ASBR 把两种业务的路由都引入 OSPF，描述这些外部路由的`Type-5 LSA`会在整个 OSPF 域内传播。如果需要在域内的某个区域部署路由策略，对办公和生产的路由执行不同的策略，那么先要区分这些路由。如果通过路由的目的网络地址和网络掩码区分，显然是不方便的。而如果在 ASBR 引入这些外部路由是，就分别为生产和办公路由打上相应的标记，那么在域内执行策略的时候，就可以直接对相应的标记进行路由匹配，使得路由策略的部署更加方便。
 
-[](OSPF-LSA/type-5-lsa-2.png)
+![](OSPF-LSA/type-5-lsa-2.png)
 
 在 ASBR 把外部路由引入 OSPF 时，可以指定路由的外部`Cost`值，以及度量值类型，这两个值会写入`Type-5 LSA`的对应字段中。一台路由器收到`Type-5 LSA`后，需要检查引入这条外部路由的 ASBR 是否可达。如果 ASBR 可达，路由器才会使用`Type-5 LSA`进行外部路由计算。另外，不同的外部路由度量值类型，路由的`Cost`值算法是不同的。假如一条`Type-5 LSA`的外部`Cost`为 B，而路由器 X 到达生成这条`Type-5 LSA`的 ASBR 的路由`Cost`为 A，那么当`Type-5 LSA`的度量值类型是`Metric-Type-1`时，X 计算出的这条外部路由的`Cost`等于 A + B，但如果度量值类型为`Metric-Type-2`，那么路由的`Cost`等于 B。
 
 ### Type-7 LSA
 `Type-7 LSA`就是非完全末梢区域外部 LSA（`Not-So-Stubby Area External LSA`）。这是一种特殊的 LSA，也用于描述 OSPF 外部路由，并且报文格式和`Type-5 LSA`一样，但是它的泛洪范围有严格限制：只能在 NSSA（`Not-So-Stubby Area`，非完全末梢区域）内泛洪，并且不能进入`Area0`。
 
-[](OSPF-LSA/type-7-lsa-1.png)
+![](OSPF-LSA/type-7-lsa-1.png)
 
 OSPF 除了常规区域外，还有几种特殊区域类型，NSSA 就是其中之一。NSSA 禁止`Area0`的`Type-5 LSA`进入，让区域内泛洪的 LSA 减少了一点，也减小了 NSSA 中路由器的路由表项，从而减小路由器负担。然而，ABR 为了让 NSSA 内的路由器能够通过骨干区域，访问过滤了的`Type-5 LSA`描述的外部路由，会向 NSSA 发布一条默认路由，使用`Type-7 LSA`描述。另外，NSSA 允许自己区域内的路由器引入少量外部路由，这些外部路由引入后，使用`Type-7 LSA`描述，而且`Type-7 LSA`只能在这个 NSSA 内泛洪，不允许进入`Area0`。NSSA 的 ABR 会将 NSSA 内泛洪的`Type-7 LSA`转换成`Type-5 LSA`，让这些外部路由能够在 OSPF 域内传播。
 
-[](OSPF-LSA/type-7-lsa-2.png)
+![](OSPF-LSA/type-7-lsa-2.png)
 
 `Area1`中泛洪了两条`Type-7 LSA`，其中一条是由 ASBR，即 R4 生成的，用于描述外部路由`10.0.0.0/8`，另一条是由 ABR，即 R3 自动生成的，是一条默认路由，这条默认路由只在`Area1`内传播。
 
@@ -275,7 +275,7 @@ OSPF 是目前使用最广泛的 IGP 之一，能够支持大规模的网络，�
 
 但仅仅这些还不够，当 OSPF 部署在一个大型网络中，实现数据互通的前提是要打通网络中的路由，而将路由信息传递到位只是第一步，还需要考虑如何优化网络、如何进一步减少 LSA 在网络中的泛洪、如何减小路由器路由表的规模。
 
-[](OSPF-LSA/area-1.png)
+![](OSPF-LSA/area-1.png)
 
 这个网络的规模比较大，网络从逻辑上分成三个区块，分别是省公司、地市公司、区县公司，其中地市和区县公司的网络运行 OSPF 协议，在同一个 OSPF 域。整个 OSPF 网络进行了层次化的设计，地市分公司的核心网络部署在`Area0`，而每个区县公司规划在非 0 区域，`CO-SW1`和`CO-SW2`是地市分公司的两台汇聚设备，用于连接地市分公司和下面的区县分公司，这两台设备同时也是 ABR。每个区县公司规划了一个独立的区域，比如区县公司 1 在`Area1`，区县公司 2 在`Area2`，以此类推。地市分公司的出口路由器（`OR-R1`和`OR-R2`）与省公司的 PE 路由器（PE1 和 PE2）对接，通过 BGP 交互路由信息，出口路由器`OR-R1`和`OR-R2`把从省公司学到的 BGP 路由引入 OSPF，让整个 OSPF 域内的路由器能够学到这些外部路由，从而使得访问省公司的数据流量能够顺利的路由到 PE 路由器。
 
@@ -287,19 +287,19 @@ OSPF 设计了多种区域类型，用于满足多种业务需求。
 ### 常规区域（Normal Area）
 所有的 OSPF 区域，默认情况下都是常规区域。当然，`Area0`是常规区域中比较特殊的一个。OSPF 所有的非骨干区域（非 0 常规区域）必须和`Area0`直接相连。常规区域中允许`Type-1`、`Type-2`、`Type-3`、`Type-4` 和`Type-5 LSA`泛洪，禁止`Type-7 LSA`出现在常规区域内。
 
-[](OSPF-LSA/area-2.png)
+![](OSPF-LSA/area-2.png)
 
 `Area1`是一个非 0 常规区域，`CO-SW1`和`CO-SW2`作为这个区域的 ABR，会将`Type-3`、`Type-4`和`Type-5 LSA`都传入`Area1`。
 ### 末梢区域（Stub Area）
 末梢区域也叫做`Stub`区域，当一个非 0 常规区域只有一个出口，比如这个区域只有一个 ABR，这个区域可以配置成 `Stub`区域。当一个区域配置成`Stub`区域后，区域内的 ABR 会阻挡`Type-5 LSA`进入区域，也就是说，禁止外部路由发布到这个区域。通过这种方式可以减少区域内泛洪的 LSA 数量，同时区域内的 ABR 自动下发一条使用`Type-3 LSA`描述的默认路由，让区域内的路由器能够路由到域外，这样既减小了区域内网络设备的路由表规模，又保证了正常的访问外部网络，还降低了设备的资源消耗。另外，ABR 依然会把描述区域间路由的`Type-3 LSA`传输到`Stub`区域中。
 
-[](OSPF-LSA/area-3.png)
+![](OSPF-LSA/area-3.png)
 
 `Area1`配置为`Stub`区域，这样`Area1`的 ABR（即`CO-SW1`和`CO-SW2`）不再把`Type-5 LSA`传播到这个区域。由于`Type-5 LSA`无法进入这个区域，`Type-4 LSA`也没必要在这个区域泛洪，所以`CO-SW1`和`CO-SW2`也不会向区域内传播 `Type-4 LSA`。这样，`Router-X`的路由表不会出现到达省公司（即 OSPF 域外）的具体路由，路由表的规模减小，设备的资源消耗也降低。当然，`Router-X`还是需要访问省公司的，为了让 `Router-X`的发往省公司的路由到达目的地，ABR 会自动向`Area1`导入默认路由，这条默认路由使用`Type-3 LSA`描述，`CO-SW1`和`CO-SW2`都会下发默认路由。`Router-X`发往省公司的流量，通过默认路由，先到达`CO-SW1`或`CO-SW2`，再转发到省公司。
 
 我们还能在`Stub`区域的基础上，进一步进一步减少 LSA 泛洪，即在`Stub`区域的 ABR 上，阻挡描述区域间路由的`Type-3 LSA`进入区域，区域内的路由器通过 ABR 下发的默认路由到达其它区域和域外的网络。这个特殊区域内，只有`Type-1`、`Type-2 LSA`和描述默认路由的`Type-3 LSA`存在，意味区域内路由器的路由表只有到达区域内部的路由，以及指向 ABR 的默认路由，路由器的路由表被极度的精简了。这个特殊的区域，叫做完全末梢网络（`Totally Stub Area`）。
 
-[](OSPF-LSA/area-4.png)
+![](OSPF-LSA/area-4.png)
 
 在`CO-SW1`和`CO-SW2`上，进一步阻挡`Type-3 LSA`进入`Area1`，这样`Router-X`不会学习到`Area1`之外的区域间路由，也学不到到达省公司的外部路由，`Router-X`的路由表会极大程度的简化。当然，`Router-X`可以通过 ABR 下发的默认路由把外出的数据包转发出去。
 ### 非完全末梢区域（Not-So-Stubby Area）
@@ -309,13 +309,13 @@ OSPF 设计了多种区域类型，用于满足多种业务需求。
 
 NSSA（`Not-So-Stubby Area`），也就是非完全末梢区域，可以看成是`Stub`区域的扩展，它有`Stub`区域的特点：阻挡`Type-4`和`Type-5 LSA`进入，减少区域内泛洪的 LSA 数量。同时，允许区域内的路由器把少量外部路由引入 OSPF。引入的外部路由，用`Type-7 LSA`描述，这些`Type-7 LSA`只能在自己的 NSSA 内泛洪，不允许直接进入`Area0`。为了让 OSPF 域内其它区域学习到 NSSA 引入的外部路由，NSSA 的 ABR 会把`Type-7 LSA`转换成`Type-5 LSA`，然后传入`Area0`，从而泛洪到整个 OSPF 域。
 
-[](OSPF-LSA/area-5.png)
+![](OSPF-LSA/area-5.png)
 
 `Area1`配置成 NSSA，这样`Area1`的 ABR 会阻挡`Type-5 LSA`进入区域内。另外，`Router-X`连接到一个静态路由网络，他将路由表中的静态路由引入 OSPF，这些引入的外部路由使用`Type-7 LSA`描述，这些 LSA 在`Area1`内泛洪，并且禁止进入`Area0`。`CO-SW1`和`CO-SW2`作为 NSSA 的 ABR，也能收到`Type-7 LSA`，根据这些 LSA 计算出到达静态路由网络的路由。另外，`CO-SW1`和`CO-SW2`把`Type-7 LSA`转换成`Type-5 LSA`，并把转换后的`Type-5 LSA`传入`Area0`，这样外部路由就可以被整个 OSPF 域中的路由器学习到。同时，`CO-SW1`和`CO-SW2`会向 NSSA 内下发一条`Type-7 LSA`的默认路由，让`Router-X`能够通过这条默认路由到达省公司。
 
 我们还可以在 NSSA 的基础上，进一步减少 LSA 的泛洪。在 NSSA 的 ABR 上，可以进一步把`Type-3 LSA`阻挡掉，从而把区域间的路由都过滤掉，NSSA 的 ABR 会自动下发一条默认路由到区域内，默认路由使用`Type-3 LSA`描述，让区域内的路由器能够通过默认路由访问 OSPF 域内的其它区域，和域外的网络。这种类型的特殊区域也叫做`Totally NSSA`。
 
 ### 各种区域类型允许出现的 LSA
-[](OSPF-LSA/area-6.png)
+![](OSPF-LSA/area-6.png)
 
 

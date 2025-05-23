@@ -7,45 +7,73 @@ order: 31
 ---
 
 ## VRRP
+VRRP(`Virtual Router Redundancy Protocol`，虚拟路由冗余协议) 是一种容错协议，可通过把几台路由设备联合组成一台虚拟的路由设备，然后使用一定的机制保证在下一跳路由设备出现故障时上一跳设备及时将业务切换到备份路由设备，从而保持通信的连续性和可靠性。
 
-![VRRP](网关冗余技术/vrrp-1.png)
+VRRP 将多个路由设备组成一台虚拟路由设备，并在其中指定一台成员路由设备作为主用(`Master`)设备，其他成员设备作为备用(`Backup`)设备，然后为这台虚拟路由器分配一个 IP 地址，作为下游设备的默认网关，当现有网关设备发生故障时，VRRP 机制能够选举新的网关设备承担数据流量，这样就可防止单点故障问题，实现路由设备容错，为上、下游设备保持持续的连通服务。
 
-在上图中，LAN 内有两台路由器，这两台路由器可以通过 VRRP 协议为 LAN 内的 PC 提供冗余网关。R1 的`GE0/0/0`口及 R2 的`GE0/0/0`都连接到了一台二层交换机上， IP 地址分别是`192.168.1.253`及`192.168.1.252`，此刻它们属于一个广播域。
-
-现在我们在 R1 的`GE0/0/0`口及 R2 的`GE0/0/0`口上激活 VRRP，将这两个接口放到一个 VRRP 组中，VRRP 将产生一台虚拟路由器，这台虚拟路由器的 IP 地址为`192.168.1.254`。LAN 内的 PC 将自己的网关都指向这个虚拟路由器的 IP 地址。VRRP 来决定该组中 R1 还是 R2 来响应 PC 发往`192.168.1.254`的数据请求。
-
-当 PC 要访问外网时，首先会发送 ARP 报文去请求网关`192.168.1.254`的 MAC 地址，这时候由 VRRP 的`Master`路由器来回应这个 ARP 请求，同时承担数据转发任务。于此同时 R1 的`GE0/0/0`口仍然在以一定的周期发送 VRRP 报文以便向`Backup`路由器通告自己的存活状态。
-
-![](网关冗余技术/vrrp-2.png)
-
-当`Master`路由器 R1 挂掉时，或者 R1 的上行接口发生故障时，VRRP 都有相应的机制能够检测到，这时 R2 就会从`Backup`状态切换到`Master`状态，并接替 R1 之前的工作。此时 PC 向`192.168.1.254`发送的 ARP 请求，以及上行业务数据转发就由 R2 处理。值得注意的是，整个切换过程 PC 端无需做任何配置变更。
+VRRP 除了最基本的主备备份功能外，还可通过配置多个虚拟备份组，指定不同设备担当主用设备，实现多路由设备之间的负载分担；还可与各种其他对象一起联动，实现更加强大的监视功能。
 
 ### VRRP术语
-* VRRP 路由器：运行 VRRP 的路由器。一台 VRRP 路由器（的接口）可以同时参与到多个 VRRP 组中，在不同的组中，一台 VRRP 路由器可以充当不同的角色。
+* VRRP 路由器：运行 VRRP 的设备，可以是路由器也可以是三层交换机。一台 VRRP 路由器（的接口）可以同时参与到多个 VRRP 组中，在不同的组中，一台 VRRP 路由器可以充当不同的角色。
 * VRRP 组：一个 VRRP 组由多个 VRRP 路由器组成，属于同一 VRRP 组的 VRRP 路由器互相交换信息，每一个 VRRP 组中只能有一个`Master`。同属一个 VRRP 组的路由器（的接口）使用相同的 VRID。同属一个 VRRP 组的路由器之间交互 VRRP 报文，这些路由器必须处于相同的广播域中。
+* VRID：虚拟路由器标识，用来唯一标识一个 VRRP 备份组。
 * 虚拟路由器：对于每一个 VRRP 组，抽象出来的一个逻辑路由器，该路由器充当网络用户的网关，该路由器并非真实存在，事实上对于用户而言，只需知道虚拟路由器的 IP 地址，至于虚拟路由器的角色由谁来承担、数据转发任务由谁来承担、`Master`挂掉之后谁来接替，这是 VRRP 的工作。
 * 虚拟 IP 地址、虚拟 MAC 地址：虚拟 IP 地址是虚拟路由器的 IP 地址，该地址一般就是用户的网关地址。与虚拟 IP 地址对应的 MAC 地址也是虚拟的，该 MAC 地址由固定比特位加上 VRID 构成，当 PC 发送 ARP 报文去请求虚拟 IP 地址对应的 MAC 地址时，`Master`路由器响应这个 ARP 请求并告知虚拟 MAC 地址。
 * `Master`路由器、`Backup`路由器：`Master`路由器就是在 VRRP 组中的主路由器，它是实际转发业务数据包的路由器，在每一个 VRRP 组中，仅有`Master`才会响应对虚拟 IP 地址的 ARP 请求，也只有`Master`才会转发业务数据。
   `Master`路由器以一定的时间间隔发送 VRRP 报文，以便通知`Backup`路由器自己的存活。
   `Backup`路由器是在 VRRP 组中备份状态的路由器，一旦`Master`路由器出现故障，`Backup`路由器就开始接替工作。
-* 选举依据：先比较接口 VRRP 优先级（越大越优先，默认为 100），如果优先级相等则比接口 IP 地址（IP 地址最大的胜出）。
+* 优先级：用来标识虚拟路由器中各成员路由设备的优先级。虚拟路由器根据优先级选举出`Master`设备和`Backup`设备。优先级越大越优先，默认为 100，如果优先级相等则比接口 IP 地址（IP 地址最大的胜出）。
+* 抢占模式：在抢占模式下，如果`Backup`设备的优先级比当前`Master`设备的优先级高，则主动将自己切换成`Master`。
+* 非抢占模式：在非抢占模式下，只要`Master`设备没有出现故障，`Backup`设备即使随后被配置了更高的优先级也不会成为`Master`设备。
 
-![](网关冗余技术/vrrp-3.png)
+![](VRRP详解/vrrp-3.png)
 
 通过 VRRP 形成的虚拟路由器使用虚拟 IP 地址和虚拟 MAC 与网络中的 PC 进行通信。虚拟 MAC 地址的格式如上图所示，其中 MAC 地址的最后 1 个字节填充 VRID，例如 VRID 是 1，虚拟MAC地址为`00-00-5E-00-01-01`。
-## 基础配置
-### 基础实验
-![VRRP](网关冗余技术/vrrp-1.png)
+## VRRP优点
+* 简化网络管理：VRRP 能在当前网关设备出现故障时仍然提供高可靠的缺省链路，且无需修改动态路由协议、路由发现协议等配置信息，可有效避免单一链路发生故障后的网络中断问题。
+* 适应性强：VRRP 报文封装在 IP 报文中，支持各种上层协议。
+* 网络开销小：VRRP 只定义了一种报文，即 VRRP 协议报文，有效减轻了网络设备的额外负担。
 
-如上图所示，R1、R2 及 PC 连接在同一台二层交换机上。R1 及 R2 将在`GE0/0/0`接口上运行 VRRP，实现网关冗余。要求在正常情况下 R1 为`Master`，当 R1 挂掉时，R2 能够成为`Master`。
+## VRRP配置实例
+### VRRP主备备份配置
+#### 实验拓扑
+![](VRRP详解/vrrp-12.png)
+#### 实验要求
+* 正常情况下，PC 以 R1 作为默认网关接入 Internet，当 R1 故障时，R2 接替作为网关，R1 故障恢复后，可以在 20s 内重新成为网关。
+* R1、R2、R3 采用 OSPF 协议进行互连。
+* R1、R2 上配置 VRRP 备份组，R1 配置较高优先级和 20s 抢占延时，作为`Master`设备承担流量转发，R2 配置较低优先级，作为备用路由器，实现网关冗余备份。
+
+#### 实验步骤
+1. 配置各设备接口 IP 地址。（省略）
+2. R1、R2、R3 配置 OSPF
 ```shell
-[R1]interface GigabitEthernet 0/0/0
-[R1-GigabitEthernet0/0/0]ip address 192.168.1.253 24
-[R1-GigabitEthernet0/0/0]vrrp ?
+[R1]ospf 1
+[R1-ospf-1]area 0
+[R1-ospf-1-area-0.0.0.0]network 10.1.1.0 0.0.0.255
+[R1-ospf-1-area-0.0.0.0]network 192.168.1.0 0.0.0.255 
+```
+```shell
+[R2]ospf 1
+[R2-ospf-1]area 0
+[R2-ospf-1-area-0.0.0.0]network 10.1.1.0 0.0.0.255
+[R2-ospf-1-area-0.0.0.0]network 192.168.2.0 0.0.0.255
+```
+```shell
+[R3]ospf 1
+[R3-ospf-1]area 0
+[R3-ospf-1-area-0.0.0.0]network 192.168.1.0 0.0.0.255
+[R3-ospf-1-area-0.0.0.0]network 192.168.2.0 0.0.0.255
+[R3-ospf-1-area-0.0.0.0]network 20.1.1.0 0.0.0.255
+```
+3. 配置 VRRP
+在 R1 上创建 VRRP 备份组 1，配置虚拟路由器 IP 地址，必须与对应的 VRRP 接口 IP 地址在同一网段，并设置 R1 在该备份组中的优先级为 120（优先级值默认为100）、抢占时间为 20s。
+```shell
+[R1]interface GigabitEthernet 0/0/1
+[R1-GigabitEthernet0/0/1]vrrp ?
   arp       Gratuitous arp
   un-check  Uncheck VRRP packet TTL value
   vrid      Specify virtual router identifier
-[R1-GigabitEthernet0/0/0]vrrp vrid 1 ?
+[R1-GigabitEthernet0/0/1]vrrp vrid 1 ?
   authentication-mode  Specify password and authentication mode
   preempt-mode         Specify preempt mode
   priority             Specify priority
@@ -53,10 +81,10 @@ order: 31
   track                Specify the track configuration
   version-3            Specify the device to support V3 for VRRP
   virtual-ip           Specify virtual IP address
-# 接口激活VRRP，加入VRRP组（VRID为1），并且虚拟IP为192.168.1.254
-[R1-GigabitEthernet0/0/0]vrrp vrid 1 virtual-ip 192.168.1.254
+# 接口激活VRRP，加入VRRP组（VRID为1），并且虚拟IP为10.1.1.254
+[R1-GigabitEthernet0/0/1]vrrp vrid 1 virtual-ip 10.1.1.254
 # 该接口在该VRRP组中的优先级为120（优先级值默认为100）
-[R1-GigabitEthernet0/0/0]vrrp vrid 1 priority 120
+[R1-GigabitEthernet0/0/1]vrrp vrid 1 priority 120
 [R1-GigabitEthernet0/0/0]vrrp vrid 1 preempt-mode ?
   disable  Cancel current configuration
   timer    Specify timer
@@ -65,26 +93,24 @@ order: 31
 [R1-GigabitEthernet0/0/0]vrrp vrid 1 preempt-mode timer delay ?
   INTEGER<0-3600>  Value of timer, in seconds(default is 0)
 # 配置虚拟路由器的抢占时间为20s，抢占时间是指当主设备因为故障修复重新切换为主状态时等待的时间
-[R1-GigabitEthernet0/0/0]vrrp vrid 1 preempt-mode timer delay 20
+[R1-GigabitEthernet0/0/1]vrrp vrid 1 preempt-mode timer delay 20
 ```
+在 R2 上创建 VRRP 备份组 1，配置与 R1 上备份组 1 相同的虚拟 IP 地址，并配置其在该备份组中的优先级为缺省值 100。
 ```shell
-[R2]interface GigabitEthernet 0/0/0
-[R2-GigabitEthernet0/0/0]ip address 192.168.1.252 24
-[R2-GigabitEthernet0/0/0]vrrp vrid 1 virtual-ip 192.168.1.254
+[R2]interface GigabitEthernet 0/0/2
+[R2-GigabitEthernet0/0/2]vrrp vrid 1 virtual-ip 10.1.1.254
 ```
-需注意，由于 R1 与 R2 的`GE0/0/0`接口工作在同一个 VRRP 组，因此双方配置的 VRID 必须相同。
-
-完成配置后，在 R1、R2 上进行查看：
+4. 在 R1、R2 上查看 VRRP 状态。
 ```shell
 [R1]display vrrp
-  GigabitEthernet0/0/0 | Virtual Router 1  # VRID
+  GigabitEthernet0/0/1 | Virtual Router 1
     State : Master  # 接口在该VRRP组中的状态
-    Virtual IP : 192.168.1.254
-    Master IP : 192.168.1.253
+    Virtual IP : 10.1.1.254
+    Master IP : 10.1.1.1
     PriorityRun : 120  # 接口在该VRRP组中的优先级
     PriorityConfig : 120
     MasterPriority : 120
-    Preempt : YES   Delay Time : 20 s  # 开启抢占，且接口在该VRRP组中的抢占时间为20s
+    Preempt : YES   Delay Time : 20 s # 开启抢占，且接口在该VRRP组中的抢占时间为20s
     TimerRun : 1 s
     TimerConfig : 1 s
     Auth type : NONE
@@ -92,21 +118,21 @@ order: 31
     Check TTL : YES
     Config type : normal-vrrp
     Backup-forward : disabled
-    Create time : 2025-05-12 11:53:19 UTC-08:00
-    Last change time : 2025-05-12 11:53:23 UTC-08:00
+    Create time : 2025-05-19 18:20:08 UTC-08:00
+    Last change time : 2025-05-19 18:20:11 UTC-08:00 
 
 [R1]display vrrp brief 
 Total:1     Master:1     Backup:0     Non-active:0      
 VRID  State        Interface                Type     Virtual IP     
 ----------------------------------------------------------------
-1     Master       GE0/0/0                  Normal   192.168.1.254 
+1     Master       GE0/0/1                  Normal   10.1.1.254 
 ```
 ```shell
 [R2]display vrrp
-  GigabitEthernet0/0/0 | Virtual Router 1
+  GigabitEthernet0/0/2 | Virtual Router 1
     State : Backup
-    Virtual IP : 192.168.1.254
-    Master IP : 192.168.1.253
+    Virtual IP : 10.1.1.254
+    Master IP : 10.1.1.1
     PriorityRun : 100
     PriorityConfig : 100
     MasterPriority : 120
@@ -118,22 +144,326 @@ VRID  State        Interface                Type     Virtual IP
     Check TTL : YES
     Config type : normal-vrrp
     Backup-forward : disabled
-    Create time : 2025-05-12 11:58:21 UTC-08:00
-    Last change time : 2025-05-12 11:58:21 UTC-08:00
-
+    Create time : 2025-05-19 18:27:01 UTC-08:00
+    Last change time : 2025-05-19 18:27:01 UTC-08:00
+    
 [R2]display vrrp brief 
 Total:1     Master:0     Backup:1     Non-active:0      
 VRID  State        Interface                Type     Virtual IP     
 ----------------------------------------------------------------
-1     Backup       GE0/0/0                  Normal   192.168.1.254  
+1     Backup       GE0/0/2                  Normal   10.1.1.254  
 ```
+5. 在 R1 的`GigabitEthernet0/0/1`上执行`shutdown`，模拟 R1 出现故障，再在 R2 上查看 VRRP 状态，可看到 R2 的状态变为`Master`，表明切换成功。
+```shell
+[R1]interface GigabitEthernet 0/0/1
+[R1-GigabitEthernet0/0/1]shutdown
+```
+```shell
+[R2]display vrrp
+  GigabitEthernet0/0/2 | Virtual Router 1
+    State : Master
+    Virtual IP : 10.1.1.254
+    Master IP : 10.1.1.2
+    PriorityRun : 100
+    PriorityConfig : 100
+    MasterPriority : 100
+    Preempt : YES   Delay Time : 0 s
+    TimerRun : 1 s
+    TimerConfig : 1 s
+    Auth type : NONE
+    Virtual MAC : 0000-5e00-0101
+    Check TTL : YES
+    Config type : normal-vrrp
+    Backup-forward : disabled
+    Create time : 2025-05-19 18:27:01 UTC-08:00
+    Last change time : 2025-05-19 18:33:45 UTC-08:00
+
+[R2]display vrrp brief
+Total:1     Master:1     Backup:0     Non-active:0      
+VRID  State        Interface                Type     Virtual IP     
+----------------------------------------------------------------
+1     Master       GE0/0/2                  Normal   10.1.1.254  
+```
+6. 再在 R1 的`GigabitEthernet0/0/1`上执行`undo shutdown`，等待 20s 后在 R1 上查看 VRRP状态，可看到 R1 又恢复成`Master`。
+```shell
+[R1-GigabitEthernet0/0/1]undo shutdown
+[R1-GigabitEthernet0/0/1]display vrrp
+  GigabitEthernet0/0/1 | Virtual Router 1
+    State : Master
+    Virtual IP : 10.1.1.254
+    Master IP : 10.1.1.1
+    PriorityRun : 120
+    PriorityConfig : 120
+    MasterPriority : 120
+    Preempt : YES   Delay Time : 20 s
+    TimerRun : 1 s
+    TimerConfig : 1 s
+    Auth type : NONE
+    Virtual MAC : 0000-5e00-0101
+    Check TTL : YES
+    Config type : normal-vrrp
+    Backup-forward : disabled
+    Create time : 2025-05-19 18:20:08 UTC-08:00
+    Last change time : 2025-05-19 18:36:16 UTC-08:00 
+```
+通过以上验证，表示配置是正确的。
+### VRRP多网关负载分担配置
+#### 实验拓扑
+![](VRRP详解/vrrp-13.png)
+#### 实验要求
+两台用户主机采用不同的设备作为默认网关实现流量的负载均衡。
+#### 实验步骤
+1. 配置各设备接口 IP 地址。（省略）
+2. R1、R2、R3 配置 OSPF（同主备备份配置）
+3. 配置 VRRP
+在 R1、R2 上分别创建 VRRP 备份组 1，配置虚拟路由器 IP 地址，配置 R1 优先级为 120、抢占延时为 20s；R2 优先级为缺省值 100。使 R1 为`Master`，R2 为`Backup`。（同主备备份配置）
+```shell
+[R1]interface GigabitEthernet 0/0/1
+[R1-GigabitEthernet0/0/1]vrrp vrid 1 virtual-ip 10.1.1.254
+[R1-GigabitEthernet0/0/1]vrrp vrid 1 priority 120
+[R1-GigabitEthernet0/0/1]vrrp vrid 1 preempt-mode timer delay 20
+```
+```shell
+[R2]interface GigabitEthernet 0/0/2
+[R2-GigabitEthernet0/0/2]vrrp vrid 1 virtual-ip 10.1.1.254
+```
+在 R1、R2 上分别创建 VRRP 备份组 2，配置虚拟路由器 IP 地址，配置 R2 优先级为 120、抢占延时为 20s；R1 优先级为缺省值 100。使 R2 为`Master`，R1 为`Backup`。
+```shell
+[R1]interface GigabitEthernet 0/0/1
+[R1-GigabitEthernet0/0/1]vrrp vrid 1 virtual-ip 10.1.1.253
+```
+```shell
+[R2]interface GigabitEthernet 0/0/2
+[R2-GigabitEthernet0/0/2]vrrp vrid 2 virtual-ip 10.1.1.253
+[R2-GigabitEthernet0/0/2]vrrp vrid 2 priority 120
+[R2-GigabitEthernet0/0/2]vrrp vrid 2 preempt-mode timer delay 20
+```
+4. 在 R1、R2 上查看 VRRP 状态。可以看到 R1 在备份组 1 中为`Master`，备份组 2 中为`Backup`；R2 在备份组 1 中为`Backup`，备份组 2 中为`Master`。
+```shell
+[R1]display vrrp brief 
+Total:2     Master:1     Backup:1     Non-active:0      
+VRID  State        Interface                Type     Virtual IP     
+----------------------------------------------------------------
+1     Master       GE0/0/1                  Normal   10.1.1.254     
+2     Backup       GE0/0/1                  Normal   10.1.1.253  
+```
+```shell
+[R2]display vrrp brief 
+Total:2     Master:1     Backup:1     Non-active:0      
+VRID  State        Interface                Type     Virtual IP     
+----------------------------------------------------------------
+1     Backup       GE0/0/2                  Normal   10.1.1.254     
+2     Master       GE0/0/2                  Normal   10.1.1.253 
+```
+5. 在用户主机上`ping 20.1.1.1`可以`ping`通，说明配置正确。
+
+### VRRP与BFD联动配置
+#### 实验拓扑
+
+[//]: # (![]&#40;VRRP详解/vrrp-14.png&#41;)
+#### 实验要求
+* 正常情况下，PC 以 R1 作为默认网关接入 Internet，当 R1 或 R1 到 SW 间链路故障时，主备网关间的切换时间小于 1s。
+
+#### 实验步骤
+1. 配置各设备接口 IP 地址。（省略）
+2. R1、R2、R3 配置 OSPF（同主备备份配置）
+3. 配置 VRRP（同主备备份配置）
+4. 在 R1、R2 上配置静态 BFD 会话，检测备份组之间的链路
+```shell
+# 全局使能 BFD 功能
+[R1]bfd
+[R1-bfd]quit
+# 创建名为atob的BFD会话，绑定对端（R2的VRRP接口IP地址）和出接口（R1的VRRP接口）
+[R1]bfd atob bind peer-ip 10.1.1.2 interface GigabitEthernet 0/0/1
+# 配置本地标识符为1
+[R1-bfd-session-atob]discriminator local 1
+# 配置对端标识符为2
+[R1-bfd-session-atob]discriminator remote 2
+# 配置最大BFD会话报文的接收时间间隔为50ms
+[R1-bfd-session-atob]min-rx-interval 50
+# 配置最大BFD会话报文的发送时间间隔为50ms
+[R1-bfd-session-atob]min-tx-interval 50
+# 提交BFD会话设置
+[R1-bfd-session-atob]commit
+[R1-bfd-session-atob]quit
+```
+```shell
+[R2]bfd
+[R2-bfd]quit
+[R2]bfd btoa bind peer-ip 10.1.1.1 interface GigabitEthernet 0/0/2
+[R2-bfd-session-btoa]discriminator local 2
+[R2-bfd-session-btoa]discriminator remote 1
+[R2-bfd-session-btoa]min-rx-interval 50
+[R2-bfd-session-btoa]min-tx-interval 50
+[R2-bfd-session-btoa]commit
+[R2-bfd-session-btoa]quit
+```
+配置完成后，在 R1、R2 上查看 BFD 会话状态，可看到会话状态为`Up`，说明 BFD 会话状态已建立。
+```shell
+[R1]display bfd session all
+--------------------------------------------------------------------------------
+Local Remote     PeerIpAddr      State     Type        InterfaceName            
+--------------------------------------------------------------------------------
+
+1     2          10.1.1.2        Up        S_IP_IF     GigabitEthernet0/0/1     
+--------------------------------------------------------------------------------
+     Total UP/DOWN Session Number : 1/0
+```
+```shell
+[R2]display bfd session all
+--------------------------------------------------------------------------------
+Local Remote     PeerIpAddr      State     Type        InterfaceName            
+--------------------------------------------------------------------------------
+
+2     1          10.1.1.1        Up        S_IP_IF     GigabitEthernet0/0/2     
+--------------------------------------------------------------------------------
+     Total UP/DOWN Session Number : 1/0
+```
+5. 在 R2 上配置 VRRP 与 BFD 联动，当 BFD 会话状态`Down`时，R2 的优先级增加 40。
+```shell
+[R2]interface GigabitEthernet 0/0/2
+[R2-GigabitEthernet0/0/2]vrrp vrid 1 track bfd-session 2 ?
+  increased  Increase priority
+  reduced    Reduce priority
+  <cr>       Please press ENTER to execute command 
+[R2-GigabitEthernet0/0/2]vrrp vrid 1 track bfd-session 2 increased 40
+```
+在 R1、R2 上执行`display vrrp`，可以看出 R1 为`Master`，R2 为`Backup`，联动的 BFD 会话状态为`Up`。
+```shell
+[R1]display vrrp
+  GigabitEthernet0/0/1 | Virtual Router 1
+    State : Master
+    Virtual IP : 10.1.1.254
+    Master IP : 10.1.1.1
+    PriorityRun : 120
+    PriorityConfig : 120
+    MasterPriority : 120
+    Preempt : YES   Delay Time : 20 s
+    TimerRun : 1 s
+    TimerConfig : 1 s
+    Auth type : NONE
+    Virtual MAC : 0000-5e00-0101
+    Check TTL : YES
+    Config type : normal-vrrp
+    Backup-forward : disabled
+    Create time : 2025-05-20 15:25:08 UTC-08:00
+    Last change time : 2025-05-20 18:01:04 UTC-08:00
+```
+```shell
+[R2]display vrrp
+  GigabitEthernet0/0/2 | Virtual Router 1
+    State : Backup
+    Virtual IP : 10.1.1.254
+    Master IP : 10.1.1.1
+    PriorityRun : 100
+    PriorityConfig : 100
+    MasterPriority : 120
+    Preempt : YES   Delay Time : 0 s
+    TimerRun : 1 s
+    TimerConfig : 1 s
+    Auth type : NONE
+    Virtual MAC : 0000-5e00-0101
+    Check TTL : YES
+    Config type : normal-vrrp
+    Backup-forward : disabled
+    Track BFD : 2  Priority increased : 40
+    BFD-session state : UP
+    Create time : 2025-05-20 15:28:01 UTC-08:00
+    Last change time : 2025-05-20 18:01:05 UTC-08:00
+```
+6. 在 R1 的`GigabitEthernet0/0/1`上执行`shutdown`，模拟链路故障，在 R1、R2 上查看 VRRP 状态，可以看到 R1 状态变为`Initialize`，R2 变为`Master`，联动的 BFD 会话状态为`Down`。
+```shell
+[R1]display vrrp 
+  GigabitEthernet0/0/1 | Virtual Router 1
+    State : Initialize
+    Virtual IP : 10.1.1.254
+    Master IP : 0.0.0.0
+    PriorityRun : 120
+    PriorityConfig : 120
+    MasterPriority : 0
+    Preempt : YES   Delay Time : 20 s
+    TimerRun : 1 s
+    TimerConfig : 1 s
+    Auth type : NONE
+    Virtual MAC : 0000-5e00-0101
+    Check TTL : YES
+    Config type : normal-vrrp
+    Backup-forward : disabled
+    Create time : 2025-05-20 15:25:08 UTC-08:00
+    Last change time : 2025-05-20 18:06:50 UTC-08:00 
+```
+```shell
+[R2]display vrrp
+  GigabitEthernet0/0/2 | Virtual Router 1
+    State : Master
+    Virtual IP : 10.1.1.254
+    Master IP : 10.1.1.2
+    PriorityRun : 140
+    PriorityConfig : 100
+    MasterPriority : 140
+    Preempt : YES   Delay Time : 0 s
+    TimerRun : 1 s
+    TimerConfig : 1 s
+    Auth type : NONE
+    Virtual MAC : 0000-5e00-0101
+    Check TTL : YES
+    Config type : normal-vrrp
+    Backup-forward : disabled
+    Track BFD : 2  Priority increased : 40
+    BFD-session state : DOWN
+    Create time : 2025-05-20 15:28:01 UTC-08:00
+    Last change time : 2025-05-20 18:06:51 UTC-08:00
+```
+7. 再在 R1 的`GigabitEthernet0/0/1`上执行`undo shutdown`，模拟故障恢复，20s 后查看 VRRP 状态，R1 变为`Master`，R2 变为`Backup`，联动的 BFD 会话状态为`Up`。
+```shell
+[R1]display vrrp
+  GigabitEthernet0/0/1 | Virtual Router 1
+    State : Master
+    Virtual IP : 10.1.1.254
+    Master IP : 10.1.1.1
+    PriorityRun : 120
+    PriorityConfig : 120
+    MasterPriority : 120
+    Preempt : YES   Delay Time : 20 s
+    TimerRun : 1 s
+    TimerConfig : 1 s
+    Auth type : NONE
+    Virtual MAC : 0000-5e00-0101
+    Check TTL : YES
+    Config type : normal-vrrp
+    Backup-forward : disabled
+    Create time : 2025-05-20 15:25:08 UTC-08:00
+    Last change time : 2025-05-20 18:11:11 UTC-08:00 
+```
+```shell
+[R2]dis vrrp
+  GigabitEthernet0/0/2 | Virtual Router 1
+    State : Backup
+    Virtual IP : 10.1.1.254
+    Master IP : 10.1.1.1
+    PriorityRun : 100
+    PriorityConfig : 100
+    MasterPriority : 120
+    Preempt : YES   Delay Time : 0 s
+    TimerRun : 1 s
+    TimerConfig : 1 s
+    Auth type : NONE
+    Virtual MAC : 0000-5e00-0101
+    Check TTL : YES
+    Config type : normal-vrrp
+    Backup-forward : disabled
+    Track BFD : 2  Priority increased : 40
+    BFD-session state : UP
+    Create time : 2025-05-20 15:28:01 UTC-08:00
+    Last change time : 2025-05-20 18:12:10 UTC-08:00
+```
+
+
 ### track接口状态
 
-![](网关冗余技术/vrrp-4.png)
+![](VRRP详解/vrrp-4.png)
 
-`Backup`路由器会不断侦听`Master`发出来的 VRRP 报文以便判断它的存活状态，当`Master`路由器发生故障时，`Backup`路由器能够感知并且进行切换。但是如果`Master`路由器没有发生整机故障，而只是其上行接口故障了呢？例如上图中，R1 作为`Master`路由器，如果其`GE0/0/1`口`DOWN`掉了，那么用户的上行流量被引导到 R1 后，将会被丢弃。
 
-VRRP 有一个特性可以解决这个问题：通过在 R1 上部署`VRRP track`，使其能够跟踪`GE0/0/1`的状态，如果`GE0/0/1`的物理状态或者协议状态变为`Down`，那么 R1 就会主动将自己的`GE0/0/0`接口 VRRP 优先级减去一个值，从而使得 R2 的优先级值更大、优先级更高，那么 R2 将成为新的`Master`，R1 则成为`Backup`，用户发往默认网关的上行流量便会被引导到 R2。
 ```shell
 [R1]interface GigabitEthernet 0/0/0
 [R1-GigabitEthernet0/0/0]ip address 192.168.1.253 24
@@ -145,7 +475,7 @@ VRRP 有一个特性可以解决这个问题：通过在 R1 上部署`VRRP track
 ```
 ### 在三层交换机上部署VRRP
 
-![](网关冗余技术/vrrp-5.png)
+![](VRRP详解/vrrp-5.png)
 
 SW1 及 SW2 都是三层交换机，内网有`VLAN10`的用户，网段为`192.168.10.0/24`。现在要在 SW1 及 SW2 间跑一组 VRRP。正常情况下 SW1 的`vlanif10`为主，SW2 为备。
 ```shell
@@ -173,7 +503,7 @@ SW1 及 SW2 都是三层交换机，内网有`VLAN10`的用户，网段为`192.1
 ```
 ### VRRP+MSTP典型组网
 
-![](网关冗余技术/vrrp-6.png)
+![](VRRP详解/vrrp-6.png)
 
 SW1及SW2为核心交换机，SW3为接入层交换机下联PC。三台交换机构成一个三角形冗余环境。内网存在四个VLAN：10、20、30和40。要求网络正常时，VLAN10、20的用户上行的流量走SW1；VLAN30、40的上行流量走SW2，并且当SW1
 或SW2发生故障时，能够进行自动切换。
@@ -312,16 +642,16 @@ Total:4 Master:2 Backup:2 Non-active:0
 ### VRRP双主问题
 由于 VRRP 协议报文是以组播的方式发送的，这就提出了一个限制：VRRP 的成员接口必须处于一个 LAN 或者说一个广播域内，否则 VRRP 报文将无法正常收发，如果同一个 VRRP 组内的接口无法正常收发 VRRP 报文，就容易出现双主故障。
 
-![VRRP](网关冗余技术/vrrp-7.png)
+![VRRP](VRRP详解/vrrp-7.png)
 
 在上图中，R1 及 R2 的`GE0/0/0`接口接入同一个交换机，此时 R1、R2 的`GE0/0/0`接口处于一个广播域内，VRRP 的协议报文收发应该没有问题，此时 VRRP 能够正常工作。但是如果交换机连接 R1、R2 的这两个接口被划分到了两个不同的 VLAN 中，那么就会出现双主故障。因为一台路由器发出的 VRRP 报文无法被另一台接收，双方感知不到对方的存在。
 
-![VRRP](网关冗余技术/vrrp-8.png)
+![VRRP](VRRP详解/vrrp-8.png)
 
 在上图所示的场景中，下行设备均为路由器，如果这些路由器都采用三层接口（而不是二层接口）与上面的设备对接，那么上面的设备就不具备运行 VRRP 的条件，因为在这种场景中，VRRP 协议报文无法被下面的路由器透传。这样，上述两种组网就不能够部署 VRRP，此时，可采用动态路由协议。
 ### 同一个广播域内VRRP VRID冲突
 
-![VRRP](网关冗余技术/vrrp-9.png)
+![VRRP](VRRP详解/vrrp-9.png)
 
 如图中所示，路由器与交换机之间通过  VRRP 的方式进行三层对接，但上、下行 VRRP 的 VRID 被设置为一样，由于 VRRP 通过 VRID 来区分不同的 VRRP 组，因此，如果出现上图这类情况就会造成 VRRP 的计算混乱，误认为四台设备的接口加入了同一个 VRRP 组。
 
@@ -329,12 +659,12 @@ Total:4 Master:2 Backup:2 Non-active:0
 ## VRRP 与 NQA 的联动
 NQA（`Network Quality Analysis`）是用于网络质量分析的一个特性。该特性能够检测网络的各项性能指标，最简单应用如使用 NQA 检测网络中某个 IP 地址的可达性。当然 NQA 的功能非常丰富，还能够用于采集网络 HTTP 的总时延、TCP 连接时延、文件传输速率、FTP 连接时延、DNS 解析时延、DNS 解析错误率等。NQA 的采集结果可以被多种应用所使用，例如和静态路由关联，从而为静态路由带来更好的灵活性，或者与 VRRP 联动，提高 VRRP 的可靠性。
 
-![VRRP](网关冗余技术/vrrp-10.png)
+![VRRP](VRRP详解/vrrp-10.png)
 
 例如上图所示的环境中，R1 与 R2 之间隔着一台二层交换机，R1 配置到达`8.8.8.0/24`网络的静态路由，如果 R2 发生故障，或者交换机与 R2 之间的互联线路发生故障，R1 是无法感知的，这就会产生问题。为了规避这个问题，可以在 R1 上运行一组 NQA 实例，探测到达`10.1.12.2`的可达性，然后，静态路由跟踪这个探测的结果，如果探测的结果是失败的，意味着`10.1.12.2`不可达了，则将静态路由失效。
 ### 验证实验
 
-![VRRP](网关冗余技术/vrrp-11.png)
+![VRRP](VRRP详解/vrrp-11.png)
 
 在上图所示的环境中，`VLAN10`为用户所在的 VLAN。
 * SW1、SW2 创建`VLAN10`及`VLAN11`，在`vlanif10`上运行 VRRP，缺省情况下 SW1 为主，SW2 为备。PC 的网关设置为 VRRP 组的虚拟 IP 地址。

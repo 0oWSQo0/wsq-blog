@@ -1,4 +1,6 @@
-
+---
+index: false
+---
 
 
 IGP 也即内部网关路由协议，典型代表有 OSPF、IS-IS 等。IGP 工作的“着眼点”在 AS（自治系统）内部，它的主要职责就是负责 AS 内的路由发现和快速收敛，而且其承载的路由前缀就是本 AS 内的前缀。
@@ -83,17 +85,214 @@ IBGP水平分割加上AS_PATH路径属性，能够在极大程度上解决BGP的
 
 
 
+## 配置实例
+###　基本功能配置
+#### 实验拓扑
+![](BGP详解/bgp-5.png)
+#### 实验要求
+所有路由器间运行 BGP 协议，其中 R1、R2 之间建立 EBGP 连接，R2、R3、R4之间建立 IBGP 连接。
+#### 实验步骤
+1. 配置各设备接口 IP 地址。
+2. 配置 R2、R3、R4 之间的 IBGP 连接。每个对等体连接均需要在双方设备上分别配置，且 IBGP 对等体中，双方都处于同一个 AS 内。IBGP 连接的源接口和源 IP 地址均缺省采用设备的物理接口和物理接口的 IP 地址。
+```shell
+[R2]bgp 65009
+[R2-bgp]router-id 2.2.2.2
+[R2-bgp]peer 10.3.3.2 as-number 65009
+[R2-bgp]peer 10.1.1.2 as-number 65009
+```
+```shell
+[R3]bgp 65009
+[R3-bgp]router-id 3.3.3.3
+[R3-bgp]peer 10.3.3.1 as-number 65009
+[R3-bgp]peer 10.2.2.1 as-number 65009
+```
+```shell
+[R4]bgp 65009
+[R4-bgp]router-id 4.4.4.4
+[R4-bgp]peer 10.1.1.1 as-number 65009
+[R4-bgp]peer 10.2.2.2 as-number 65009
+```
+3. 配置 R1、R2 之间的 EBGP 连接。也需要在双方分别配置，也采用缺省的物理接口和物理接口的 IP 地址作为 EBGP 连接源接口和源 IP 地址。
+```shell
+[R1]bgp 65008
+[R1-bgp]router-id 1.1.1.1
+[R1-bgp]peer 200.1.1.1 as-number 65009 
+```
+```shell
+[R2]bgp 65009
+[R2-bgp]peer 200.1.1.2 as-number 65008
+```
+4. 查看各设备上的 BGP 对等体的连接状态。
+```shell
+[R1]display bgp peer
+
+ BGP local router ID : 1.1.1.1
+ Local AS number : 65008
+ Total number of peers : 1		  Peers in established state : 1
+
+  Peer            V          AS  MsgRcvd  MsgSent  OutQ  Up/Down       State PrefRcv
+
+  200.1.1.1       4       65009        4        5     0 00:02:32 Established       0 
+```
+```shell
+[R2]display bgp peer
+
+ BGP local router ID : 2.2.2.2
+ Local AS number : 65009
+ Total number of peers : 3		  Peers in established state : 3
+
+  Peer            V          AS  MsgRcvd  MsgSent  OutQ  Up/Down       State PrefRcv
+
+  10.1.1.2        4       65009        5        6     0 00:03:34 Established       0
+  10.3.3.2        4       65009       29       30     0 00:27:43 Established       0
+  200.1.1.2       4       65008        3        3     0 00:01:28 Established       0
+```
+```shell
+[R3]display bgp peer 
+
+ BGP local router ID : 3.3.3.3
+ Local AS number : 65009
+ Total number of peers : 2		  Peers in established state : 2
+
+  Peer            V          AS  MsgRcvd  MsgSent  OutQ  Up/Down       State PrefRcv
+
+  10.2.2.1        4       65009        7        8     0 00:05:16 Established       0
+  10.3.3.1        4       65009       31       31     0 00:29:35 Established       0
+```
+```shell
+[R4]display bgp peer
+
+ BGP local router ID : 4.4.4.4
+ Local AS number : 65009
+ Total number of peers : 2		  Peers in established state : 2
+
+  Peer            V          AS  MsgRcvd  MsgSent  OutQ  Up/Down       State PrefRcv
+
+  10.1.1.1        4       65009        7        7     0 00:05:52 Established       0
+  10.2.2.2        4       65009        7        7     0 00:05:42 Established       0
+```
+5. 配置 R1 发布与 EBGP 对等体之间的非直连路由`8.0.0.0/8`。这里要在对应的地址视图下进行配置，因为如果是在 BGP 视图下发布，将在多种地址族下生效。
+```shell
+[R1]bgp 65008
+[R1-bgp]ipv4-family ?
+  multicast     Specify multicast address family
+  unicast       Specify unicast address family
+  vpn-instance  Specify VPN instance
+  vpnv4         Specify VPNv4 address family
+[R1-bgp]ipv4-family unicast
+[R1-bgp-af-ipv4]network 8.0.0.0 255.0.0.0
+```
+通过`display bgp routing-table`查看各路由器上的 BGP 路由表信息，发现它们均已有 R1 发布的`8.0.0.0/8`这条路由信息。前边带`*`的路由表示有效路由。
+```shell
+[R1]display bgp routing-table 
+
+ BGP Local router ID is 1.1.1.1 
+ Status codes: * - valid, > - best, d - damped,
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
 
 
+ Total Number of Routes: 1
+      Network            NextHop        MED        LocPrf    PrefVal Path/Ogn
+
+ *>   8.0.0.0            0.0.0.0         0                     0      i
+```
+```
+[R2]display bgp routing-table 
+
+ BGP Local router ID is 2.2.2.2 
+ Status codes: * - valid, > - best, d - damped,
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
 
 
+ Total Number of Routes: 1
+      Network            NextHop        MED        LocPrf    PrefVal Path/Ogn
+
+ *>   8.0.0.0            200.1.1.2       0                     0      65008i
+```
+```shell
+[R3]display bgp routing-table 
+
+ BGP Local router ID is 3.3.3.3 
+ Status codes: * - valid, > - best, d - damped,
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
 
 
+ Total Number of Routes: 1
+      Network            NextHop        MED        LocPrf    PrefVal Path/Ogn
+
+   i  8.0.0.0            200.1.1.2       0          100        0      65008i
+```
+```shell
+[R4]display bgp routing-table 
+
+ BGP Local router ID is 4.4.4.4 
+ Status codes: * - valid, > - best, d - damped,
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
 
 
+ Total Number of Routes: 1
+      Network            NextHop        MED        LocPrf    PrefVal Path/Ogn
+
+   i  8.0.0.0            200.1.1.2       0          100        0      65008i
+```
+R3、R4 虽然也收到了 R1 发布的`8.0.0.0/8`路由信息，但因为下一跳`200.1.1.2`不可达（因为目前还没有 BGP 路由到达），所以不是有效路由
+6. 为了解决 R3、R4 可以到达`8.0.0.0/8`路由的下一跳`200.1.1.2`，只需在它们共同连接的 R2 上使 BGP 协议引入直连路由即可。
+```shell
+[R2]bgp 65009
+[R2-bgp]ipv4-family ?
+  multicast     Specify multicast address family
+  unicast       Specify unicast address family
+  vpn-instance  Specify VPN instance
+  vpnv4         Specify VPNv4 address family
+[R2-bgp]ipv4-family unicast 
+[R2-bgp-af-ipv4]import-route ?
+  direct  Connected routes
+  isis    Intermediate System to Intermediate System (IS-IS) routes
+  ospf    Open Shortest Path First (OSPF) routes
+  rip     Routing Information Protocol (RIP) routes
+  static  Static routes
+  unr     User network routes
+[R2-bgp-af-ipv4]import-route direct 
+```
+此时可以看到在 R1 的 BGP 路由表中，除了`8.0.0.0/8`路由外，还有 R2 引入的 3 条直连路由。
+```shell
+[R1]display bgp routing-table 
+
+ BGP Local router ID is 1.1.1.1 
+ Status codes: * - valid, > - best, d - damped,
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
 
 
+ Total Number of Routes: 4
+      Network            NextHop        MED        LocPrf    PrefVal Path/Ogn
+
+ *>   8.0.0.0            0.0.0.0         0                     0      i
+ *>   10.1.1.0/24        200.1.1.1       0                     0      65009?
+ *>   10.3.3.0/24        200.1.1.1       0                     0      65009?
+      200.1.1.0          200.1.1.1       0                     0      65009?
+```
+R3 的 BGP 路由表中也有 R2 引入的 3 条直连路由。另外，原来的`8.0.0.0/8`路由也变成了有效路由。
+```shell
+[R3]display bgp routing-table 
+
+ BGP Local router ID is 3.3.3.3 
+ Status codes: * - valid, > - best, d - damped,
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
 
 
+ Total Number of Routes: 4
+      Network            NextHop        MED        LocPrf    PrefVal Path/Ogn
+
+ *>i  8.0.0.0            200.1.1.2       0          100        0      65008i
+ *>i  10.1.1.0/24        10.3.3.1        0          100        0      ?
+   i  10.3.3.0/24        10.3.3.1        0          100        0      ?
+ *>i  200.1.1.0          10.3.3.1        0          100        0      ?
+```
 
 

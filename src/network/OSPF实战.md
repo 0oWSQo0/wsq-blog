@@ -581,14 +581,12 @@ OSPF routing table status : <Inactive>
 ![](OSPF实战/18.png)
 
 R1、R2、R3 运行 OSPF，R3 把自己的静态路由引入 OSPF，让域内的路由器学习到外部路由。
-### 1、基本配置
-R1 配置：
+### 1、OSPF 基本配置
 ```shell
 [R1]ospf 1 router-id 1.1.1.1
 [R1-ospf-1]area 1
 [R1-ospf-1-area-0.0.0.1]network 10.1.12.0 0.0.0.255
 ```
-R2 配置：
 ```shell
 [R2]ospf 1 router-id 2.2.2.2
 [R2-ospf-1]area 1
@@ -597,7 +595,6 @@ R2 配置：
 [R2-ospf-1]area 0
 [R2-ospf-1-area-0.0.0.0]network 10.1.23.0 0.0.0.255
 ```
-R3 配置：
 ```shell
 [R3]ip route-static 10.3.1.0 24 NULL 0
 [R3]ip route-static 10.3.2.0 24 NULL 0
@@ -945,3 +942,30 @@ R3、R4 激活接口认证配置：
 [R4-GigabitEthernet0/0/0]ospf authentication-mode simple cipher 654321
 ```
 接口认证优先级高于区域认证方式，如果同时配置两种认证方式，只有接口认证方式生效。命令中的`simple`关键字表示明文，即认证口令是明文保存在 OSPF 报文中，这样是不安全的，推荐使用 MD5 的方式。
+## 其他常用命令
+```shell
+# 设置每次泛洪更新 LSA 的数量为 100
+[R-ospf-1]flooding-control number 100
+
+# 设置接口的网络类型
+[R-GigabitEthernet0/0/0]ospf network-type broadcast
+
+# 设置接口在选举 DR 时的优先级
+[R-GigabitEthernet0/0/0]ospf dr-priority 8
+
+# OSPF 引入外部路由
+# 引入 RIP 进程 40 的路由，并设置外部路由类型为 Type 2，路由标记为 33，开销值为 50
+[R-ospf-1]import-route rip 40 type 2 tag 33 cost 50
+
+# 将缺省路由通告到 OSPF 区域
+[R-ospf-1]default-route-advertise alaways
+
+# 路由聚合
+[R-ospf-1]abr-summary 10.2.0.0 255.255.0.0
+[R-ospf-1]asbr-summary 10.2.0.0 255.255.0.0 not-advertise tag 2 cost 100
+
+# 修改Hello间隔和路由器失效时间
+[R]interface g0/0/0
+[R-GigabitEthernet0/0/0]ospf timer hello 15
+[R-GigabitEthernet0/0/0]ospf timer dead 45
+```

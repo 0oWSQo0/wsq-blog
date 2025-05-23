@@ -24,7 +24,7 @@ ACL  是一个列表形式的一组规则。ACL 能够识别一个 IP 数据包�
 
 ## 典型的 ACL 应用组网场景
 
-[](ACL/1.png)
+![](ACL/1.png)
 
 某企业为保证财务数据安全，禁止研发部门访问财务服务器，但总裁办公室不受限制。
 
@@ -37,7 +37,7 @@ ACL  是一个列表形式的一组规则。ACL 能够识别一个 IP 数据包�
 ## ACL的基本语句
 ACL 由一系列规则组成，通过将报文与 ACL 规则进行匹配，设备可以过滤出特定的报文。
 
-[](ACL/2.png)
+![](ACL/2.png)
 
 **ACL编号**：用于标识 ACL，表明该 ACL 是数字型 ACL。
 
@@ -53,7 +53,7 @@ ACL 规则的编号范围是`0～4294967294`，所有规则均按照规则编号
 ## ACL的匹配机制
 设备将报文与 ACL 规则进行匹配时，遵循“一旦命中立即停止匹配”的机制。
 
-[](ACL/3.png)
+![](ACL/3.png)
 
 * 首先系统会查找设备上是否配置了 ACL。
 * 如果 ACL 不存在，则返回ACL匹配结果为：不匹配。
@@ -296,9 +296,9 @@ time-range time-name { start-time to end-time days|from time1 date1 [to time2 da
 ## 实战
 某公司通过交换机实现各部门之间的互连。要求只允许公司内网用户可以访问内网中的财务服务器，外网用户不允许访问。
 
-[](ACL/5.png)
+![](ACL/5.png)
 
-### 1、配置接口加入 VLAN，并配置 VLANIF 接口的 IP 地址
+1. 配置接口加入 VLAN，并配置 VLANIF 接口的 IP 地址
 将`GE1/0/1～GE1/0/3`分别加入`VLAN10、20、30`，这三个`vlan`中，也就是给公司三个部门各分配一个`vlan`。
 
 `GE2/0/1`加入`VLAN100`，并配置各`VLANIF`接口的IP地址，也就是内网财务服务器的端口单独加一个`vlan`。
@@ -329,7 +329,7 @@ time-range time-name { start-time to end-time days|from time1 date1 [to time2 da
 [Switch]interface vlanif 100
 [Switch-Vlanif100]ip address 10.164.4.1 255.255.255.0
 ```
-### 2、配置ACL
+2. 配置ACL
 创建高级 ACL 3002 并配置 ACL 规则，允许位于内网的总裁办公室、市场部和研发部访问财务服务器的报文通过，拒绝外网用户访问财务服务器的报文通过。
 ```
 [Switch]acl 30002
@@ -339,24 +339,24 @@ time-range time-name { start-time to end-time days|from time1 date1 [to time2 da
 [Switch-acl-adv-3002]rule deny ip destination 10.164.4.4 0.0.0.0 //禁止其他用户访问财务服务器
 [Switch-acl-adv-3002]quit
 ```
-### 3、配置基于ACL的流分类
+3. 配置基于ACL的流分类
 配置流分类`c_network`，对匹配 ACL 3002 的报文进行分类。
 ```
 [Switch]traffic classifier c_network // 创建流分类
 [Switch-classifier-c_network]if-match acl 3002 // 将 acl 与流分类关联
 ```
-### 4、配置流行为
+4. 配置流行为
 配置流行为`b_network`，动作为允许报文通过（缺省值，不需配置）。
 ```
 [Switch]traffic behavior b_network // 创建流行为
 ```
-### 5、配置流策略
+5. 配置流策略
 ```
 [Switch]traffic policy p_network // 创建流策略
 // 配置流策略p_network，将流分类c_network与流行为b_network关联。
 [Switch-trafficpolicy-p_network]classifier c_network behavior b_network
 ```
-### 6、应用流策略
+6. 应用流策略
 由于内外网访问服务器的流量均从接口`GE2/0/1`出口流向服务器，所以可以在`GE2/0/1`接口的出方向应用流策略`p_network`。
 ```
 [Switch]interface gigabitethernet 2/0/1

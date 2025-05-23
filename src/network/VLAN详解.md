@@ -155,6 +155,10 @@ MAC 地址表不仅记录了交换机端口和 MAC 地址的对应关系，还�
 
 ![MAC地址表的VLAN ID](VLAN详解/vlan-routing-9.png)
 
+#### 多臂路由缺点
+* 随着每个交换机上 VLAN 数量的增加，这样做必然需要大量的路由器接口，而路由器的接口数量是极其有限的。
+* 某些 VLAN 之间的主机可能不需要频繁进行通信，如果这样配置的话，会导致路由器的接口利用率 很低。
+
 ### 单臂路由实现 VLAN 间通信
 路由器用于连接异构网络，特点是有不同类型的物理接口，接口数量少；交换机则是用于组建局域网，特点是物理接口类型少，接口数量多。实际网络环境中，会在一台交换机上创建大量的 VLAN，每个 VLAN 使用一个路由器接口作为默认网关，路由器接口就不够用了。
 
@@ -166,8 +170,13 @@ MAC 地址表不仅记录了交换机端口和 MAC 地址的对应关系，还�
 
 ![单臂路由逻辑拓扑图](VLAN详解/vlan-routing-11.png)
 
-#### 一个路由器接口能够像多个接口那样工作，同时用来传输多个不同 VLAN 的流量吗？
-路由器提供了一种称为子接口的逻辑接口。子接口顾名思义，就是通过逻辑的方式，将一个路由器物理接口划分为多个逻辑子接口，来满足用一个物理接口连接多个网络的需求。
+路由器提供了一种称为子接口的逻辑接口。子接口就是通过逻辑的方式，将一个路由器物理接口划分为多个逻辑子接口，来满足用一个物理接口连接多个网络的需求。
+
+配置子接口时，需要注意以下几点：
+* 必须为每个子接口分配一个 IP 地址。该 IP 地址与子接口所属 VLAN 位于同一网段
+* 需要在子接口上配置 802.1Q 封装，来剥掉和添加`VLAN Tag`，从而实现 VLAN 间互通
+* 在子接口上执行命令`arp broadcast enable`使能子接口的 ARP 广播功能
+
 ### 三层交换机实现 VLAN 间通信
 多臂路由和单臂路由都存在固有的缺点，虽然单臂路由在现网应用很多，但是更常用的方案是把三层交换机作为主机的网关使用，此时就需要该交换机具备三层功能，即路由功能。
 
@@ -334,7 +343,7 @@ VID  Status  Property      MAC-LRN Statistics Description
 ![](VLAN详解/dot1q-1.png)
 
 #### 实验要求
-PC1 能 ping 通 PC5
+PC1 能`ping`通 PC5。
 
 #### 实验步骤
 1. 根据接口 IP 地址表，配置路由器的子接口 IP 地址。
@@ -360,8 +369,12 @@ PC1 能 ping 通 PC5
 [RT-GigabitEthernet0/0/1.20]quit 
 ```
 * 命令`interface interface-type interface-number.sub-interface number`创建子接口。子接口编号范围是`1~4096`，与 VLAN ID 保持一致。
-* 命令`dot1q termination vid`配置 802.1Q 封装并指定端口的 PVID，确保路由器子接口与对端的交换机端口封装模式一致。
-* 命令`arp broadcast enable`启动子接口的 ARP 广播功能。默认状态下，ARP 广播功能是禁用的，收到 ARP 广播帧会直接丢弃。
+* 命令`dot1q termination vid vlan-id`配置 802.1Q 封装并指定端口的 PVID，确保路由器子接口与对端的交换机端口封装模式一致。
+* 命令`arp broadcast enable`启动子接口的 ARP 广播功能。默认状态下，子接口的 ARP 广播功能是禁用的，收到 ARP 广播帧会直接丢弃。
+
+`dot1q termination vid vlan-id`命令有两个功能：
+1. 删除 VLAN 标签，接口在收到 VLAN 报文后，剥掉报文中携带的`Tag`后进行三层转发。转发出去的报文是否携带`Tag`由出接口决定。
+2. 添加 VLAN 标签，接口在发送报文时，将相应的 VLAN 信息添加到报文中再发送。
 
 ```shell
 [RT]display ip interface brief 
@@ -405,6 +418,7 @@ Destination/Mask    Proto   Pre  Cost      Flags NextHop         Interface
 2. 根据 VLAN 划分表，配置 SW 连接路由器端口的 VLAN。
 ```shell
 [SW]interface GigabitEthernet 0/0/1
+# 配置单臂路由时，路由器与交换机连接到端口必须配置为 trunk 口
 [SW-GigabitEthernet0/0/1]port link-type trunk 
 [SW-GigabitEthernet0/0/1]port trunk allow-pass vlan 10 20
 [SW-GigabitEthernet0/0/1]quit 

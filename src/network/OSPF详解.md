@@ -42,12 +42,12 @@ OSPF 中有几个非常重要的基本概念：自治系统、链路状态、邻
 ### 度量值
 每种路由协议对度量值的定义是不同的，OSPF 使用`Cost`作为路由度量值，`Cost`值越小，则路径（路由）越优。每一个激活 OSPF 的接口都有一个接口的`Cost`值，值等于 100/接口带宽 Mbit/s，计算结果取整数部分，当结果小于 1 时，值取 1。这个值也可以人为修改，修改值会直接影响`Cost`值的计算，从而影响网络中 OSPF 路由的选择。
 
-[](OSPF详解/cost-1.png)
+![](OSPF详解/cost-1.png)
 
 ### Router-ID
 `Router-ID`用于标识 OSPF 路由器，是一个 32 位的数值，跟 IPv4 地址格式一样。连续的 OSPF 路由器组成的网络叫做 OSPF 域，域内`Router-ID`必须唯一，也就是在同一个域内不允许出现两台相同`Router-ID`的路由器。`Router-ID`可以手动设置，也可以自动生成，常见的做法是把设备的`Router-ID`指定为设备的`Loopback`接口的 IP 地址。
 
-[](OSPF详解/route-id.png)
+![](OSPF详解/route-id.png)
 
 ### Loopback 接口
 `Loopback`接口也就是本地回环接口，是一种软件的、逻辑的接口，不只网络设备支持`Loopback`接口，Windows 主机或 Linux 主机也支持。根据业务需求，在网络设备上创建`Loopback`接口，并配置 IP 地址。`Loopback`接口非常稳定，除非手动进行关闭或删除，否则是永远不会失效的。正因如此，`Loopback`接口常用于设备网管、网络测试、网络协议应用等。
@@ -78,20 +78,20 @@ OSPF 的每一个区域都由一个编号，不同的编号表示不同的区域
 
 任何一个非骨干区域都必须与`Area0`相连，当网络中某个区域没有与`Area0`相连时，这个区域的路由计算就会出问题。OSPF 的区域间路由都由`Area0`中转，任何两个非骨干区域之间是不能直接交互路由的。
 
-[](OSPF详解/area-2.png)
+![](OSPF详解/area-2.png)
 
 解决方法是修改 OSPF 的网络设计，与`Area0`直接相连。如果不能改或改动成本大等问题，可以考虑使用 OSPF 虚链路（`Virtual Link`）。`Virtual Link`是一种逻辑的链路，不是一条真实的链路。通过搭建一条`Virtual Link`，可以把原来没有与骨干区域直连的区域给连接起来。
 
 另一个可能的问题是，骨干区域不连续或被分隔开。非骨干区域交互区域路由时，容易引发路由环路。因此，OSPF 要求 ABR 只能将自己直连的区域内部路由通告给`Area0`，而不能将自己到达其它区域的域间路由通告给`Area0`。另外，ABR 可以将自己直连区域的内部路由和到达其它区域的域间路由通告给非骨干区域。这样就能规避网络规划不合理导致的路由环路。解决问题最好的办法是修改 OSPF 的规划，当然建立`Virtual Link`也可以临时解决这个问题。
 
-[](OSPF详解/area-3.png)
+![](OSPF详解/area-3.png)
 
 实际部署中，Virtual Link 并不是一种常规的技术，而是一种临时方案，合理的 OSPF 网络规划依然是一个最佳的选择。
 
 ## OSPF路由器角色
 OSPF 不仅在路由器上使用，许多交换机、防火墙，甚至 Linux 主机都能实现。这里说的 OSPF 路由器，实际上是以路由器为代表。
 
-[](OSPF详解/router.png)
+![](OSPF详解/router.png)
 
 OSPF 定义了一系列类型的路由器：
 1. 内部路由器(`Internal Router，IR`)
@@ -120,7 +120,7 @@ OSPF 在 P2P 网络类型中，接口以组播方式发送协议报文，组播�
 
 默认情况下，P2P 类型接口的`Hello`报文发送间隔是 10 秒。P2P 类型的网络中，不会选举 DR 和 BDR。
 
-[](OSPF详解/p2p.png)
+![](OSPF详解/p2p.png)
 
 即使在以太网中只有两台路由器，OSPF 也会选举 DR 和 BDR，实际上没必要且浪费时间，因为从逻辑上看是点对点的连接，选举 DR 和 BDR 实在是画蛇添足。因此，为了提高 OSPF 的效率，加快邻接关系的建立过程，可以把互联接口的网络类型修改为 P2P。
 ### 广播型网络
@@ -130,7 +130,7 @@ OSPF 在 P2P 网络类型中，接口以组播方式发送协议报文，组播�
 
 BMA 网络中，会选举 DR 和 BDR，所有非 DR、BDR 路由器仅与 DR 和 BDR 建立邻接关系。
 
-[](OSPF详解/bma.png)
+![](OSPF详解/bma.png)
 
 ### 非广播网络
 非广播网络(`Non-Broadcast Multi-Access，NBMA`)也允许多台路由器接入，但是不具备广播能力，这时组播发送的`Hello`报文在 NBMA 网络中可能会有问题。为了让 OSPF 路由器之间能够顺利发现彼此，并正确建立邻接关系，还需要手动配置，比如使用单播方式发送 OSPF 报文等。
@@ -157,24 +157,24 @@ OSPF 在 P2MP 类型的接口上以组播方式发送`Hello`报文，以单播�
 [Huawei-GigabitEthernet0/0/0]ospf network-type p2p
 ```
 ## OSPF 协议大致过程
-[](OSPF详解/ospf-step.png)
+![](OSPF详解/ospf-step.png)
 
 OSPF 协议有四个主要过程：
 * 寻找邻居
   OSPF 协议启动后，先寻找网络中的邻居，也就是通过`Hello`报文确认可以双向通信。
-  [](OSPF详解/ospf-step-2.png)
+  ![](OSPF详解/ospf-step-2.png)
 * 建立邻接关系
   一部分路由器形成邻居关系后，就开始进行建立邻接关系。建立了邻居关系的路由器才能互相传递链路状态信息。
-  [](OSPF详解/ospf-step-3.png)
+  ![](OSPF详解/ospf-step-3.png)
 * 链路状态信息同步
   建立邻接关系的 OSPF 路由器在网络中交互 LSA（链路状态通告），最后形成包含网络完整链路状态信息的 LSDB（链路状态数据库）。
-  [](OSPF详解/ospf-step-4.png)
+  ![](OSPF详解/ospf-step-4.png)
 * 计算路由
   LSDB 同步完成后，OSPF 区域内的每个路由器对网络结构有相同的认识，邻居路由器之间形成完全的邻接关系。然后，每台路由器根据 LSDB 的信息使用 SPF（最短路径优先）算法独立计算出路由。
-  [](OSPF详解/ospf-step-5.png)
+  ![](OSPF详解/ospf-step-5.png)
   
 ## OSPF报文类型
-OSPF 协议的报文直接使用 IP 封装，在 IP 报文头部对应的协议号是 89。
+OSPF 协议的报文使用 IP 封装，在 IP 报文头部对应的协议号是 89。
 
 ![](OSPF详解/ospf-ip.png)
 
@@ -182,52 +182,50 @@ OSPF 协议的报文直接使用 IP 封装，在 IP 报文头部对应的协议�
 * `224.0.0.5`：这个组播地址是指所有的 OSPF 路由器。
 * `224.0.0.6`：这个组播地址是指所有的 OSPF DR/BDR 路由器。
 
-OSPF 报文主要有 5 种类型：`Hello`报文、DD(`DatabaseDescription`，数据库描述)报文、LSR(`LinkState Request`，链路状态请求)报文、LSU(`LinkState Update`，链路状态更新)报文和LSAck(`LinkState Acknowledgment`，链路状态应答)报文。它们使用相同的 OSPF 报头格式，头部长度是 24 字节。
+OSPF 报文主要有 5 种类型：
 
-c
+| 类型 | 报文名称 | 报文说明                                                                  |
+| :--: | :--: |:----------------------------------------------------------------------|
+| 1 |     Hello     | 周期性发送，用来发现和维持邻居关系                                                     |
+| 2 | DD<br>Database Description<br>数据库描述 | 描述本地 LSDB 的摘要信息，用于两台设备进行数据库同步，不是完整的 LSA 内容                            |
+| 3 | LSR<br>Link State Request<br>链路状态请求 | 向对方请求所需的 LSA，只有在双方成功交换 DD 报文后才会向对方发出 LSR 报文                           |
+| 4 | LSU<br>Link State Update<br>链路状态更新 | 向对方发送其所需的 LSA 或泛洪自己更新的 LSA，报文中携带的是完整的 LSA 数据                          |
+| 5 | LSAck<br>Link State Acknowledgment<br>链路状态确认 | 对收到的 LSA 进行确认                                                         |
+
+它们使用相同的 OSPF 报头格式，头部长度是 24 字节。
+### OSPF 报头格式
+![OSPF 报头格式](OSPF详解/header.png)
 
 报头字段含义：
 * 版本：OSPFv2 的值为 2。
-* 类型：表示 OSPF 报文的类型。值与报文类型对应关系是：`1–Hello；2–DD；3–LSR；4–LSU；5–LSAck`。
+* 类型：表示 OSPF 报文的类型。值与报文类型对应关系是：`1–Hello;2–DD;3–LSR;4–LSU;5–LSAck`。
 * 报文长度：整个 OSPF 报文的长度，单位是字节。
 * 路由器 ID：路由器的 OSPF `Router-ID`，是每台路由器的唯一标识。
 * 区域 ID：表示所属的区域 ID，是一个 4 字节的数值。
 * 校验和：用来校验报文有效性。
 * 认证类型：表示报文使用的认证类型。0 表示无认证；1 表示明文验证；2 表示 MD5 验证。
-* 认证数据：用于报文认证的内容。具体值根据不同验证类型而定。验证类型为 0 时，此字段没有数据。验证类型为 1 时，此字段为验证密码。验证类型为 2 时，此字段为 MD5 摘要消息。
+* 认证数据：用于报文认证的内容。具体值根据不同认证类型而定：
+  * 认证类型为 0 时，此字段没有数据
+  * 认证类型为 1 时，此字段为验证密码
+  * 认证类型为 2 时，此字段为 MD5 摘要消息
 
 路由器的接口一旦激活 OSPF，就会开始发送`Hello`报文。`Hello`报文的一个重要功能就是发现直连链路上的 OSPF 邻居。发现邻居后，就开始邻接关系的建立。这个过程中，DD 报文用于发送 LSA 的头部摘要。通过 DD 报文的交互，路由器知道了对方所有的 LSA，而 LSR 向对方请求完整的 LSA。LSU 对 LSR 进行回应，或者主动更新 LSA，LSU 包含完整的 LSA 数据。LSAck 保证 OSPF 更新机制的可靠性。此外，`Hello`报文负责 OSPF 邻居关系的维护，两台直连路由器形成邻接关系后，双方仍然周期性的发送`Hello`报文，告知对方自己是在线状态。
-
-| 类型 | 报文名称 | 报文说明 |
-| :--: | :--: | :--: |
-| 1 |     Hello     | 用于发现直连链路上的 OSPF 邻居，以及维护 OSPF 邻居关系 |
-| 2 | DD<br>Database Description<br>数据库描述 | 用于描述LSDB，报文中携带的是 LSA 的头部数据，不是完整的 LSA 内容 |
-| 3 | LSR<br>Link State Request<br>链路状态请求 | 向 OSPF 邻居请求 LSA |
-| 4 | LSU<br>Link State Update<br>链路状态更新 | 用于发送 LSA，报文中携带的是完整的 LSA 数据 |
-| 5 | LSAck<br>Link State Acknowledgment<br>链路状态确认 | 设备收到 LSU 后，LSAck对接收的 LSA 进行确认 |
 
 ### Hello 报文
 `Hello`报文用于发现直连链路上的邻居，以及维护邻居关系。`Hello`报文携带邻居关系建立的各项参数，建立邻居关系的过程中，会检查这些参数，只有参数匹配，才能正确建立邻居关系。
 
-[OSPF 报头格式](OSPF详解/hello.png)
+![Hello 报文格式](OSPF详解/hello.png)
 
 `Hello`报文字段含义：
 * 网络掩码：表示发送`Hello`报文接口的 IP 地址对应的子网掩码。如果两台路由器是通过以太网接口连接，那么直连的两个接口必须配置相同的网络掩码。如果收到的`Hello`报文中网络掩码字段与自己接口的不同，就忽略这个`Hello`报文，不会建立邻居关系。
 * `Hello`间隔：接口周期性发送`Hello`报文的时间间隔，单位是秒。两台路由器要建立邻居关系，需要接口的`Hello`间隔相同，否则邻居关系无法建立。默认情况下，OSPF 路由器在 P2P 或 Broadcast 类型的接口上，`Hello`间隔是 10 秒，在 NBMA 及 P2MP 类型的接口上，`Hello`间隔是 30 秒。
 * 选项：这个字段一共 8 比特，每个比特位都表示路由器的某个特性。路由器通过设置相应的「选项」比特位来通告自己支持某种特性或拥有某种能力。
-* 路由器优先级：也叫做 DR 优先级，用于 DR 和 BDR 的选举。默认情况下，OSPF 接口的 DR 优先级是 1，这个值也可以通过命令进行修改。
+* 路由器优先级：也叫做 DR 优先级，用于 DR 和 BDR 的选举。默认情况下，OSPF 接口的 DR 优先级是 1，优先级为 0 表示不参与选举，这个值也可以通过命令进行修改。
 * 路由器失效时间：路由器等待对方发送`Hello`报文的时间，超过这个时间就认为是路由器已离线。路由器建立邻居关系，也需要双方接口的路由器失效时间相同。默认情况下，路由器失效时间是`Hello`间隔的 4 倍。
 * 指定路由器：网络中 DR 的`Route-ID`。如果值为`0.0.0.0`，表示没有 DR 或 DR 还未选举出来。
 * 备份指定路由器：网络中 BDR 的`Route-ID`。如果值为`0.0.0.0`，表示没有 BDR 或 BDR 还未选举出来。
 * 邻居：表示邻居的`Router-ID`，是在直连链路上发现的有效邻居，如果发现多个邻居，就包含多个邻居字段。
 
-#### 修改Hello间隔和路由器失效时间
-在华为设备上修改 OSPF 接口的网络类型命令：
-```shell
-[Huawei]interface g0/0/0
-[Huawei-GigabitEthernet0/0/0]ospf timer hello 15
-[Huawei-GigabitEthernet0/0/0]ospf timer dead 45
-```
 ### DD 报文
 DD 报文用于描述本地 LSDB 的摘要信息，这个报文携带的是 LSDB 中 LSA 的头部数据，并非完整的 LSA 内容。
 
@@ -235,9 +233,9 @@ DD 报文用于描述本地 LSDB 的摘要信息，这个报文携带的是 LSDB
 
 `Master/Slave`确定后，双方开始使用 DD 报文描述各自的 LSDB，这时的 DD 报文包含 LSDB 里的 LSA 头部信息。路由器可以使用多个 DD 报文来描述 LSDB，为了确保 DD 报文传输的有序和可靠，`Master`路由器使用“DD Sequence Number（DD 序列号）”字段主导整个 LSDB 交互过程。比如：`Master`路由器发送一个 DD 序列号是 100 的 DD 报文给`Slave`路由器，`Slave`收到这个报文后，才发送自己的 DD 报文，而 DD 序列号也使用 100。`Master`路由器发送下一个 DD 报文（DD 序列号是 101），`Slave`路由器才会发送 DD 报文。这个过程一直持续，直到 LSDB 同步完成。
 
-[DD报文交互流程](OSPF详解/dd-1.png)
+![DD报文交互流程](OSPF详解/dd-1.png)
 
-[DD 报文格式](OSPF详解/dd-2.png)
+![DD 报文格式](OSPF详解/dd-2.png)
 
 DD 报文字段含义：
 * 接口最大传输单元（`Interface Maximum Transmission Unit`）：接口的 MTU。默认情况下，接口发送的 DD 报文中，无论接口实际的 MTU 值是多少，值都为 0。
@@ -251,21 +249,21 @@ DD 报文字段含义：
 ### LSR 报文
 在与 OSPF 邻居交换 DD 报文后，路由器就知道了邻居的 LSDB 摘要，向邻居发送 LSR 报文请求所需 LSA 的完整数据。LSR 报文的链路状态类型（`Link-State Type`）、链路状态 ID（`Link-State ID`）、通告路由器（`Advertising Router`）三个字段表示路由器请求的 LSA。如果请求多个 LSA，那么 LSR 可能包含多个三元组。
 
-[LSR 报文格式](OSPF详解/lsr.png)
+![LSR 报文格式](OSPF详解/lsr.png)
 
-* 链路状态类型：表示 LSA 类型。OSPF 有多种 LSA 类型，每种 LSA 描述 OSPF 网络的某个部分，使用不同的类型编号。常见的 LSA 类型值和 LSA 名称是：`1–Router LSA，2–Network LSA，3–Network Summary LSA，4–ASBR Summary LSA，5–AS External LSA`。
-* 链路状态标识：LSA 的标识。不同的 LSA 类型，字段的定义不同。
-* 通告路由器：生成这条 LSA 的路由器的`Router-ID`。
+* 链路状态类型：LSA 类型。OSPF 有多种 LSA 类型，每种 LSA 描述 OSPF 网络的某个部分，使用不同的类型编号。常见的 LSA 类型值和 LSA 名称是：`1–Router LSA、2–Network LSA、3–Network Summary LSA、4–ASBR Summary LSA、5–AS External LSA`
+* 链路状态标识：LSA 的标识。不同的 LSA 类型，字段的定义不同
+* 通告路由器：生成这条 LSA 的路由器的`Router-ID`
 
 ### LSU 报文
 路由器收到邻居发送的 LSR 后，会使用 LSU 报文进行回应，在 LSU 报文中包含请求 LSA 的完整信息，一个 LSU 报文可以包含多个 LSA。另外，当路由器感知到网络发生变化时，也会触发 LSU 报文的泛洪，及时把网络变化通告给其它路由器。在 BMA 网络中，非 DR、BDR 路由器向组播地址`224.0.0.6`发送 LSU 报文，而 DR 和 BDR 会侦听这个组播地址，DR 在接收 LSU 报文后向`224.0.0.5`发送 LSU 报文，从而将更新信息泛洪到整个 OSPF 区域，所有的 OSPF 路由器都会侦听`224.0.0.5`这个组播地址。
 
-[LSU 报文格式](OSPF详解/lsu.png)
+![LSU 报文格式](OSPF详解/lsu.png)
 
 ### LSAck 报文
 当一台路由器收到邻居发送的 LSU 报文时，为了确认 LSA 已经送达，需要对报文中的 LSA 进行确认，就是回复一个 LSAck 报文。LSAck 报文包含路由器确认的 LSA 头部信息。
 
-[LSAck 报文格式](OSPF详解/lsack.png)
+![LSAck 报文格式](OSPF详解/lsack.png)
 
 
 ## 邻居与邻接
@@ -279,7 +277,7 @@ DD 报文字段含义：
 ## OSPF邻居状态机变迁
 OSPF 是一种链路状态路由协议，邻居设备间交换的是链路状态信息，OSPF 路由也是依据由链路状态路由信息构成的链路状态数据库(LSDB)计算得到的。所以在 OSPF 中，建立设备间的邻居关系，交换彼此的 LSDB 非常重要。而邻居关系建立的过程体现在 OSPF 接口的状态转换过程中。在 OSPF 中，共有 8 种状态机，分别是`Down、Attempt、Init、2-way、ExstartExchange、Loading、Full`。OSPF 邻居关系的建立需要经历多个过程。
 
-[OSPF邻居状态](OSPF详解/neighbor-status.png)
+![OSPF邻居状态](OSPF详解/neighbor-status.png)
 
 ### 邻居状态建立
 #### Down（失效）
@@ -287,17 +285,17 @@ OSPF 邻居的初始状态，表示接口没有收到邻居发来的`Hello`报�
 #### Init（初始）
 收到邻居发送的`Hello`报文，但是报文内没有自己的`Router-ID`，邻居状态就是`Init`。这个状态表示，直连链路上有一个 OSPF 路由器，但是尚未与邻居建立双向通信关系。接下来，路由器会把对方的`Router-ID`添加到发送的`Hello`报文中。
 
-[Init 状态](OSPF详解/neighbor-init.png)
+![Init 状态](OSPF详解/neighbor-init.png)
 
 #### Attempt（尝试）
 只在 NBMA 网络中出现。当路由器的 NBMA 接口启动后，邻居状态从`Down`切换到`Attempt`。这种状态下，路由器周期性的向邻居发送`Hello`报文，但是未收到邻居的有效`Hello`报文。当路由器收到邻居发送的没有自己`Router-ID`的`Hello`报文后，就将邻居状态切换到`Init`。
 
-[attempt 状态](OSPF详解/neighbor-attempt.png)
+![attempt 状态](OSPF详解/neighbor-attempt.png)
 
 #### 2-Way（双向通信）
 路由器收到邻居的`Hello`报文，报文里有自己的`Router-ID`时，状态切换成`2-Way`，表示两个路由器形成了可以双向通信的邻居关系，但是没有与邻居建立邻接关系。这是建立邻接关系以前的最高级状态。 如果网络为广播网络或者 BMA 网络则选举 DR/BDR。
 
-[2-way 状态](OSPF详解/neighbor-2-way.png)
+![2-way 状态](OSPF详解/neighbor-2-way.png)
 
 在形成邻居关系过程中，需要对`Hello`报文携带的参数进行协商：
 * 如果接收端口的网络类型是广播型，点到多点或者 NBMA，所接收的`Hello`报文中`Network Mask`字段必须和接收端口的网络掩码一致,如果接收端口的网络类型为点到点类型或者是虚连接，则不检查`Network Mask`字段；
@@ -341,7 +339,7 @@ DR、BDR 的选举通过`Hello`报文实现，发生在`2-Way`状态之后。`He
 
 既不是 DR 也不是 BDR 的路由器叫做 DROther，MA 网络中所有 DROther 只和 DR 及 BDR 建立 OSPF 邻接关系，BDR 也和 DR 建立邻接关系，DROther 之间只停留在`2-Way`状态。这样，就有`2(n-2)+1`个邻接关系，数量得到优化。
 
-[](OSPF详解/dr-bdr.png)
+![](OSPF详解/dr-bdr.png)
 
 ### DR 的主要功能
 DR 具有以下主要功能:
@@ -359,7 +357,7 @@ DR 具有以下主要功能:
 ### 选举过程
 当接口激活 OSPF 后，它会查看网络中是否存在 DR，如果有就使用已经存在的 DR，也就是 DR 不可抢占，否则选择最高优先级的路由器成为 DR，当优先级相等时，选择`Router-ID`最大的路由器成为 DR。之后还会进行 BDR 的选举，选举过程与 DR 类似。
 
-[](OSPF详解/dr-bdr-2.png)
+![](OSPF详解/dr-bdr-2.png)
 
 在一个 MA 网络中，DR 要确保接入到网络中的所有路由器有相同的 LSDB，也就是确保 LSDB 同步。DR 使用组播地址`224.0.0.5`向网络中发送 LSU 报文，所有 OSPF 路由器都会侦听这个组播地址，并与 DR 同步 LSDB。而 DROther 感知到拓扑变化时，向`224.0.0.6`发送 LSU 报文通告这个变化，DR 和 BDR 会侦听这个组播地址。
 
@@ -426,9 +424,9 @@ Intra Area: 4 Inter Area: 0 ASE: 0 NSSA: 0
 
 由于一条 LSA 是对一台路由器或一个网段拓扑结构的描述，整个 LSDB 就形成了对整个网络的拓扑结构的描述。所有路由器得到一张完全相同的图。
 
-[](OSPF详解/spf-1.png)
+![](OSPF详解/spf-1.png)
 
 使用 SPF（最短路径优先算法）计算出路由。OSPF 路由器用 SPF 算法以自己为根节点，计算出一棵最短路径树。这棵树上，由根到各个节点的累计开销最小，也就是从根到各个节点的路径都是最优的，这样就获得了由根去往各个节点的路由。计算完成后，路由器将路由加入到 OSPF 路由表。当 SPF 算法发现有两条到达目的网络的路由的`Cost`值相同，会将这两条路由都加入到 OSPF 路由表中，形成等价路由。
 
-[](OSPF详解/spf-2.png)
+![](OSPF详解/spf-2.png)
 

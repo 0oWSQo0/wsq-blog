@@ -265,3 +265,369 @@ IS-IS 在 LAN 中选举 DIS 的顺序如下：
 * 在一个 LAN 中，`Level-1`和`Level-2`的 DIS 独立选举，互不干扰。完全有可能出现一种情况：`Level-1 DIS`和`Level-2 DIS`不是同一个设备。
 * IS-IS 没有备份 DIS，当 DIS 发生故障时，立即选举新的 DIS。
 * DIS 可抢占。比如一个已经选举出 DIS 的 LAN 中，新加一台优先级更高的设备，那么这台设备会抢占 DIS 的角色，成为新的 DIS。
+
+## 配置实例
+### IS-IS基本配置
+#### 实验拓扑
+![](ISIS详解/isis-1.png)
+#### 实验要求
+实现各路由器的网络互通。
+#### 实验步骤
+1. 配置各设备接口 IP 地址。（省略）
+2. 配置各路由器的 IS-IS 功能。
+```shell
+[R1]isis 1
+[R1-isis-1]is-level ?
+  level-1    Level-1
+  level-1-2  Level-1-2
+  level-2    Level-2
+[R1-isis-1]is-level level-1
+[R1-isis-1]network-entity 10.0000.0000.0001.00
+[R1-isis-1]quit
+[R1]interface GigabitEthernet 0/0/0
+[R1-GigabitEthernet0/0/0]isis enable ?
+  INTEGER<1-65535>  Process ID
+  <cr>              Please press ENTER to execute command 
+[R1-GigabitEthernet0/0/0]isis enable 1 
+```
+```shell
+[R2]isis 1	
+[R2-isis-1]is-level level-1
+[R2-isis-1]network-entity 10.0000.0000.0002.00
+[R2-isis-1]quit
+[R2]interface GigabitEthernet 0/0/1
+[R2-GigabitEthernet0/0/1]isis enable 1
+```
+```shell
+[R3]isis 1
+[R3-isis-1]network-entity 10.0000.0000.0003.00
+[R3-isis-1]quit
+[R3]interface GigabitEthernet 0/0/0
+[R3-GigabitEthernet0/0/0]isis enable 1
+[R3-GigabitEthernet0/0/0]quit
+[R3]interface GigabitEthernet 0/0/1
+[R3-GigabitEthernet0/0/1]isis enable 1
+[R3-GigabitEthernet0/0/1]quit
+[R3]interface GigabitEthernet 0/0/2
+[R3-GigabitEthernet0/0/2]isis enable 1
+```
+```shell
+[R4]isis 1
+[R4-isis-1]is-level level-2
+[R4-isis-1]network-entity 20.0000.0000.0004.00
+[R4-isis-1]quit
+[R4]interface GigabitEthernet 0/0/2
+[R4-GigabitEthernet0/0/2]isis enable 1
+[R4-GigabitEthernet0/0/2]quit
+[R4]interface GigabitEthernet 0/0/1
+[R4-GigabitEthernet0/0/1]isis enable 1
+```
+配置好后，查看 IS-IS LSDB 信息，验证配置结果。其中`*(In TLV)`表示渗透路由，`*(By LSPID)`表示本地生成的 LSP，`+`表示本地生成的扩展 LSP。在 L1 路由器中有 L1 LSDB，在 L1/2 路由器中同时有 L1 LSDB 和 L2 LSDB，在 L2 路由器中只有 L2 LSDB。
+```shell
+[R1]display isis lsdb
+
+                        Database information for ISIS(1)
+                        --------------------------------
+
+                          Level-1 Link State Database
+
+LSPID                 Seq Num      Checksum      Holdtime      Length  ATT/P/OL
+-------------------------------------------------------------------------------
+0000.0000.0001.00-00* 0x00000005   0x68d4        727           68      0/0/0   
+0000.0000.0002.00-00  0x00000005   0xf442        856           68      0/0/0   
+0000.0000.0003.00-00  0x00000009   0x93de        1046          111     0/0/0   
+0000.0000.0003.01-00  0x00000003   0xa9dc        1044          55      0/0/0   
+0000.0000.0003.02-00  0x00000003   0xbec5        1044          55      0/0/0   
+
+Total LSP(s): 5
+    *(In TLV)-Leaking Route, *(By LSPID)-Self LSP, +-Self LSP(Extended), 
+           ATT-Attached, P-Partition, OL-Overload
+```
+```shell
+[R2]display isis lsdb
+
+                        Database information for ISIS(1)
+                        --------------------------------
+
+                          Level-1 Link State Database
+
+LSPID                 Seq Num      Checksum      Holdtime      Length  ATT/P/OL
+-------------------------------------------------------------------------------
+0000.0000.0001.00-00  0x00000005   0x68d4        699           68      0/0/0   
+0000.0000.0002.00-00* 0x00000005   0xf442        832           68      0/0/0   
+0000.0000.0003.00-00  0x00000009   0x93de        1020          111     0/0/0   
+0000.0000.0003.01-00  0x00000003   0xa9dc        1018          55      0/0/0   
+0000.0000.0003.02-00  0x00000003   0xbec5        1018          55      0/0/0   
+
+Total LSP(s): 5
+    *(In TLV)-Leaking Route, *(By LSPID)-Self LSP, +-Self LSP(Extended), 
+           ATT-Attached, P-Partition, OL-Overload
+```
+```shell
+[R3]display isis lsdb
+
+                        Database information for ISIS(1)
+                        --------------------------------
+
+                          Level-1 Link State Database
+
+LSPID                 Seq Num      Checksum      Holdtime      Length  ATT/P/OL
+-------------------------------------------------------------------------------
+0000.0000.0001.00-00  0x00000005   0x68d4        669           68      0/0/0   
+0000.0000.0002.00-00  0x00000005   0xf442        801           68      0/0/0   
+0000.0000.0003.00-00* 0x00000009   0x93de        990           111     0/0/0   
+0000.0000.0003.01-00* 0x00000003   0xa9dc        989           55      0/0/0   
+0000.0000.0003.02-00* 0x00000003   0xbec5        989           55      0/0/0   
+
+Total LSP(s): 5
+    *(In TLV)-Leaking Route, *(By LSPID)-Self LSP, +-Self LSP(Extended), 
+           ATT-Attached, P-Partition, OL-Overload
+
+
+                          Level-2 Link State Database
+
+LSPID                 Seq Num      Checksum      Holdtime      Length  ATT/P/OL
+-------------------------------------------------------------------------------
+0000.0000.0003.00-00* 0x0000000a   0x6b9f        1004          100     0/0/0   
+0000.0000.0003.03-00* 0x00000001   0xf38f        1004          55      0/0/0   
+0000.0000.0004.00-00  0x00000006   0xa5bd        988           84      0/0/0   
+
+Total LSP(s): 3
+    *(In TLV)-Leaking Route, *(By LSPID)-Self LSP, +-Self LSP(Extended), 
+           ATT-Attached, P-Partition, OL-Overload
+```
+```shell
+[R4]display isis lsdb
+
+                        Database information for ISIS(1)
+                        --------------------------------
+
+                          Level-2 Link State Database
+
+LSPID                 Seq Num      Checksum      Holdtime      Length  ATT/P/OL
+-------------------------------------------------------------------------------
+0000.0000.0003.00-00  0x0000000a   0x6b9f        974           100     0/0/0   
+0000.0000.0003.03-00  0x00000001   0xf38f        974           55      0/0/0   
+0000.0000.0004.00-00* 0x00000006   0xa5bd        960           84      0/0/0   
+
+Total LSP(s): 3
+    *(In TLV)-Leaking Route, *(By LSPID)-Self LSP, +-Self LSP(Extended), 
+           ATT-Attached, P-Partition, OL-Overload
+```
+从中可以看出，处于`area 10`的 R1、R2、R3 的 L1 LSDB 是完全一样的，实现了同步；处于`area 20`的 R3、R4 的 L2 LSDB 是完全一样的，实现了同步。
+
+还可以通过`display isis route`命令显示各路由器的 IS-IS 信息。L1 路由器的路由表中应该有一条缺省路由，且下一跳为 L1/2 路由器，L2 路由器应该有所有 L1 和 L2 的路由。
+
+输出信息中：
+* `IntCost`为 IS-IS 路由的开销值
+* `ExtCost`为由外部引入的其他协议路由的开销值
+* `ExitInterface`为路由的出接口
+* `NextHop`为路由的下一跳地址，当目的网段为设备直连网段时，显示为`Direct`
+* `Flags`为路由信息标记：`D`表示直连路由；`A`表示此路由被加入单播路由表中；`L`表示此路由通过 LSP 发布出去
+
+```shell
+[R1]display isis route
+
+                         Route information for ISIS(1)
+                         -----------------------------
+
+                        ISIS(1) Level-1 Forwarding Table
+                        --------------------------------
+
+IPV4 Destination     IntCost    ExtCost ExitInterface   NextHop         Flags
+-------------------------------------------------------------------------------
+0.0.0.0/0            10         NULL    GE0/0/0         10.1.1.1        A/-/-/-
+192.168.0.0/24       20         NULL    GE0/0/0         10.1.1.1        A/-/-/-
+10.2.2.0/24          20         NULL    GE0/0/0         10.1.1.1        A/-/-/-
+10.1.1.0/24          10         NULL    GE0/0/0         Direct          D/-/L/-
+     Flags: D-Direct, A-Added to URT, L-Advertised in LSPs, S-IGP Shortcut,
+                               U-Up/Down Bit Set
+```
+```shell
+[R2]display isis route 
+
+                         Route information for ISIS(1)
+                         -----------------------------
+
+                        ISIS(1) Level-1 Forwarding Table
+                        --------------------------------
+
+IPV4 Destination     IntCost    ExtCost ExitInterface   NextHop         Flags
+-------------------------------------------------------------------------------
+0.0.0.0/0            10         NULL    GE0/0/1         10.2.2.1        A/-/-/-
+192.168.0.0/24       20         NULL    GE0/0/1         10.2.2.1        A/-/-/-
+10.2.2.0/24          10         NULL    GE0/0/1         Direct          D/-/L/-
+10.1.1.0/24          20         NULL    GE0/0/1         10.2.2.1        A/-/-/-
+     Flags: D-Direct, A-Added to URT, L-Advertised in LSPs, S-IGP Shortcut,
+                               U-Up/Down Bit Set
+```
+```shell
+[R3]display isis route 
+
+                         Route information for ISIS(1)
+                         -----------------------------
+
+                        ISIS(1) Level-1 Forwarding Table
+                        --------------------------------
+
+IPV4 Destination     IntCost    ExtCost ExitInterface   NextHop         Flags
+-------------------------------------------------------------------------------
+192.168.0.0/24       10         NULL    GE0/0/2         Direct          D/-/L/-
+10.2.2.0/24          10         NULL    GE0/0/1         Direct          D/-/L/-
+10.1.1.0/24          10         NULL    GE0/0/0         Direct          D/-/L/-
+     Flags: D-Direct, A-Added to URT, L-Advertised in LSPs, S-IGP Shortcut,
+                               U-Up/Down Bit Set
+
+
+                        ISIS(1) Level-2 Forwarding Table
+                        --------------------------------
+
+IPV4 Destination     IntCost    ExtCost ExitInterface   NextHop         Flags
+-------------------------------------------------------------------------------
+192.168.0.0/24       10         NULL    GE0/0/2         Direct          D/-/L/-
+10.2.2.0/24          10         NULL    GE0/0/1         Direct          D/-/L/-
+172.16.0.0/16        20         NULL    GE0/0/2         192.168.0.2     A/-/-/-
+10.1.1.0/24          10         NULL    GE0/0/0         Direct          D/-/L/-
+     Flags: D-Direct, A-Added to URT, L-Advertised in LSPs, S-IGP Shortcut,
+                               U-Up/Down Bit Set
+```
+```shell
+[R4]display isis route 
+
+                         Route information for ISIS(1)
+                         -----------------------------
+
+                        ISIS(1) Level-2 Forwarding Table
+                        --------------------------------
+
+IPV4 Destination     IntCost    ExtCost ExitInterface   NextHop         Flags
+-------------------------------------------------------------------------------
+192.168.0.0/24       10         NULL    GE0/0/2         Direct          D/-/L/-
+10.2.2.0/24          20         NULL    GE0/0/2         192.168.0.1     A/-/-/-
+172.16.0.0/16        10         NULL    GE0/0/1         Direct          D/-/L/-
+10.1.1.0/24          20         NULL    GE0/0/2         192.168.0.1     A/-/-/-
+     Flags: D-Direct, A-Added to URT, L-Advertised in LSPs, S-IGP Shortcut,
+                               U-Up/Down Bit Set
+```
+### 路由聚合配置
+#### 实验拓扑
+![](ISIS详解/isis-2.png)
+#### 实验要求
+3 台路由器通过 IS-IS 路由协议实现互联，由于 IS-IS 路由条目太多造成 R1 系统资源负载过重，现要求降低 R1 系统资源的消耗。
+
+#### 实验步骤
+1. 配置各设备接口 IP 地址。（省略）
+2. 在各路由器上配置 IS-IS 功能，实现网络互联。
+```shell
+[R1]isis 1
+[R1-isis-1]is-level level-2
+[R1-isis-1]network-entity 20.0000.0000.0001.00
+[R1-isis-1]quit
+[R1]int GigabitEthernet 0/0/0
+[R1-GigabitEthernet0/0/0]isis enable 1
+```
+```shell
+[R2]isis 1
+[R2-isis-1]network-entity 10.0000.0000.0002.00
+[R2-isis-1]quit
+[R2]interface GigabitEthernet 0/0/0
+[R2-GigabitEthernet0/0/0]isis enable 1
+[R2-GigabitEthernet0/0/0]quit
+[R2]interface GigabitEthernet 0/0/1
+[R2-GigabitEthernet0/0/1]isis enable 1
+```
+```shell
+[R3]isis 1
+[R3-isis-1]is-level level-1
+[R3-isis-1]network-entity 10.0000.0000.0003.00
+[R3-isis-1]quit
+[R3]interface GigabitEthernet 0/0/1
+[R3-GigabitEthernet0/0/1]isis enable 1
+[R3-GigabitEthernet0/0/1]quit
+[R3]interface GigabitEthernet 2/0/0
+[R3-GigabitEthernet2/0/0]isis enable 1
+[R3-GigabitEthernet2/0/0]quit
+[R3]interface GigabitEthernet 2/0/1
+[R3-GigabitEthernet2/0/1]isis enable 1
+[R3-GigabitEthernet2/0/1]quit
+[R3]interface GigabitEthernet 2/0/2
+[R3-GigabitEthernet2/0/2]isis enable 1
+```
+在 R1 上查看 IS-IS 路由表信息，从中可以看出，R1 上有到达 R3 上连接的 4 个连续子网的 IS-IS 路由条目。
+```shell
+[R1]display isis route 
+
+                         Route information for ISIS(1)
+                         -----------------------------
+
+                        ISIS(1) Level-2 Forwarding Table
+                        --------------------------------
+
+IPV4 Destination     IntCost    ExtCost ExitInterface   NextHop         Flags
+-------------------------------------------------------------------------------
+172.1.4.0/24         20         NULL    GE0/0/0         172.2.1.2       A/-/-/-
+172.1.3.0/24         30         NULL    GE0/0/0         172.2.1.2       A/-/-/-
+172.1.2.0/24         30         NULL    GE0/0/0         172.2.1.2       A/-/-/-
+172.1.1.0/24         30         NULL    GE0/0/0         172.2.1.2       A/-/-/-
+172.2.1.0/24         10         NULL    GE0/0/0         Direct          D/-/L/-
+     Flags: D-Direct, A-Added to URT, L-Advertised in LSPs, S-IGP Shortcut,
+                               U-Up/Down Bit Set
+```
+3. 在 R2 上配置路由聚合，将 4 个连续子网的路由汇聚成`172.1.0.0/16`。因为这 4 个子网都属于 L1 区域，所以仅需对引入 L1 区域中的路由进行聚合即可。
+```shell
+[R2]isis 1
+[R2-isis-1]summary 172.1.0.0 255.255.0.0 ?
+  avoid-feedback        Avoid learning this summary route through SPF
+  generate_null0_route  Generate the discard route for preventing route loops
+  level-1               Level-1
+  level-1-2             Level-1-2
+  level-2               Level-2
+  tag                   Specify the value of the tag
+  <cr>                  Please press ENTER to execute command 
+[R2-isis-1]summary 172.1.0.0 255.255.0.0 level-1 
+```
+查看 R1 上的 IS-IS 路由表信息，发现 4 个连续子网的路由条目汇聚成了`172.1.0.0/16`。
+```shell
+[R1]display isis route 
+
+                         Route information for ISIS(1)
+                         -----------------------------
+
+                        ISIS(1) Level-2 Forwarding Table
+                        --------------------------------
+
+IPV4 Destination     IntCost    ExtCost ExitInterface   NextHop         Flags
+-------------------------------------------------------------------------------
+172.1.0.0/16         20         NULL    GE0/0/0         172.2.1.2       A/-/L/-
+172.2.1.0/24         10         NULL    GE0/0/0         Direct          D/-/L/-
+     Flags: D-Direct, A-Added to URT, L-Advertised in LSPs, S-IGP Shortcut,
+                               U-Up/Down Bit Set
+```
+
+### 其他常用命令
+```shell
+# IS-IS 发布缺省路由配置
+# 设置当前设备发布匹配名为 filter 的路由策略的 IPv4 缺省路由，并设置该缺省路由的开销为 15
+[R-isis-1]default-route-advertise route-policy filter cost 15
+
+# IS-IS 引入外部路由
+# 配置IS-IS引入静态路由，并设置该路由的开销值为 15
+[R-isis-1]import-route static cost 15
+# 配置IS-IS引入OSPF路由，并保留该路由的原有开销值
+[R-isis-1]import-route ospf inherit cost
+
+# IS-IS 发布外部路由过滤
+# 配置 ACL 2000，仅允许已引入的外部路由 1.1.1.0/24在发布给其他路由器时进行过滤
+[R]acl 2000
+[R-acl-basic-2000]rule 5 permit source 1.1.1.0 0.0.0.255
+[R]isis
+[R-isis-1]filter-policy 2000 export
+
+# IS-IS路由下发IP路由表过滤
+# 配置 ACL 2000 过滤接收的路由，将 1.1.1.0/24 加入到 IP 路由表中
+[R]acl 2000
+[R-acl-basic-2000]rule 5 permit source 1.1.1.0 0.0.0.255
+[R]isis
+[R-isis-1]filter-policy 2000 import
+
+```
