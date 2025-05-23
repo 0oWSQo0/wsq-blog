@@ -1,5 +1,5 @@
 ---
-title: 网关冗余技术
+title: VRRP 详解
 date: 2025-05-30
 tags: network
 categories: 计算机网络
